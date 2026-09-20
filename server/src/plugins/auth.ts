@@ -1,6 +1,6 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
-import { config } from "../config.js";
-import { verifyJwt } from "../lib/jwt.js";
+import { config } from "../config.ts";
+import { verifyJwt } from "../lib/jwt.ts";
 
 declare module "fastify" {
   interface FastifyRequest {

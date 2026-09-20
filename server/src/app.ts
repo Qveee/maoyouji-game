@@ -1,9 +1,9 @@
 import Fastify, { type FastifyInstance } from "fastify";
 import cookie from "@fastify/cookie";
-import { healthRoute } from "./routes/health.js";
-import { authRoutes } from "./routes/auth.js";
-import { characterRoutes } from "./routes/characters.js";
-import { petsRoutes } from "./routes/pets.js";
+import { healthRoute } from "./routes/health.ts";
+import { authRoutes } from "./routes/auth.ts";
+import { characterRoutes } from "./routes/characters.ts";
+import { petsRoutes } from "./routes/pets.ts";
 
 export function buildApp(): FastifyInstance {
   const app = Fastify({ logger: true });

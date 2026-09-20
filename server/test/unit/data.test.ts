@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { loadPets } from "../../src/data/loader.js";
-import { PetsFileSchema } from "../../src/data/schemas.js";
+import { loadPets } from "../../src/data/loader.ts";
+import { PetsFileSchema } from "../../src/data/schemas.ts";
 
 describe("静态宠物数据", () => {
   it("内置 pets.json 含 17 种宠物且全部可选", () => {

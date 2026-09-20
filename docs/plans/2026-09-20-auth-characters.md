@@ -6,7 +6,7 @@
 
 **Architecture:** JWT(HS256 手写, httpOnly cookie) 认证；角色初始属性按 `docs/游戏规则设计.md` §3.3 由 pets.json baseStats 派生；pets.json 为首个静态数据文件，引入 zod 启动校验模式（共识 #4）。
 
-**Tech Stack:** zod、@node-rs/argon2（若安装失败退回 node:crypto scrypt 并更新共识）、@fastify/cookie、Vitest。
+**Tech Stack:** zod、@node-rs/argon2、@fastify/cookie、Vitest。（后端运行器改用 Node 24 原生 TS，tsx 已移除）
 
 ---
 

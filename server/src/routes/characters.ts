@@ -1,9 +1,9 @@
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import type { ResultSetHeader, RowDataPacket } from "mysql2";
-import { getPool } from "../db.js";
-import { petIndex } from "../data/loader.js";
-import { requireAccount } from "../plugins/auth.js";
+import { getPool } from "../db.ts";
+import { petIndex } from "../data/loader.ts";
+import { requireAccount } from "../plugins/auth.ts";
 
 const createSchema = z.object({
   name: z.string().trim().min(2).max(16),

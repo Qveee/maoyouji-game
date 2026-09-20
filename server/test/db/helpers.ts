@@ -1,6 +1,6 @@
 import { expect } from "vitest";
 import type { FastifyInstance } from "fastify";
-import { getPool } from "../../src/db.js";
+import { getPool } from "../../src/db.ts";
 
 type InjectResponse = Awaited<ReturnType<FastifyInstance["inject"]>>;
 

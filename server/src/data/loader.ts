@@ -1,5 +1,5 @@
 import { readFileSync } from "node:fs";
-import { PetsFileSchema, type Pet, type PetsFile } from "./schemas.js";
+import { PetsFileSchema, type Pet, type PetsFile } from "./schemas.ts";
 
 const DEFAULT_PATH = new URL("../../data/pets.json", import.meta.url);
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { signJwt, verifyJwt } from "../../src/lib/jwt.js";
+import { signJwt, verifyJwt } from "../../src/lib/jwt.ts";
 
 const SECRET = "test-secret";
 

@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { buildApp } from "../../src/app.js";
-import { resetDb, registerAndLogin, cookieOf } from "./helpers.js";
+import { buildApp } from "../../src/app.ts";
+import { resetDb, registerAndLogin, cookieOf } from "./helpers.ts";
 
 const app = buildApp();
 

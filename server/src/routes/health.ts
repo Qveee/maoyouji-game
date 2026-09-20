@@ -1,5 +1,5 @@
 import type { FastifyInstance } from "fastify";
-import { pingDb } from "../db.js";
+import { pingDb } from "../db.ts";
 
 export async function healthRoute(app: FastifyInstance) {
   app.get("/health", async () => {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildApp } from "../src/app.js";
+import { buildApp } from "../src/app.ts";
 
 // 健康检查单测不依赖数据库：屏蔽环境中的连接配置
 delete process.env.DATABASE_URL;

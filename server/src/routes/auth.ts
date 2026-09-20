@@ -2,10 +2,10 @@ import type { FastifyInstance } from "fastify";
 import { hash, verify } from "@node-rs/argon2";
 import { z } from "zod";
 import type { ResultSetHeader, RowDataPacket } from "mysql2";
-import { getPool } from "../db.js";
-import { config } from "../config.js";
-import { signJwt } from "../lib/jwt.js";
-import { COOKIE_NAME, requireAccount } from "../plugins/auth.js";
+import { getPool } from "../db.ts";
+import { config } from "../config.ts";
+import { signJwt } from "../lib/jwt.ts";
+import { COOKIE_NAME, requireAccount } from "../plugins/auth.ts";
 
 const credentialsSchema = z.object({
   username: z.string().trim().min(2).max(32),
