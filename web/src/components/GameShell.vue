@@ -309,7 +309,12 @@ onMounted(async () => {
 
 .chatlog { flex: 1; min-height: 0; }
 .chatlog time { color: #8b7b55; margin-right: 4px; }
-.chatlog p { margin: 1px 0; }
+.chatlog p {
+  margin: 1px 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 .chatlog p.chat { color: #1e5f3f; }
 
 .center { width: 290px; display: flex; flex-direction: column; gap: 4px; min-height: 0; }
@@ -327,7 +332,7 @@ onMounted(async () => {
 .npc .tt.t-green { color: #178714; }
 .npc .tt.t-orange { color: #d97a00; }
 
-.right { flex: 1; display: flex; flex-direction: column; gap: 4px; min-height: 0; }
+.right { flex: 1; min-width: 300px; display: flex; flex-direction: column; gap: 4px; min-height: 0; }
 .drop-panel { flex: 2; }
 .private-panel { flex: 2; }
 .input-panel { flex: none; height: 38px; display: flex; align-items: center; gap: 5px; padding: 0 6px; }
