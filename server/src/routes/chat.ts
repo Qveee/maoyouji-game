@@ -44,7 +44,7 @@ export async function chatRoutes(app: FastifyInstance) {
       "SELECT current_node_code FROM characters WHERE id = ? AND deleted_at IS NULL",
       [characterId],
     );
-    // 无格子的角色给一个永不等值哨兵，避免 NULL = NULL 误可见
+    // 无格子的角色给一个永不等值哨兵（node_code = NULL 等值比较本就永假，哨兵仅为可读性）
     const nodeCode = (meRows[0]?.current_node_code as string | null) ?? "__nowhere__";
 
     const sinceId = Number((req.query as { sinceId?: string }).sinceId ?? 0);
