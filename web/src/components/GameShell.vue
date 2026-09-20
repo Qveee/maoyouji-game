@@ -394,22 +394,25 @@ onUnmounted(() => window.removeEventListener("resize", fitStage));
 .slot {
   position: relative;
   width: 44px;
-  height: 44px;
+  height: 40px;
   flex: none;
   cursor: pointer;
   border-radius: 4px;
-  background: linear-gradient(#e8c98a, #c49a4e 60%, #a87c34);
-  box-shadow: inset 0 1px 0 rgba(255, 245, 210, 0.6), inset 0 -2px 3px rgba(90, 50, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.3);
+  background: linear-gradient(#48a1c8, #449ec5 30%, #439dc4 45%, #45a0c7 62%, #409ac1);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 1px 2px rgba(0, 0, 0, 0.2);
 }
-.slot:hover { box-shadow: inset 0 0 0 2px rgba(255, 240, 170, 0.65), inset 0 -2px 3px rgba(90, 50, 0, 0.4); }
+.slot:hover { box-shadow: inset 0 0 0 2px rgba(255, 240, 170, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.25); }
 .slot .key {
   position: absolute;
-  right: 2px;
-  bottom: 0;
-  font: 10px/12px Tahoma, Verdana, sans-serif;
+  left: 0;
+  right: 0;
+  bottom: -15px;
+  text-align: center;
+  font: bold 11px/13px Tahoma, Verdana, sans-serif;
   font-style: normal;
-  color: #5c3a10;
-  text-shadow: 0 1px 0 rgba(255, 245, 210, 0.7);
+  color: #fff;
+  text-shadow: 0 1px 1px rgba(20, 60, 90, 0.8);
 }
 .pagebtns { position: static; width: 40px; height: 44px; cursor: pointer; }
 .pagebtns i { position: absolute; left: 0; width: 100%; height: 50%; }
