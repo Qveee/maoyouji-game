@@ -69,7 +69,7 @@ export async function authRoutes(app: FastifyInstance) {
     return reply.send({ ok: true });
   });
 
-  app.get("/me", { preHandler: requireAccount }, async (req) => {
+  app.get("/me", { preHandler: requireAccount }, async (req, reply) => {
     const { accountId, characterId } = req.account!;
     const [rows] = await getPool().query<RowDataPacket[]>(
       "SELECT username FROM accounts WHERE id = ?",
