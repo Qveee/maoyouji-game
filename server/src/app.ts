@@ -5,6 +5,7 @@ import { authRoutes } from "./routes/auth.ts";
 import { characterRoutes } from "./routes/characters.ts";
 import { petsRoutes } from "./routes/pets.ts";
 import { mapRoutes } from "./routes/map.ts";
+import { chatRoutes } from "./routes/chat.ts";
 
 export function buildApp(): FastifyInstance {
   const app = Fastify({ logger: true });
@@ -14,5 +15,6 @@ export function buildApp(): FastifyInstance {
   app.register(characterRoutes, { prefix: "/api/characters" });
   app.register(petsRoutes, { prefix: "/api/pets" });
   app.register(mapRoutes, { prefix: "/api/map" });
+  app.register(chatRoutes, { prefix: "/api/chat" });
   return app;
 }
