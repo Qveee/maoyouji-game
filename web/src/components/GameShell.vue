@@ -332,7 +332,7 @@ onUnmounted(() => window.removeEventListener("resize", fitStage));
 .body.scr::-webkit-scrollbar { width: 8px; }
 .body.scr::-webkit-scrollbar-thumb { background: #8db8cd; border-radius: 4px; }
 .empty { color: #8b7b55; }
-.private-hint { color: #74A5CF; }
+.private-hint { color: #74A5CF; font-size: 14px; font-weight: bold; }
 
 .chatlog { flex: 1; min-height: 0; }
 .chatlog time { color: #8b7b55; margin-right: 4px; }
