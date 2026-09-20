@@ -82,7 +82,7 @@ function todo(what: string) {
 
 /** 舞台等比缩放：窗口小于 1400×832 时整体缩小，避免截断与横向滚动 */
 function fitStage() {
-  fitScale.value = Math.max(0.4, Math.min(window.innerWidth / 1424, (window.innerHeight - 28) / 848, 1));
+  fitScale.value = Math.max(0.4, Math.min(window.innerWidth / 1484, (window.innerHeight - 28) / 908, 1));
 }
 
 const topMenus = ["功能", "帮助", "图鉴", "战斗力", "竞技场", "成就", "活动"];
@@ -276,7 +276,7 @@ onUnmounted(() => window.removeEventListener("resize", fitStage));
 
 /* 主区 */
 .main { flex: 1; display: flex; gap: 4px; padding: 4px; min-height: 0; }
-.left { width: 600px; flex: none; min-width: 0; display: flex; flex-direction: column; gap: 4px; min-height: 0; }
+.left { width: 660px; flex: none; min-width: 0; display: flex; flex-direction: column; gap: 4px; min-height: 0; }
 .scene { flex: none; aspect-ratio: 4 / 3; background: #cde9f5; border: 1px solid #58b1d8; overflow: hidden; }
 .mapview { position: relative; width: 100%; height: 100%; overflow: hidden; background: #7fae62; box-shadow: inset 0 0 20px rgba(30, 60, 80, 0.35); }
 .world { position: absolute; left: 0; top: 0; width: 180%; height: 180%; background: #7fae62; }
