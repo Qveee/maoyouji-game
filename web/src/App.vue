@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
 import { api, type Character, type Pet } from "./api";
+import LoginPanel from "./components/LoginPanel.vue";
+import CharacterSelect from "./components/CharacterSelect.vue";
+import GamePanel from "./components/GamePanel.vue";
 
 type View = "loading" | "auth" | "select" | "game";
 
@@ -8,20 +11,16 @@ const view = ref<View>("loading");
 const username = ref("");
 const characters = ref<Character[]>([]);
 const pets = ref<Pet[]>([]);
-const characterName = ref("");
 const current = ref<Character | null>(null);
 const message = ref("");
-const authMode = ref<"login" | "register">("login");
-const authUsername = ref("");
-const authPassword = ref("");
-const selectedPet = ref("mao");
-const selectedProfession = ref<"warrior" | "mage">("warrior");
 
-const professionName = { warrior: "战士", mage: "法师" } as const;
-const petName = (code: string) => pets.value.find((p) => p.code === code)?.name ?? code;
+const petNameOf = (code: string) => pets.value.find((p) => p.code === code)?.name ?? code;
 
 async function refresh() {
   try {
+    if (pets.value.length === 0) {
+      pets.value = (await api.pets()).pets;
+    }
     const me = await api.me();
     username.value = me.username;
     const list = await api.characters();
@@ -33,13 +32,13 @@ async function refresh() {
   }
 }
 
-async function submitAuth() {
+async function submitAuth(mode: "login" | "register", user: string, password: string) {
   message.value = "";
   try {
-    if (authMode.value === "login") {
-      await api.login(authUsername.value, authPassword.value);
+    if (mode === "login") {
+      await api.login(user, password);
     } else {
-      await api.register(authUsername.value, authPassword.value);
+      await api.register(user, password);
     }
     if (pets.value.length === 0) {
       pets.value = (await api.pets()).pets;
@@ -56,11 +55,10 @@ async function logout() {
   current.value = null;
 }
 
-async function createCharacter() {
+async function createCharacter(name: string, breedCode: string, profession: "warrior" | "mage") {
   message.value = "";
   try {
-    await api.createCharacter(characterName.value, selectedPet.value, selectedProfession.value);
-    characterName.value = "";
+    await api.createCharacter(name, breedCode, profession);
     await refresh();
   } catch (err) {
     message.value = err instanceof Error ? err.message : "创建失败";
@@ -91,127 +89,74 @@ onMounted(refresh);
 </script>
 
 <template>
-  <div class="app">
-    <header v-if="view !== 'loading'" class="topbar">
-      <b>喵游记</b>
-      <span v-if="username">账号：{{ username }}</span>
-      <a v-if="view !== 'auth'" href="#" @click.prevent="logout">退出登录</a>
+  <div class="app" :class="{ immersive: view === 'auth' }">
+    <header v-if="view === 'select' || view === 'game'" class="topbar">
+      <b class="brand">喵游记</b>
+      <span class="who">冒险者：{{ username }}</span>
+      <a href="#" @click.prevent="logout">退出登录</a>
     </header>
 
-    <main v-if="view === 'loading'" class="panel">加载中…</main>
+    <div v-if="view === 'loading'" class="loading">加载中…</div>
 
-    <main v-else-if="view === 'auth'" class="panel auth">
-      <h2>{{ authMode === "login" ? "登录" : "注册新账号" }}</h2>
-      <form @submit.prevent="submitAuth">
-        <label>用户名<input v-model="authUsername" autocomplete="username" required /></label>
-        <label>密码<input v-model="authPassword" type="password" autocomplete="current-password" required /></label>
-        <button type="submit">{{ authMode === "login" ? "登录" : "注册并登录" }}</button>
-      </form>
-      <p class="tip">
-        <a href="#" @click.prevent="authMode = authMode === 'login' ? 'register' : 'login'">
-          {{ authMode === "login" ? "没有账号？注册" : "已有账号？登录" }}
-        </a>
-      </p>
-      <p v-if="message" class="error">{{ message }}</p>
-    </main>
+    <LoginPanel v-else-if="view === 'auth'" :message="message" @submit="submitAuth" />
 
-    <main v-else-if="view === 'select'" class="panel select">
-      <section>
-        <h2>我的角色（{{ characters.length }}/5）</h2>
-        <table v-if="characters.length">
-          <thead><tr><th>名字</th><th>宠物</th><th>职业</th><th>等级</th><th></th></tr></thead>
-          <tbody>
-            <tr v-for="c in characters" :key="c.id">
-              <td><b>{{ c.name }}</b></td>
-              <td>{{ petName(c.breedCode) }}</td>
-              <td>{{ professionName[c.profession] }}</td>
-              <td>Lv.{{ c.level }}</td>
-              <td>
-                <button @click="enter(c.id)">进入</button>
-                <button class="danger" @click="remove(c.id)">删除</button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-        <p v-else class="tip">还没有角色，先领养一只宠物吧！</p>
-      </section>
+    <CharacterSelect
+      v-else-if="view === 'select'"
+      :characters="characters"
+      :pets="pets"
+      :message="message"
+      @create="createCharacter"
+      @enter="enter"
+      @remove="remove"
+    />
 
-      <section v-if="characters.length < 5">
-        <h2>领养新宠物</h2>
-        <form class="create" @submit.prevent="createCharacter">
-          <label>名字<input v-model="characterName" maxlength="16" required placeholder="2~16 字" /></label>
-          <label>宠物
-            <select v-model="selectedPet">
-              <option v-for="p in pets" :key="p.code" :value="p.code">{{ p.name }}（{{ p.description }}）</option>
-            </select>
-          </label>
-          <label>职业
-            <select v-model="selectedProfession">
-              <option value="warrior">战士（近战物理）</option>
-              <option value="mage">法师（远程法术）</option>
-            </select>
-          </label>
-          <button type="submit">领养</button>
-        </form>
-      </section>
-      <p v-if="message" class="error">{{ message }}</p>
-    </main>
-
-    <main v-else class="panel game">
-      <h2>{{ current?.name }} <small>Lv.{{ current?.level }} {{ current ? professionName[current.profession] : "" }}</small></h2>
-      <p class="stats" v-if="current">
-        HP {{ current.hp }} ｜ SP {{ current.sp }} ｜ 体力 {{ current.vit }} 力量 {{ current.str }}
-        敏捷 {{ current.agi }} 智力 {{ current.intel }} 精神 {{ current.spr }}
-      </p>
-      <p class="tip">已进入猫隐村的世界。地图与战斗将在下一切片点亮。</p>
-      <button @click="view = 'select'">切换角色</button>
-    </main>
+    <GamePanel
+      v-else-if="view === 'game' && current"
+      :character="current"
+      :pet-name="petNameOf(current.breedCode)"
+      @switch-view="view = 'select'"
+    />
   </div>
 </template>
 
-<style scoped>
-.app {
-  min-height: 100vh;
+<style>
+* { box-sizing: border-box; }
+body {
+  margin: 0;
   font-family: "Microsoft YaHei", "SimSun", sans-serif;
   color: #14506e;
-  background: linear-gradient(#cde9f5, #aed7ea);
 }
+
+.app:not(.immersive) {
+  min-height: 100vh;
+  background:
+    radial-gradient(900px 380px at 20% -8%, #ffffffaa, transparent 60%),
+    linear-gradient(#a8dcf3, #d8f2fc 70%);
+}
+
 .topbar {
   display: flex;
-  gap: 16px;
+  gap: 18px;
   align-items: center;
-  padding: 6px 12px;
-  background: #14506e;
+  padding: 8px 18px;
+  background: linear-gradient(#3d88ad, #2c617e);
   color: #fff;
+  box-shadow: 0 2px 8px rgba(20, 80, 110, 0.35);
 }
-.topbar a { color: #cde9f5; }
-.panel {
-  max-width: 720px;
-  margin: 32px auto;
-  padding: 20px 24px;
-  background: #f4fbff;
-  border: 2px solid #58b1d8;
-  border-radius: 6px;
+.topbar .brand {
+  font-family: "STKaiti", "KaiTi", "SimSun", serif;
+  font-size: 20px;
+  letter-spacing: 4px;
+  text-shadow: 0 1px 0 rgba(9, 47, 68, 0.6);
 }
-.panel h2 { margin-top: 0; }
-label { display: block; margin: 8px 0; }
-input, select {
-  margin-left: 8px;
-  padding: 3px 6px;
-  border: 1px solid #58b1d8;
+.topbar .who { flex: 1; font-size: 13px; opacity: 0.9; }
+.topbar a { color: #cde9f5; font-size: 13px; }
+
+.loading {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  color: #48788f;
+  letter-spacing: 2px;
 }
-button {
-  margin-top: 8px;
-  padding: 4px 14px;
-  border: 1px solid #14506e;
-  background: #cde9f5;
-  cursor: pointer;
-}
-button.danger { border-color: #a33; color: #a33; }
-.tip { color: #48788f; font-size: 13px; }
-.error { color: #a33; }
-table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
-th, td { padding: 6px 8px; border-bottom: 1px solid #bfe0ef; text-align: left; }
-.create { max-width: 420px; }
-.stats { background: #e7f5fc; padding: 8px 10px; }
 </style>

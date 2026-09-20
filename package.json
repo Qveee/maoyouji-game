@@ -7,7 +7,7 @@
     "node": ">=22"
   },
   "scripts": {
-    "dev": "pnpm --parallel --filter server --filter web dev",
+    "dev": "pnpm --parallel --filter maoyouji-server --filter maoyouji-web dev",
     "test": "pnpm -r test",
     "db:up": "docker compose up -d",
     "db:down": "docker compose down",

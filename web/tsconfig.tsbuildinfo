@@ -1,1 +1,1 @@
-{"root":["./src/api.ts","./src/env.d.ts","./src/main.ts","./src/app.vue"],"version":"5.9.3"}
+{"root":["./src/api.ts","./src/env.d.ts","./src/main.ts","./src/app.vue","./src/components/characterselect.vue","./src/components/gamepanel.vue","./src/components/loginpanel.vue"],"version":"5.9.3"}

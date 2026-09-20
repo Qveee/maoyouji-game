@@ -18,13 +18,15 @@ export interface Pet {
   code: string;
   name: string;
   description: string;
+  sprite: string;
   baseStats: Record<string, number>;
 }
 
 async function request<T>(url: string, init?: RequestInit): Promise<T> {
+  const hasBody = init?.body != null;
   const res = await fetch(url, {
     ...init,
-    headers: { "Content-Type": "application/json", ...init?.headers },
+    headers: { ...(hasBody ? { "Content-Type": "application/json" } : {}), ...init?.headers },
   });
   const body = (await res.json().catch(() => ({}))) as T & { message?: string };
   if (!res.ok) {
