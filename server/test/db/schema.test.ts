@@ -1,6 +1,6 @@
 import { beforeAll, describe, expect, it } from "vitest";
-import "../src/config.js";
-import { getPool } from "../src/db.js";
+import "../../src/config.js";
+import { getPool } from "../../src/db.js";
 
 // 仅在配置了 DATABASE_URL 且 MySQL 在跑时执行（pnpm test:db）
 const hasDb = Boolean(process.env.DATABASE_URL);
