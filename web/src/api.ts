@@ -45,6 +45,7 @@ export interface MapCurrent {
   nodes: MapNode[];
 }
 
+/** 与 server/src/routes/chat.ts toMessage() 输出一一对应 */
 export interface ChatMessage {
   id: number;
   channel: "area" | "world" | "private" | "guild" | "team";
