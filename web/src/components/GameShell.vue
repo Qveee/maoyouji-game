@@ -350,7 +350,7 @@ onUnmounted(() => window.removeEventListener("resize", fitStage));
 .players-panel { flex: 2; }
 .npc { display: flex; align-items: center; gap: 4px; line-height: 20px; white-space: nowrap; overflow: hidden; cursor: pointer; }
 .npc:hover { background: #d9eef8; }
-.npc b { color: #14506e; font-weight: bold; }
+.npc b { color: #212627; font-weight: bold; }
 .npc b:hover { color: #0d6ba8; }
 .npc svg { width: 12px; height: 12px; flex: none; }
 .npc .tt { flex: none; font-weight: 400; }
