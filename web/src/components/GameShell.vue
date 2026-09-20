@@ -399,7 +399,7 @@ onUnmounted(() => window.removeEventListener("resize", fitStage));
   cursor: pointer;
   border-radius: 4px;
   background: linear-gradient(#48a1c8, #449ec5 30%, #439dc4 45%, #45a0c7 62%, #409ac1);
-  border: 1px solid rgba(255, 255, 255, 0.35);
+  border: 1px solid #000;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 .slot:hover { box-shadow: inset 0 0 0 2px rgba(255, 240, 170, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.25); }
