@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref } from "vue";
+import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import { api, type MapNode, type ChatMessage } from "../api";
 
 const props = defineProps<{
@@ -27,6 +27,8 @@ const privateMsgs = ref<ChatMessage[]>([]);
 const chatTarget = ref("");
 let chatTimer: number | undefined;
 let sinceId = 0; // 轮询游标：已拿到的最大消息 id
+let chatPolling = false; // 轮询在途标记：上一轮请求超 3s 未返回时跳过本轮，避免重复拉取
+let chatSending = false; // 发送在途标记：防止连点/连按回车重复 POST
 
 function fmtTime(iso: string) {
   return new Date(iso).toLocaleTimeString("zh-CN", { hour12: false });
@@ -37,14 +39,21 @@ function routeChat(m: ChatMessage) {
   sinceId = Math.max(sinceId, m.id);
   if (m.channel === "world") worldMsgs.value.push(m);
   else privateMsgs.value.push(m);
+  // 各窗上限 200 条：超出丢弃最旧的，避免长时间挂机时数组无限增长
+  if (worldMsgs.value.length > 200) worldMsgs.value.splice(0, worldMsgs.value.length - 200);
+  if (privateMsgs.value.length > 200) privateMsgs.value.splice(0, privateMsgs.value.length - 200);
 }
 
 async function pollChat() {
+  if (chatPolling) return;
+  chatPolling = true;
   try {
     const { messages } = await api.chatMessages(sinceId);
     for (const m of messages) routeChat(m);
   } catch {
     /* 轮询失败静默，下一轮重试 */
+  } finally {
+    chatPolling = false;
   }
 }
 
@@ -97,17 +106,37 @@ async function move(node: MapNode) {
 }
 
 async function sendChat() {
-  const text = chatText.value.trim();
-  if (!text) return;
-  const apiChannel = CHANNEL_OF[channel.value];
-  if (!apiChannel) return; // 公会/队伍为禁用占位，正常选不到
+  if (chatSending) return;
+  chatSending = true;
   try {
+    const text = chatText.value.trim();
+    if (!text) return;
+    const apiChannel = CHANNEL_OF[channel.value];
+    if (!apiChannel) return; // 公会/队伍为禁用占位，正常选不到
+    // 私聊目标为空时服务端会 400，客户端先拦截提示
+    if (channel.value === "私聊" && !chatTarget.value.trim()) {
+      say("【系统】请填写私聊目标");
+      return;
+    }
     await api.chatSend(apiChannel, text, channel.value === "私聊" ? chatTarget.value.trim() : undefined);
     chatText.value = "";
   } catch (err) {
     say(`【系统】${err instanceof Error ? err.message : "发送失败"}`);
+  } finally {
+    chatSending = false;
   }
 }
+
+/** 回车发送：过滤输入法组合中的 Enter 与按住自动重复，避免误发/重发 */
+function onChatKeydown(e: KeyboardEvent) {
+  if (e.isComposing || e.repeat) return;
+  sendChat();
+}
+
+/** 切离私聊频道时清空目标名，避免残留值带进下次私聊 */
+watch(channel, (v) => {
+  if (v !== "私聊") chatTarget.value = "";
+});
 
 function todo(what: string) {
   say(`【系统】${what}将在后续切片开放。`);
@@ -264,7 +293,7 @@ onUnmounted(() => {
             <option disabled>公会</option><option disabled>队伍</option>
           </select>
           <input v-if="channel === '私聊'" v-model="chatTarget" class="target" maxlength="32" placeholder="目标角色名" />
-          <input v-model="chatText" maxlength="60" placeholder="在这里输入聊天内容…" @keydown.enter.prevent="sendChat" />
+          <input v-model="chatText" maxlength="60" placeholder="在这里输入聊天内容…" @keydown.enter.prevent="onChatKeydown" />
           <button type="button" @click="sendChat">输入</button>
         </div>
       </div>
