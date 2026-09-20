@@ -266,7 +266,8 @@ onUnmounted(() => {
         </div>
         <div class="panel private-panel">
           <div class="body scr">
-            <p v-if="!privateMsgs.length" class="empty private-hint">私人信息显示窗口,你的聊天和别人对你的聊天显示在本窗口</p>
+            <!-- 常驻首行提示（#74A5CF），随聊天记录增多被顶上去 -->
+            <p class="empty private-hint">私人信息显示窗口,你的聊天和别人对你的聊天显示在本窗口</p>
             <template v-for="m in privateMsgs" :key="m.id">
               <!-- 私聊模板（用户指定）：名字下划线、「你」字红 #F52627 -->
               <p v-if="m.channel === 'private'" class="msg c-private">
