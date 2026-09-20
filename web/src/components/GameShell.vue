@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from "vue";
-import { api, type MapNode } from "../api";
+import { api, type MapNode, type ChatMessage } from "../api";
 
 const props = defineProps<{
   username: string;
@@ -21,6 +21,33 @@ const fitScale = ref(1);
 const messages = ref<{ time: string; text: string; kind: "sys" | "chat" }[]>([]);
 const chatText = ref("");
 const channel = ref("区域");
+const CHANNEL_OF: Record<string, string> = { 区域: "area", 世界: "world", 私聊: "private" };
+const worldMsgs = ref<ChatMessage[]>([]);
+const privateMsgs = ref<ChatMessage[]>([]);
+const chatTarget = ref("");
+let chatTimer: number | undefined;
+let sinceId = 0; // 轮询游标：已拿到的最大消息 id
+
+function fmtTime(iso: string) {
+  return new Date(iso).toLocaleTimeString("zh-CN", { hour12: false });
+}
+
+/** 按频道路由：世界 → 世界窗；其余（区域/私聊，未来公会/队伍）→ 私人信息窗 */
+function routeChat(m: ChatMessage) {
+  sinceId = Math.max(sinceId, m.id);
+  if (m.channel === "world") worldMsgs.value.push(m);
+  else privateMsgs.value.push(m);
+}
+
+async function pollChat() {
+  try {
+    const { messages } = await api.chatMessages(sinceId);
+    for (const m of messages) routeChat(m);
+  } catch {
+    /* 轮询失败静默，下一轮重试 */
+  }
+}
+
 const busy = ref(false);
 
 const currentNode = computed<MapNode | null>(
@@ -69,11 +96,17 @@ async function move(node: MapNode) {
   }
 }
 
-function sendChat() {
+async function sendChat() {
   const text = chatText.value.trim();
   if (!text) return;
-  say(`${props.characterName}：${text}`, "chat");
-  chatText.value = "";
+  const apiChannel = CHANNEL_OF[channel.value];
+  if (!apiChannel) return; // 公会/队伍为禁用占位，正常选不到
+  try {
+    await api.chatSend(apiChannel, text, channel.value === "私聊" ? chatTarget.value.trim() : undefined);
+    chatText.value = "";
+  } catch (err) {
+    say(`【系统】${err instanceof Error ? err.message : "发送失败"}`);
+  }
 }
 
 function todo(what: string) {
@@ -95,10 +128,15 @@ onMounted(async () => {
   fitStage();
   window.addEventListener("resize", fitStage);
   await load();
+  await pollChat();
+  chatTimer = window.setInterval(pollChat, 3000);
   say(`欢迎来到猫隐村，${props.characterName}！点击地图上的地点即可移动。`);
 });
 
-onUnmounted(() => window.removeEventListener("resize", fitStage));
+onUnmounted(() => {
+  window.removeEventListener("resize", fitStage);
+  if (chatTimer) window.clearInterval(chatTimer);
+});
 </script>
 
 <template>
@@ -190,17 +228,42 @@ onUnmounted(() => window.removeEventListener("resize", fitStage));
       <!-- 右：消息窗 -->
       <section class="right">
         <div class="panel drop-panel">
-          <div class="body scr"><p class="empty">暂无公告。</p></div>
+          <div class="body scr">
+            <p v-if="!worldMsgs.length" class="empty">暂无公告。</p>
+            <p v-for="m in worldMsgs" :key="m.id" class="msg c-world">
+              <time>{{ fmtTime(m.createdAt) }}</time><span class="name">{{ m.senderName }}</span>：{{ m.content }}
+            </p>
+          </div>
         </div>
         <div class="panel private-panel">
-          <div class="body scr"><p class="empty private-hint">私人信息显示窗口,你的聊天和别人对你的聊天显示在本窗口</p></div>
+          <div class="body scr">
+            <p v-if="!privateMsgs.length" class="empty private-hint">私人信息显示窗口,你的聊天和别人对你的聊天显示在本窗口</p>
+            <template v-for="m in privateMsgs" :key="m.id">
+              <!-- 私聊模板（用户指定）：名字下划线、「你」字红 #F52627 -->
+              <p v-if="m.channel === 'private'" class="msg c-private">
+                <time>{{ fmtTime(m.createdAt) }}</time>
+                <template v-if="m.senderName === characterName">
+                  <span class="you">你</span> 对 <span class="name">{{ m.targetName }}</span> 说: {{ m.content }}
+                </template>
+                <template v-else>
+                  <span class="name">{{ m.senderName }}</span> 对 <span class="you">你</span> 说: {{ m.content }}
+                </template>
+              </p>
+              <!-- 区域（未来公会/队伍同构，仅 c- 类换色） -->
+              <p v-else class="msg" :class="'c-' + m.channel">
+                <time>{{ fmtTime(m.createdAt) }}</time><span class="name">{{ m.senderName }}</span>：{{ m.content }}
+              </p>
+            </template>
+          </div>
         </div>
       </section>
         </div>
         <div class="panel input-panel">
           <select v-model="channel">
-            <option>区域</option><option>世界</option><option>私聊</option><option>公会</option>
+            <option>区域</option><option>世界</option><option>私聊</option>
+            <option disabled>公会</option><option disabled>队伍</option>
           </select>
+          <input v-if="channel === '私聊'" v-model="chatTarget" class="target" maxlength="32" placeholder="目标角色名" />
           <input v-model="chatText" maxlength="60" placeholder="在这里输入聊天内容…" @keydown.enter.prevent="sendChat" />
           <button type="button" @click="sendChat">输入</button>
         </div>
@@ -383,6 +446,19 @@ onUnmounted(() => window.removeEventListener("resize", fitStage));
   box-shadow: inset 1px 1px 0 #ffd9a3, 1px 1px 2px rgba(60, 30, 0, 0.35);
 }
 .input-panel button:hover { filter: brightness(1.08); }
+
+/* 聊天消息（世界窗/私人信息窗共用）：频道配色为用户指定色值，见 docs/聊天系统设计.md */
+.msg { margin: 1px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.msg time { color: #8b7b55; margin-right: 4px; }
+.msg .name { text-decoration: underline; }
+.you { color: #f52627; }
+.c-area { color: #363a3c; }
+.c-world { color: #14506e; }
+.c-private { color: #058306; }
+.c-guild { color: #5991ca; }
+.c-team { color: #8b4513; }
+/* 私聊目标名输入框：固定宽（spec 值 70px），不参与 flex 伸展 */
+.input-panel input.target { flex: none; width: 70px; }
 
 /* 底栏 */
 .bottombar {
