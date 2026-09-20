@@ -328,6 +328,7 @@ onUnmounted(() => window.removeEventListener("resize", fitStage));
   border-bottom: 1px solid #58b1d8;
 }
 .body { flex: 1; overflow-y: auto; padding: 4px 8px; }
+.panel > .body { background: #C2E1EB; }
 .body.scr::-webkit-scrollbar { width: 8px; }
 .body.scr::-webkit-scrollbar-thumb { background: #8db8cd; border-radius: 4px; }
 .empty { color: #8b7b55; }
