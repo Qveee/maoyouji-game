@@ -45,6 +45,17 @@ export interface MapCurrent {
   nodes: MapNode[];
 }
 
+export interface ChatMessage {
+  id: number;
+  channel: "area" | "world" | "private" | "guild" | "team";
+  senderId: number;
+  senderName: string;
+  targetName: string | null;
+  nodeCode: string | null;
+  content: string;
+  createdAt: string; // ISO UTC，展示时转本地时间
+}
+
 async function request<T>(url: string, init?: RequestInit): Promise<T> {
   const hasBody = init?.body != null;
   const res = await fetch(url, {
@@ -77,5 +88,12 @@ export const api = {
     request<{ node: { code: string; name: string; short: string } }>("/api/map/move", {
       method: "POST",
       body: JSON.stringify({ toCode }),
+    }),
+  chatMessages: (sinceId?: number) =>
+    request<{ messages: ChatMessage[] }>(`/api/chat/messages${sinceId ? `?sinceId=${sinceId}` : ""}`),
+  chatSend: (channel: string, content: string, targetName?: string) =>
+    request<{ message: ChatMessage }>("/api/chat/send", {
+      method: "POST",
+      body: JSON.stringify({ channel, content, targetName }),
     }),
 };
