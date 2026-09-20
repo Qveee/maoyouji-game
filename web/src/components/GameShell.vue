@@ -482,7 +482,7 @@ onUnmounted(() => {
 .msg .name { text-decoration: underline; }
 .you { color: #f52627; }
 .c-area { color: #363a3c; }
-.c-world { color: #14506e; }
+.c-world { color: #363a3c; } /* 与区域聊同色（2026-09-21 用户指定） */
 .c-private { color: #058306; }
 .c-guild { color: #5991ca; }
 .c-team { color: #8b4513; }
