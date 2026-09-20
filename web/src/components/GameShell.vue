@@ -19,6 +19,7 @@ const camY = ref(0);
 const map = ref<Awaited<ReturnType<typeof api.mapCurrent>> | null>(null);
 const messages = ref<{ time: string; text: string; kind: "sys" | "chat" }[]>([]);
 const chatText = ref("");
+const channel = ref("区域");
 const busy = ref(false);
 
 const currentNode = computed<MapNode | null>(
@@ -183,12 +184,11 @@ onMounted(async () => {
           <div class="body scr"><p class="empty">暂无私信。</p></div>
         </div>
         <div class="panel input-panel">
-          <div class="panel-head">发言</div>
-          <div class="input-row">
-            <select><option>当前</option><option>世界</option></select>
-            <input v-model="chatText" maxlength="80" placeholder="说点什么…" @keydown.enter.prevent="sendChat" />
-            <button type="button" @click="sendChat">发送</button>
-          </div>
+          <select v-model="channel">
+            <option>区域</option><option>世界</option><option>私聊</option><option>公会</option>
+          </select>
+          <input v-model="chatText" maxlength="60" placeholder="在这里输入聊天内容…" @keydown.enter.prevent="sendChat" />
+          <button type="button" @click="sendChat">输入</button>
         </div>
       </section>
     </div>
@@ -282,7 +282,7 @@ onMounted(async () => {
   filter: drop-shadow(0 2px 2px rgba(0, 20, 40, 0.5));
   animation: bob 1.2s ease-in-out infinite;
 }
-.pet-mark img { height: 48px; width: auto; display: block; }
+.pet-mark img { height: 60px; width: auto; display: block; }
 @keyframes bob { 50% { transform: translate(-50%, calc(-50% - 3px)); } }
 @media (prefers-reduced-motion: reduce) { .pet-mark { animation: none; } }
 
@@ -314,6 +314,7 @@ onMounted(async () => {
 
 .center { width: 290px; display: flex; flex-direction: column; gap: 4px; min-height: 0; }
 .npc-panel { flex: 3; }
+.npc-panel .panel-head { text-align: center; color: #000; font-weight: bold; }
 .players-panel { flex: 2; }
 .npc { display: flex; align-items: center; gap: 4px; line-height: 20px; white-space: nowrap; overflow: hidden; cursor: pointer; }
 .npc:hover { background: #d9eef8; }
@@ -329,11 +330,24 @@ onMounted(async () => {
 .right { flex: 1; display: flex; flex-direction: column; gap: 4px; min-height: 0; }
 .drop-panel { flex: 2; }
 .private-panel { flex: 2; }
-.input-panel { flex: none; }
-.input-row { display: flex; gap: 4px; padding: 5px 6px; }
-.input-row select { width: 52px; font-size: 12px; }
-.input-row input { flex: 1; min-width: 0; padding: 2px 6px; font-size: 12px; border: 1px solid #7fb8d4; }
-.input-row button { cursor: pointer; padding: 2px 10px; font-size: 12px; border: 1px solid #14506e; background: #cde9f5; }
+.input-panel { flex: none; height: 38px; display: flex; align-items: center; gap: 5px; padding: 0 6px; }
+.input-panel select {
+  width: 62px; height: 24px; color: #1a1a1a; background: #fff; cursor: pointer;
+  border: 1px solid #7f7f7f; box-shadow: inset 1px 1px 0 #d4d0c8;
+}
+.input-panel input {
+  flex: 1; min-width: 0; height: 24px; padding: 0 6px; color: #111; background: #fff;
+  border: 1px solid #7f7f7f; box-shadow: inset 1px 1px 0 #d4d0c8; outline: none;
+}
+.input-panel input:focus { border-color: #3a8ec2; }
+.input-panel button {
+  width: 56px; height: 26px; cursor: pointer; font: bold 12px "SimSun", serif; color: #fff;
+  text-shadow: 0 1px 1px #6b3407;
+  background: linear-gradient(#f4bc6a, #d3812f 55%, #b96a1d);
+  border: 1px solid #7a3d0d;
+  box-shadow: inset 1px 1px 0 #ffd9a3, 1px 1px 2px rgba(60, 30, 0, 0.35);
+}
+.input-panel button:hover { filter: brightness(1.08); }
 
 /* 底栏 */
 .bottombar {
