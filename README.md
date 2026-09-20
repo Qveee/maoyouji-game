@@ -14,7 +14,7 @@ pnpm dev            # 并行启动 server(3000) 与 web(5173)
 
 ```powershell
 pnpm test           # 全部单测（不依赖数据库的部分）
-pnpm --filter server run test:db   # 连库测试（需先 db:up）
+pnpm --filter maoyouji-server test:db   # 连库测试（需先 db:up）
 ```
 
 ## 结构

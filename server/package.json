@@ -6,8 +6,8 @@
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "tsc -p tsconfig.json",
-    "test": "vitest run --exclude \"test/db.test.ts\"",
-    "test:db": "vitest run test/db.test.ts"
+    "test": "vitest run --exclude \"test/db/**\"",
+    "test:db": "vitest run test/db"
   },
   "dependencies": {
     "fastify": "^5.2.1",
