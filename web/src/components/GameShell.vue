@@ -151,12 +151,25 @@ onMounted(async () => {
           <div class="panel-head">{{ currentNode ? currentNode.name : "—" }}</div>
           <div class="body scr">
             <p v-if="!currentNode?.npcs.length" class="empty">这里空荡荡的，没有 NPC。</p>
-            <div v-for="npc in currentNode?.npcs" :key="npc.name" class="npc-row">
-              <b v-if="npc.title" :class="'t-' + (npc.titleColor || '')">{{ npc.title }}</b>
-              <span>{{ npc.name }}</span>
-              <a href="#" @click.prevent="todo('NPC 交谈')">交谈</a>
+            <div
+              v-for="npc in currentNode?.npcs"
+              :key="npc.name"
+              class="npc"
+              @click="say(`【系统】与【${npc.name}】的交互将在任务切片开放。`)"
+            >
+              <span v-if="npc.title" class="tt" :class="'t-' + (npc.titleColor || '')">{{ npc.title }}</span>
+              <b :title="'交谈'">{{ npc.name }}</b>
+              <svg viewBox="0 0 12 12" aria-hidden="true">
+                <path d="M1 2h10v7H7l-3 3v-3H1z" fill="#e8f4fc" stroke="#2f7fc4" stroke-width="1.2" />
+                <circle cx="4" cy="5.2" r=".8" fill="#2f7fc4" />
+                <circle cx="6" cy="5.2" r=".8" fill="#2f7fc4" />
+                <circle cx="8" cy="5.2" r=".8" fill="#2f7fc4" />
+              </svg>
             </div>
           </div>
+        </div>
+        <div class="panel players-panel">
+          <div class="body scr"></div>
         </div>
       </section>
 
@@ -249,15 +262,14 @@ onMounted(async () => {
 .pet-mark {
   position: absolute;
   z-index: 3;
-  width: 68px;
-  height: 34px;
-  margin: -17px 0 0 -34px;
+  width: 80px;
+  height: 40px;
   pointer-events: none;
   transform: translate(-50%, -50%);
   filter: drop-shadow(0 2px 2px rgba(0, 20, 40, 0.5));
   animation: bob 1.2s ease-in-out infinite;
 }
-.pet-mark img { width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated; display: block; }
+.pet-mark img { width: 100%; height: 100%; display: block; }
 @keyframes bob { 50% { transform: translate(-50%, calc(-50% - 3px)); } }
 @media (prefers-reduced-motion: reduce) { .pet-mark { animation: none; } }
 
@@ -288,14 +300,18 @@ onMounted(async () => {
 .chatlog p.chat { color: #1e5f3f; }
 
 .center { width: 290px; display: flex; flex-direction: column; gap: 4px; min-height: 0; }
-.npc-panel { flex: 1; }
-.npc-row { display: flex; align-items: center; gap: 6px; padding: 2px 0; border-bottom: 1px dotted #bfe0ef; }
-.npc-row b { font-weight: 400; }
-.npc-row b.t-red { color: #d63a2a; font-weight: 700; }
-.npc-row b.t-blue { color: #1e7fb8; font-weight: 700; }
-.npc-row b.t-green { color: #2e8b57; font-weight: 700; }
-.npc-row b.t-orange { color: #d9822b; font-weight: 700; }
-.npc-row span { flex: 1; }
+.npc-panel { flex: 3; }
+.players-panel { flex: 2; }
+.npc { display: flex; align-items: center; gap: 4px; line-height: 20px; white-space: nowrap; overflow: hidden; cursor: pointer; }
+.npc:hover { background: #d9eef8; }
+.npc b { color: #14506e; font-weight: bold; }
+.npc b:hover { color: #0d6ba8; }
+.npc svg { width: 12px; height: 12px; flex: none; }
+.npc .tt { flex: none; font-weight: 400; }
+.npc .tt.t-red { color: #c33812; }
+.npc .tt.t-blue { color: #2b6fc4; }
+.npc .tt.t-green { color: #178714; }
+.npc .tt.t-orange { color: #d97a00; }
 
 .right { flex: 1; display: flex; flex-direction: column; gap: 4px; min-height: 0; }
 .drop-panel { flex: 2; }

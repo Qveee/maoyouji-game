@@ -75,6 +75,7 @@ export async function authRoutes(app: FastifyInstance) {
       "SELECT username FROM accounts WHERE id = ?",
       [accountId],
     );
+    if (!rows[0]) return reply.code(401).send({ message: "登录状态已失效，请重新登录" });
     return { username: rows[0]?.username, characterId };
   });
 

@@ -14,8 +14,16 @@ export async function mapRoutes(app: FastifyInstance) {
       "SELECT current_node_code FROM characters WHERE id = ? AND deleted_at IS NULL",
       [req.account!.characterId],
     );
-    const current = rows[0]?.current_node_code as string | null;
     const map = mapIndex().get(VILLAGE_CODE)!;
+    let current = rows[0]?.current_node_code as string | null;
+    if (!current) {
+      // 旧角色（出生点功能上线前创建）：惰性落库出生点
+      current = map.spawnNodeCode;
+      await getPool().query(
+        "UPDATE characters SET current_node_code = ? WHERE id = ?",
+        [current, req.account!.characterId],
+      );
+    }
     return {
       map: { code: map.code, name: map.name, type: map.type, background: map.background },
       currentNodeCode: current,
