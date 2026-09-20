@@ -10,7 +10,11 @@ const props = defineProps<{
 
 defineEmits<{ switchView: [] }>();
 
-const MAP_SCALE = 0.75; // 背景图 800×600 → 显示 600×450
+const GW = 800;
+const GH = 600;
+const ZOOM = 1.8; // 视野拉远：可见范围约为全图 55.6%（与原型一致）
+const camX = ref(0);
+const camY = ref(0);
 
 const map = ref<Awaited<ReturnType<typeof api.mapCurrent>> | null>(null);
 const messages = ref<{ time: string; text: string; kind: "sys" | "chat" }[]>([]);
@@ -20,6 +24,18 @@ const busy = ref(false);
 const currentNode = computed<MapNode | null>(
   () => map.value?.nodes.find((n) => n.code === map.value?.currentNodeCode) ?? null,
 );
+
+/** 镜头：让玩家居中，clamp 在世界边界内（百分比 translate 基于 mapview 自身尺寸） */
+const camTransform = computed(() => {
+  if (!currentNode.value) return "translate(0,0)";
+  const vw = GW / ZOOM;
+  const vh = GH / ZOOM;
+  const cx = Math.max(0, Math.min(currentNode.value.x - vw / 2, GW - vw));
+  const cy = Math.max(0, Math.min(currentNode.value.y - vh / 2, GH - vh));
+  return `translate(${-(cx / GW) * 100}%, ${-(cy / GH) * 100}%)`;
+});
+
+const posStyle = (x: number, y: number) => ({ left: (x / GW) * 100 + "%", top: (y / GH) * 100 + "%" });
 
 function now() {
   return new Date().toLocaleTimeString("zh-CN", { hour12: false });
@@ -91,27 +107,32 @@ onMounted(async () => {
       <section class="left">
         <div class="scene">
           <div class="mapview">
-            <img v-if="map" :src="map.map.background" :alt="map.map.name" draggable="false" />
+            <div
+              v-if="map"
+              class="world"
+              :style="{ transform: camTransform, background: `url('${map.map.background}') center / 100% 100% no-repeat` }"
+            >
             <template v-if="map">
               <button
                 v-for="n in map.nodes"
                 :key="n.code"
                 class="loc"
                 :class="{ current: n.code === map.currentNodeCode, locked: n.locked }"
-                :style="{ left: n.x * MAP_SCALE + 'px', top: n.y * MAP_SCALE + 'px' }"
+                :style="posStyle(n.x, n.y)"
                 :title="n.name"
                 @click="move(n)"
               >
-                {{ n.short }}<i v-if="n.npcs.length" class="npc-count">{{ n.npcs.length }}</i>
+                {{ n.short }}
               </button>
               <div
                 v-if="currentNode"
                 class="pet-mark"
-                :style="{ left: currentNode.x * MAP_SCALE + 'px', top: currentNode.y * MAP_SCALE + 'px' }"
+                :style="posStyle(currentNode.x, currentNode.y)"
               >
                 <img :src="petGif" :alt="characterName" />
               </div>
             </template>
+            </div>
           </div>
         </div>
         <div class="chatlog panel">
@@ -127,7 +148,7 @@ onMounted(async () => {
       <!-- 中：NPC / 玩家 -->
       <section class="center">
         <div class="panel npc-panel">
-          <div class="panel-head">{{ currentNode ? currentNode.name : "—" }} · NPC</div>
+          <div class="panel-head">{{ currentNode ? currentNode.name : "—" }}</div>
           <div class="body scr">
             <p v-if="!currentNode?.npcs.length" class="empty">这里空荡荡的，没有 NPC。</p>
             <div v-for="npc in currentNode?.npcs" :key="npc.name" class="npc-row">
@@ -135,12 +156,6 @@ onMounted(async () => {
               <span>{{ npc.name }}</span>
               <a href="#" @click.prevent="todo('NPC 交谈')">交谈</a>
             </div>
-          </div>
-        </div>
-        <div class="panel players-panel">
-          <div class="panel-head">同格玩家</div>
-          <div class="body scr">
-            <p class="empty">当前没有其他玩家（单机模式）。</p>
           </div>
         </div>
       </section>
@@ -210,47 +225,41 @@ onMounted(async () => {
 /* 主区 */
 .main { flex: 1; display: flex; gap: 4px; padding: 4px; min-height: 0; }
 .left { width: 600px; display: flex; flex-direction: column; gap: 4px; min-height: 0; }
-.scene { flex: 1; min-height: 0; display: grid; place-items: center; background: #cde9f5; border: 1px solid #58b1d8; overflow: hidden; }
-.mapview { position: relative; width: 600px; height: 450px; }
-.mapview > img { width: 100%; height: 100%; object-fit: cover; image-rendering: auto; display: block; user-select: none; }
+.scene { flex: none; aspect-ratio: 4 / 3; background: #cde9f5; border: 1px solid #58b1d8; overflow: hidden; }
+.mapview { position: relative; width: 100%; height: 100%; overflow: hidden; background: #7fae62; box-shadow: inset 0 0 20px rgba(30, 60, 80, 0.35); }
+.world { position: absolute; left: 0; top: 0; width: 180%; height: 180%; background: #7fae62; }
 .loc {
   position: absolute;
   transform: translate(-50%, -50%);
   cursor: pointer;
-  padding: 2px 8px;
-  font: 12px "SimSun", serif;
-  color: #14506e;
-  background: #ffffe1;
-  border: 1px solid #338ee1;
-  border-radius: 3px;
-  box-shadow: 0 1px 2px rgba(20, 80, 110, 0.35);
+  z-index: 1;
+  padding: 0 3px;
+  font: bold 12px/14px "SimSun", "宋体", serif;
   white-space: nowrap;
-  transition: background-color 0.15s ease, color 0.15s ease;
+  color: #4b4b42;
+  background: #ffffe1;
+  border: 1px solid rgba(13, 62, 90, 0.45);
+  box-shadow: 0 1px 2px rgba(20, 40, 60, 0.25);
+  white-space: nowrap;
+  transition: background-color 0.15s ease;
 }
-.loc:hover { background: #338ee1; color: #fff; }
-.loc.current { background: #d9a441; border-color: #8a5218; color: #fff; font-weight: 700; }
+.loc:hover { background: #fffdf0; border-color: #3a8ec2; }
+.loc.current { color: #fff; background: #338ee1; border-color: #38b6f0; font-weight: bold; box-shadow: 0 0 0 2px rgba(56, 182, 240, 0.5); }
 .loc.locked { color: #8b7b55; border-style: dashed; }
-.npc-count {
-  position: absolute;
-  top: -7px;
-  right: -7px;
-  min-width: 14px;
-  height: 14px;
-  line-height: 14px;
-  font-style: normal;
-  font-size: 10px;
-  text-align: center;
-  color: #fff;
-  background: #d63a2a;
-  border-radius: 7px;
-}
 .pet-mark {
   position: absolute;
-  transform: translate(-50%, -100%);
+  z-index: 3;
+  width: 68px;
+  height: 34px;
+  margin: -17px 0 0 -34px;
   pointer-events: none;
-  filter: drop-shadow(0 2px 2px rgba(20, 80, 110, 0.5));
+  transform: translate(-50%, -50%);
+  filter: drop-shadow(0 2px 2px rgba(0, 20, 40, 0.5));
+  animation: bob 1.2s ease-in-out infinite;
 }
-.pet-mark img { width: 40px; height: 40px; object-fit: contain; image-rendering: pixelated; display: block; }
+.pet-mark img { width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated; display: block; }
+@keyframes bob { 50% { transform: translate(-50%, calc(-50% - 3px)); } }
+@media (prefers-reduced-motion: reduce) { .pet-mark { animation: none; } }
 
 /* 面板通用 */
 .panel {
@@ -273,14 +282,13 @@ onMounted(async () => {
 .body.scr::-webkit-scrollbar-thumb { background: #8db8cd; border-radius: 4px; }
 .empty { color: #8b7b55; }
 
-.chatlog { height: 258px; }
+.chatlog { flex: 1; min-height: 0; }
 .chatlog time { color: #8b7b55; margin-right: 4px; }
 .chatlog p { margin: 1px 0; }
 .chatlog p.chat { color: #1e5f3f; }
 
 .center { width: 290px; display: flex; flex-direction: column; gap: 4px; min-height: 0; }
-.npc-panel { flex: 3; }
-.players-panel { flex: 2; }
+.npc-panel { flex: 1; }
 .npc-row { display: flex; align-items: center; gap: 6px; padding: 2px 0; border-bottom: 1px dotted #bfe0ef; }
 .npc-row b { font-weight: 400; }
 .npc-row b.t-red { color: #d63a2a; font-weight: 700; }
