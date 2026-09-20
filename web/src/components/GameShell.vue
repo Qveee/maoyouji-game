@@ -425,7 +425,7 @@ onUnmounted(() => {
 .body.scr::-webkit-scrollbar { width: 8px; }
 .body.scr::-webkit-scrollbar-thumb { background: #8db8cd; border-radius: 4px; }
 .empty { color: #8b7b55; }
-.private-hint { color: #74A5CF; font-size: 14px; font-weight: bold; margin: -3px 0 0; }
+.private-hint { color: #74A5CF; font-size: 14px; font-weight: 800; text-shadow: 0 0 0.4px currentColor; text-align: left; margin: -3px 0 0; }
 
 .chatlog { flex: 1; min-height: 0; }
 .chatlog time { color: #8b7b55; margin-right: 4px; }
