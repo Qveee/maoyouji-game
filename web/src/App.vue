@@ -3,7 +3,7 @@ import { onMounted, ref } from "vue";
 import { api, type Character, type Pet } from "./api";
 import LoginPanel from "./components/LoginPanel.vue";
 import CharacterSelect from "./components/CharacterSelect.vue";
-import GamePanel from "./components/GamePanel.vue";
+import GameShell from "./components/GameShell.vue";
 
 type View = "loading" | "auth" | "select" | "game";
 
@@ -15,6 +15,10 @@ const current = ref<Character | null>(null);
 const message = ref("");
 
 const petNameOf = (code: string) => pets.value.find((p) => p.code === code)?.name ?? code;
+const petGifOf = (code: string) => {
+  const sprite = pets.value.find((p) => p.code === code)?.sprite ?? "宠物/朝右/猫.gif";
+  return `/pets/${encodeURIComponent(sprite.split("/").pop() ?? "")}`;
+};
 
 async function refresh() {
   try {
@@ -90,7 +94,7 @@ onMounted(refresh);
 
 <template>
   <div class="app" :class="{ immersive: view === 'auth' }">
-    <header v-if="view === 'select' || view === 'game'" class="topbar">
+    <header v-if="view === 'select'" class="topbar">
       <b class="brand">喵游记</b>
       <span class="who">冒险者：{{ username }}</span>
       <a href="#" @click.prevent="logout">退出登录</a>
@@ -110,10 +114,11 @@ onMounted(refresh);
       @remove="remove"
     />
 
-    <GamePanel
+    <GameShell
       v-else-if="view === 'game' && current"
-      :character="current"
-      :pet-name="petNameOf(current.breedCode)"
+      :username="username"
+      :character-name="current.name"
+      :pet-gif="petGifOf(current.breedCode)"
       @switch-view="view = 'select'"
     />
   </div>

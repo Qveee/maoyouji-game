@@ -3,6 +3,7 @@ import { z } from "zod";
 import type { ResultSetHeader, RowDataPacket } from "mysql2";
 import { getPool } from "../db.ts";
 import { petIndex } from "../data/loader.ts";
+import { mapIndex } from "../data/loader.ts";
 import { requireAccount } from "../plugins/auth.ts";
 
 const createSchema = z.object({
@@ -12,7 +13,7 @@ const createSchema = z.object({
 });
 
 const SELECT_FIELDS =
-  "id, name, profession, breed_code AS breedCode, level, exp, vit, str, agi, intel, spr, hp, sp";
+  "id, name, profession, breed_code AS breedCode, level, exp, vit, str, agi, intel, spr, hp, sp, current_node_code AS currentNodeCode";
 
 interface CharacterRow extends RowDataPacket {
   id: number;
@@ -28,6 +29,7 @@ interface CharacterRow extends RowDataPacket {
   spr: number;
   hp: number;
   sp: number;
+  currentNodeCode: string | null;
 }
 
 export async function characterRoutes(app: FastifyInstance) {
@@ -61,9 +63,10 @@ export async function characterRoutes(app: FastifyInstance) {
     const sp = 30 + intel * 5 + level * 5;
     try {
       const [result] = await pool.query<ResultSetHeader>(
-        `INSERT INTO characters (account_id, name, profession, breed_code, vit, str, agi, intel, spr, hp, sp)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [req.account!.accountId, name, profession, breedCode, vit, str, agi, intel, spr, hp, sp],
+        `INSERT INTO characters (account_id, name, profession, breed_code, vit, str, agi, intel, spr, hp, sp, current_node_code)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [req.account!.accountId, name, profession, breedCode, vit, str, agi, intel, spr, hp, sp,
+         mapIndex().get("maoyin_village")!.spawnNodeCode],
       );
       const [rows] = await pool.query<CharacterRow[]>(
         `SELECT ${SELECT_FIELDS} FROM characters WHERE id = ?`,

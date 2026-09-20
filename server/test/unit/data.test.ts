@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { loadPets } from "../../src/data/loader.ts";
+import { loadMaps, loadPets } from "../../src/data/loader.ts";
 import { PetsFileSchema } from "../../src/data/schemas.ts";
 
 describe("静态宠物数据", () => {
@@ -18,5 +18,14 @@ describe("静态宠物数据", () => {
     const file = loadPets();
     const bad = { pets: [{ ...file.pets[0]!, baseStats: { vit: 9, str: 9, agi: 5, intel: 5, spr: 5 } }] };
     expect(() => PetsFileSchema.parse(bad)).toThrow(/25/);
+  });
+
+  it("猫隐村地图含 20 节点且出生点与锁点合法", () => {
+    const village = loadMaps().maps.find((m) => m.code === "maoyin_village")!;
+    expect(village.nodes).toHaveLength(20);
+    expect(new Set(village.nodes.map((n) => n.code)).size).toBe(20);
+    expect(village.spawnNodeCode).toBe("guangchang");
+    expect(village.nodes.filter((n) => n.locked)).toHaveLength(1);
+    expect(village.nodes.reduce((s, n) => s + n.npcs.length, 0)).toBeGreaterThan(80);
   });
 });

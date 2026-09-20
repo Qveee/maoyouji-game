@@ -29,7 +29,7 @@ describe("角色", () => {
     expect(res.statusCode).toBe(201);
     const body = res.json();
     // §3.3：HP=50+vit*8+level*10=50+40+10；SP=30+intel*5+level*5=30+25+5
-    expect(body).toMatchObject({ name: "大橘为重", breedCode: "mao", profession: "warrior", level: 1, vit: 5, str: 5, agi: 5, intel: 5, spr: 5, hp: 100, sp: 60 });
+    expect(body).toMatchObject({ name: "大橘为重", breedCode: "mao", profession: "warrior", level: 1, vit: 5, str: 5, agi: 5, intel: 5, spr: 5, hp: 100, sp: 60, currentNodeCode: "guangchang" });
   });
 
   it("未知宠物返回 400", async () => {

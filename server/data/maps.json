@@ -1,0 +1,624 @@
+{
+  "maps": [
+    {
+      "code": "maoyin_village",
+      "name": "猫隐村",
+      "type": "town",
+      "background": "/maps/maoyin.jpg",
+      "spawnNodeCode": "guangchang",
+      "nodes": [
+        {
+          "code": "jiedaobanshichu",
+          "name": "街道办事处",
+          "short": "街道办",
+          "x": 213,
+          "y": 157,
+          "npcs": [
+            {
+              "name": "张大娘",
+              "title": "",
+              "titleColor": ""
+            },
+            {
+              "name": "狱卒",
+              "title": "",
+              "titleColor": ""
+            },
+            {
+              "name": "mop.com",
+              "title": "",
+              "titleColor": ""
+            },
+            {
+              "name": "梅姊姊",
+              "title": "绝世媚妞",
+              "titleColor": "red"
+            },
+            {
+              "name": "公会专员",
+              "title": "",
+              "titleColor": ""
+            }
+          ]
+        },
+        {
+          "code": "cunzhangxiaowu",
+          "name": "村长小屋",
+          "short": "村长小屋",
+          "x": 306,
+          "y": 116,
+          "npcs": [
+            {
+              "name": "肥猫",
+              "title": "猫隐村村长",
+              "titleColor": "blue"
+            }
+          ]
+        },
+        {
+          "code": "zhuangbeidian",
+          "name": "装备店",
+          "short": "装备店",
+          "x": 412,
+          "y": 160,
+          "npcs": [
+            {
+              "name": "欧老板",
+              "title": "",
+              "titleColor": ""
+            },
+            {
+              "name": "李金斗",
+              "title": "当铺老板",
+              "titleColor": "green"
+            }
+          ]
+        },
+        {
+          "code": "jiaotang",
+          "name": "教堂",
+          "short": "教堂",
+          "x": 561,
+          "y": 178,
+          "npcs": [
+            {
+              "name": "圣殿守护者",
+              "title": "",
+              "titleColor": ""
+            },
+            {
+              "name": "修女",
+              "title": "",
+              "titleColor": ""
+            },
+            {
+              "name": "圣殿守护者",
+              "title": "",
+              "titleColor": ""
+            }
+          ]
+        },
+        {
+          "code": "hocunxiaodao",
+          "name": "后村小道",
+          "short": "后村小道",
+          "x": 298,
+          "y": 198,
+          "npcs": [
+            {
+              "name": "傻二",
+              "title": "",
+              "titleColor": ""
+            },
+            {
+              "name": "范坚强",
+              "title": "",
+              "titleColor": ""
+            },
+            {
+              "name": "衙役",
+              "title": "官衙",
+              "titleColor": "blue"
+            }
+          ]
+        },
+        {
+          "code": "maoyincunxiaojing",
+          "name": "猫隐村小径",
+          "short": "猫隐村小径",
+          "x": 244,
+          "y": 366,
+          "npcs": [
+            {
+              "name": "吾善贴图",
+              "title": "微缩神教",
+              "titleColor": "red"
+            },
+            {
+              "name": "衙役",
+              "title": "官衙",
+              "titleColor": "blue"
+            }
+          ]
+        },
+        {
+          "code": "biwuchang",
+          "name": "比武场",
+          "short": "比武场",
+          "x": 118,
+          "y": 196,
+          "npcs": [
+            {
+              "name": "修女",
+              "title": "",
+              "titleColor": ""
+            },
+            {
+              "name": "mop.com",
+              "title": "",
+              "titleColor": ""
+            },
+            {
+              "name": "mop.com",
+              "title": "",
+              "titleColor": ""
+            },
+            {
+              "name": "mop.com",
+              "title": "",
+              "titleColor": ""
+            },
+            {
+              "name": "mop.com",
+              "title": "",
+              "titleColor": ""
+            }
+          ]
+        },
+        {
+          "code": "guangchang",
+          "name": "猫隐村广场",
+          "short": "猫隐村广场",
+          "x": 341,
+          "y": 340,
+          "npcs": [
+            {
+              "name": "木静静",
+              "title": "美女教官",
+              "titleColor": "red"
+            },
+            {
+              "name": "新手福音-戈多",
+              "title": "",
+              "titleColor": ""
+            },
+            {
+              "name": "钱大伯",
+              "title": "双倍经验",
+              "titleColor": "orange"
+            },
+            {
+              "name": "宝石手工艺人",
+              "title": "",
+              "titleColor": ""
+            },
+            {
+              "name": "饰品大师",
+              "title": "",
+              "titleColor": ""
+            }
+          ]
+        },
+        {
+          "code": "cunkou",
+          "name": "村口",
+          "short": "村口",
+          "x": 338,
+          "y": 494,
+          "npcs": [
+            {
+              "name": "流浪歌手小牙",
+              "title": "",
+              "titleColor": ""
+            },
+            {
+              "name": "衙役",
+              "title": "官衙",
+              "titleColor": "blue"
+            },
+            {
+              "name": "衙役",
+              "title": "官衙",
+              "titleColor": "blue"
+            }
+          ]
+        },
+        {
+          "code": "daojudian",
+          "name": "道具店",
+          "short": "道具店",
+          "x": 435,
+          "y": 270,
+          "npcs": [
+            {
+              "name": "道具店老板",
+              "title": "",
+              "titleColor": ""
+            },
+            {
+              "name": "李金斗",
+              "title": "当铺老板",
+              "titleColor": "green"
+            },
+            {
+              "name": "王小二",
+              "title": "道具店跑堂",
+              "titleColor": "blue"
+            }
+          ]
+        },
+        {
+          "code": "chongwutueryuansuo",
+          "name": "宠物托儿所",
+          "short": "宠物托儿所",
+          "x": 70,
+          "y": 293,
+          "npcs": [
+            {
+              "name": "明美",
+              "title": "骑乘训练师",
+              "titleColor": "blue"
+            }
+          ]
+        },
+        {
+          "code": "chongwuyanjiusuo",
+          "name": "宠物研究所",
+          "short": "宠物研究所",
+          "x": 470,
+          "y": 499,
+          "npcs": [
+            {
+              "name": "洛克洛",
+              "title": "帝国研究师",
+              "titleColor": "blue"
+            },
+            {
+              "name": "封印师",
+              "title": "",
+              "titleColor": ""
+            },
+            {
+              "name": "守护灵媒",
+              "title": "",
+              "titleColor": ""
+            },
+            {
+              "name": "物化灵媒",
+              "title": "",
+              "titleColor": ""
+            },
+            {
+              "name": "守护灵保姆",
+              "title": "",
+              "titleColor": ""
+            },
+            {
+              "name": "克拉拉",
+              "title": "守护灵研究师",
+              "titleColor": "blue"
+            }
+          ]
+        },
+        {
+          "code": "cangku",
+          "name": "仓库",
+          "short": "仓库",
+          "x": 522,
+          "y": 419,
+          "npcs": [
+            {
+              "name": "物品保管员",
+              "title": "",
+              "titleColor": ""
+            },
+            {
+              "name": "娜娜的 虫",
+              "title": "想",
+              "titleColor": "red"
+            }
+          ]
+        },
+        {
+          "code": "guangchangxiaodao",
+          "name": "广场小道",
+          "short": "广场小道",
+          "x": 444,
+          "y": 379,
+          "npcs": [
+            {
+              "name": "老赵",
+              "title": "",
+              "titleColor": ""
+            },
+            {
+              "name": "任务板",
+              "title": "使命",
+              "titleColor": "green"
+            },
+            {
+              "name": "衙役",
+              "title": "官衙",
+              "titleColor": "blue"
+            }
+          ]
+        },
+        {
+          "code": "hocunlindi",
+          "name": "后村林地",
+          "short": "后村林地",
+          "x": 173,
+          "y": 53,
+          "npcs": [
+            {
+              "name": "懒得动的小臭",
+              "title": "",
+              "titleColor": ""
+            },
+            {
+              "name": "衙役",
+              "title": "官衙",
+              "titleColor": "blue"
+            },
+            {
+              "name": "衙役",
+              "title": "官衙",
+              "titleColor": "blue"
+            }
+          ]
+        },
+        {
+          "code": "hocungudi",
+          "name": "后村谷地",
+          "short": "后村谷地",
+          "x": 76,
+          "y": 90,
+          "npcs": []
+        },
+        {
+          "code": "chibianxiaodao",
+          "name": "池边小道",
+          "short": "池边小道",
+          "x": 241,
+          "y": 292,
+          "npcs": [
+            {
+              "name": "小胖",
+              "title": "",
+              "titleColor": ""
+            },
+            {
+              "name": "小明",
+              "title": "",
+              "titleColor": ""
+            }
+          ]
+        },
+        {
+          "code": "yizhan",
+          "name": "猫隐村驿站",
+          "short": "驿站",
+          "x": 210,
+          "y": 449,
+          "npcs": [
+            {
+              "name": "专用空姐",
+              "title": "",
+              "titleColor": ""
+            },
+            {
+              "name": "猫扑快递公司",
+              "title": "",
+              "titleColor": ""
+            },
+            {
+              "name": "客房经理",
+              "title": "旅馆",
+              "titleColor": "orange"
+            },
+            {
+              "name": "焦急的大妈",
+              "title": "",
+              "titleColor": ""
+            }
+          ]
+        },
+        {
+          "code": "muye03",
+          "name": "牧野草原03",
+          "short": "牧野草原",
+          "x": 374,
+          "y": 570,
+          "locked": true,
+          "lockedReason": "牧野草原将在下一切片开放",
+          "npcs": [
+            {
+              "name": "小牧童",
+              "title": "",
+              "titleColor": ""
+            },
+            {
+              "name": "草原蝎",
+              "title": "",
+              "titleColor": ""
+            },
+            {
+              "name": "小鸡",
+              "title": "",
+              "titleColor": ""
+            },
+            {
+              "name": "小鸡",
+              "title": "",
+              "titleColor": ""
+            },
+            {
+              "name": "小鸡",
+              "title": "",
+              "titleColor": ""
+            },
+            {
+              "name": "红蘑菇",
+              "title": "",
+              "titleColor": ""
+            },
+            {
+              "name": "草原蝎",
+              "title": "",
+              "titleColor": ""
+            },
+            {
+              "name": "绿毛虫",
+              "title": "",
+              "titleColor": ""
+            },
+            {
+              "name": "草原蝎",
+              "title": "",
+              "titleColor": ""
+            },
+            {
+              "name": "草原蝎",
+              "title": "",
+              "titleColor": ""
+            },
+            {
+              "name": "小鸡",
+              "title": "",
+              "titleColor": ""
+            }
+          ]
+        },
+        {
+          "code": "xicunkou",
+          "name": "西村口",
+          "short": "西村口",
+          "x": 215,
+          "y": 538,
+          "npcs": [
+            {
+              "name": "绿毛虫",
+              "title": "",
+              "titleColor": ""
+            },
+            {
+              "name": "绿毛虫",
+              "title": "",
+              "titleColor": ""
+            },
+            {
+              "name": "绿毛虫",
+              "title": "",
+              "titleColor": ""
+            },
+            {
+              "name": "泡泡",
+              "title": "",
+              "titleColor": ""
+            },
+            {
+              "name": "泡泡",
+              "title": "",
+              "titleColor": ""
+            },
+            {
+              "name": "泡泡",
+              "title": "",
+              "titleColor": ""
+            },
+            {
+              "name": "泡泡",
+              "title": "",
+              "titleColor": ""
+            },
+            {
+              "name": "绿毛虫",
+              "title": "",
+              "titleColor": ""
+            },
+            {
+              "name": "绿毛虫",
+              "title": "",
+              "titleColor": ""
+            },
+            {
+              "name": "泡泡",
+              "title": "",
+              "titleColor": ""
+            },
+            {
+              "name": "泡泡",
+              "title": "",
+              "titleColor": ""
+            },
+            {
+              "name": "泡泡",
+              "title": "",
+              "titleColor": ""
+            },
+            {
+              "name": "泡泡",
+              "title": "",
+              "titleColor": ""
+            },
+            {
+              "name": "泡泡",
+              "title": "",
+              "titleColor": ""
+            },
+            {
+              "name": "泡泡",
+              "title": "",
+              "titleColor": ""
+            },
+            {
+              "name": "泡泡",
+              "title": "",
+              "titleColor": ""
+            },
+            {
+              "name": "绿毛虫",
+              "title": "",
+              "titleColor": ""
+            },
+            {
+              "name": "绿毛虫",
+              "title": "",
+              "titleColor": ""
+            },
+            {
+              "name": "绿毛虫",
+              "title": "",
+              "titleColor": ""
+            },
+            {
+              "name": "泡泡",
+              "title": "",
+              "titleColor": ""
+            },
+            {
+              "name": "焦虑的爷爷",
+              "title": "",
+              "titleColor": ""
+            },
+            {
+              "name": "泡泡",
+              "title": "",
+              "titleColor": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,5 +1,5 @@
 import { readFileSync } from "node:fs";
-import { PetsFileSchema, type Pet, type PetsFile } from "./schemas.ts";
+import { MapsFileSchema, PetsFileSchema, type GameMap, type Pet, type PetsFile } from "./schemas.ts";
 
 const DEFAULT_PATH = new URL("../../data/pets.json", import.meta.url);
 
@@ -17,4 +17,21 @@ export function petIndex(): Map<string, Pet> {
     cache = new Map(loadPets().pets.map((p) => [p.code, p]));
   }
   return cache;
+}
+
+const DEFAULT_MAPS_PATH = new URL("../../data/maps.json", import.meta.url);
+
+/** 读取并校验静态地图数据 */
+export function loadMaps(path: URL | string = DEFAULT_MAPS_PATH) {
+  return MapsFileSchema.parse(JSON.parse(readFileSync(path, "utf8")));
+}
+
+let mapCache: Map<string, GameMap> | null = null;
+
+/** 地图 code → 地图 索引 */
+export function mapIndex(): Map<string, GameMap> {
+  if (!mapCache) {
+    mapCache = new Map(loadMaps().maps.map((m) => [m.code, m]));
+  }
+  return mapCache;
 }

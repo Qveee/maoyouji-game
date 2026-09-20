@@ -22,6 +22,29 @@ export interface Pet {
   baseStats: Record<string, number>;
 }
 
+export interface MapNpc {
+  name: string;
+  title: string;
+  titleColor: string;
+}
+
+export interface MapNode {
+  code: string;
+  name: string;
+  short: string;
+  x: number;
+  y: number;
+  locked: boolean;
+  lockedReason: string | null;
+  npcs: MapNpc[];
+}
+
+export interface MapCurrent {
+  map: { code: string; name: string; type: string; background: string };
+  currentNodeCode: string | null;
+  nodes: MapNode[];
+}
+
 async function request<T>(url: string, init?: RequestInit): Promise<T> {
   const hasBody = init?.body != null;
   const res = await fetch(url, {
@@ -49,4 +72,10 @@ export const api = {
   selectCharacter: (characterId: number) =>
     request<{ characterId: number }>("/api/auth/select-character", { method: "POST", body: JSON.stringify({ characterId }) }),
   pets: () => request<{ pets: Pet[] }>("/api/pets"),
+  mapCurrent: () => request<MapCurrent>("/api/map/current"),
+  move: (toCode: string) =>
+    request<{ node: { code: string; name: string; short: string } }>("/api/map/move", {
+      method: "POST",
+      body: JSON.stringify({ toCode }),
+    }),
 };
