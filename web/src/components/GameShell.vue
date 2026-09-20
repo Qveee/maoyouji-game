@@ -88,6 +88,8 @@ function fitStage() {
 const topMenus = ["功能", "帮助", "图鉴", "战斗力", "竞技场", "成就", "活动"];
 const funcBtns = ["任务", "技能", "道具", "宝库", "宠物", "好友", "队伍", "公会"];
 const SLOT_KEYS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 10, 11, 12];
+/** 技能栏 12 格：null=空格；后续切片装入技能 code 后显示图标并可点击/按数字键释放 */
+const skillSlots = ref<(string | null)[]>(Array(12).fill(null));
 
 onMounted(async () => {
   fitStage();
@@ -207,16 +209,17 @@ onUnmounted(() => window.removeEventListener("resize", fitStage));
     <!-- 底栏 80px -->
     <footer class="bottombar">
       <div class="bar-main">
-        <div class="skillzone" @click.self="todo('技能书')">
-          <img src="/ui/skillbar.png" alt="技能栏" draggable="false" />
+        <div class="skillzone">
           <div class="slots">
             <div
               v-for="(k, i) in SLOT_KEYS"
               :key="i"
               class="slot"
-              :title="`技能格${i + 1}（快捷键 ${k}，未装备，点击打开技能书）`"
+              :title="skillSlots[i] ? `技能（快捷键 ${k}）` : `空技能格（快捷键 ${k}，装备技能后此处显示图标）`"
               @click="todo('技能书')"
-            ></div>
+            >
+              <i class="key">{{ k }}</i>
+            </div>
           </div>
           <div class="pagebtns" title="技能栏翻页">
             <i data-p="up"></i><i data-p="down"></i>
@@ -386,12 +389,29 @@ onUnmounted(() => window.removeEventListener("resize", fitStage));
   border-top: 1px solid #2e86ab;
 }
 .bar-main { flex: 1; display: flex; align-items: center; min-width: 0; padding-right: 24px; }
-.skillzone { position: relative; flex: none; height: 100%; width: 742px; cursor: pointer; }
-.skillzone > img { width: 100%; height: 100%; display: block; }
-.slots { position: absolute; left: 20px; top: 10px; width: 632px; height: 44px; display: flex; gap: 5px; }
-.slot { width: 44px; flex: none; cursor: pointer; }
-.slot:hover { box-shadow: inset 0 0 0 2px rgba(255, 240, 170, 0.65); }
-.pagebtns { position: absolute; left: 653px; top: 7px; width: 47px; height: 46px; cursor: pointer; }
+.skillzone { position: relative; flex: none; height: 56px; width: 640px; display: flex; align-items: center; gap: 6px; padding: 0 4px; background: rgba(20, 60, 90, 0.28); border: 1px solid rgba(255, 255, 255, 0.25); border-radius: 6px; }
+.slots { display: flex; gap: 5px; }
+.slot {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  flex: none;
+  cursor: pointer;
+  border-radius: 4px;
+  background: linear-gradient(#e8c98a, #c49a4e 60%, #a87c34);
+  box-shadow: inset 0 1px 0 rgba(255, 245, 210, 0.6), inset 0 -2px 3px rgba(90, 50, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+.slot:hover { box-shadow: inset 0 0 0 2px rgba(255, 240, 170, 0.65), inset 0 -2px 3px rgba(90, 50, 0, 0.4); }
+.slot .key {
+  position: absolute;
+  right: 2px;
+  bottom: 0;
+  font: 10px/12px Tahoma, Verdana, sans-serif;
+  font-style: normal;
+  color: #5c3a10;
+  text-shadow: 0 1px 0 rgba(255, 245, 210, 0.7);
+}
+.pagebtns { position: static; width: 40px; height: 44px; cursor: pointer; }
 .pagebtns i { position: absolute; left: 0; width: 100%; height: 50%; }
 .pagebtns i:hover { background: rgba(255, 255, 255, 0.22); }
 .fbtns { flex: 1; display: flex; justify-content: space-evenly; align-items: center; min-width: 0; }
