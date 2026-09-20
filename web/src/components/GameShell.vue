@@ -60,7 +60,6 @@ async function move(node: MapNode) {
   try {
     await api.move(node.code);
     map.value!.currentNodeCode = node.code;
-    say(`你走到了【${node.name}】。`);
   } catch (err) {
     say(`【系统】${err instanceof Error ? err.message : "移动失败"}`);
   } finally {
@@ -81,7 +80,7 @@ function todo(what: string) {
 
 const topMenus = ["功能", "帮助", "图鉴", "战斗力", "竞技场", "成就", "活动"];
 const funcBtns = ["任务", "技能", "道具", "宝库", "宠物", "好友", "队伍", "公会"];
-const slots = Array.from({ length: 12 }, (_, i) => i + 1);
+const SLOT_KEYS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 10, 11, 12];
 
 onMounted(async () => {
   await load();
@@ -196,11 +195,27 @@ onMounted(async () => {
 
     <!-- 底栏 80px -->
     <footer class="bottombar">
-      <div class="slots">
-        <button v-for="s in slots" :key="s" type="button" class="slot" @click="todo('技能栏')">{{ s }}</button>
-      </div>
-      <div class="fbtns">
-        <button v-for="f in funcBtns" :key="f" type="button" class="fbtn" @click="todo(f)">{{ f }}</button>
+      <div class="bar-main">
+        <div class="skillzone" @click.self="todo('技能书')">
+          <img src="/ui/skillbar.png" alt="技能栏" draggable="false" />
+          <div class="slots">
+            <div
+              v-for="(k, i) in SLOT_KEYS"
+              :key="i"
+              class="slot"
+              :title="`技能格${i + 1}（快捷键 ${k}，未装备，点击打开技能书）`"
+              @click="todo('技能书')"
+            ></div>
+          </div>
+          <div class="pagebtns" title="技能栏翻页">
+            <i data-p="up"></i><i data-p="down"></i>
+          </div>
+        </div>
+        <div class="fbtns">
+          <div v-for="f in funcBtns" :key="f" class="fbtn" :title="f" @click="todo(f)">
+            <img :src="`/ui/${f}按钮.gif`" :alt="f" />
+          </div>
+        </div>
       </div>
     </footer>
   </main>
@@ -262,14 +277,12 @@ onMounted(async () => {
 .pet-mark {
   position: absolute;
   z-index: 3;
-  width: 80px;
-  height: 40px;
   pointer-events: none;
   transform: translate(-50%, -50%);
   filter: drop-shadow(0 2px 2px rgba(0, 20, 40, 0.5));
   animation: bob 1.2s ease-in-out infinite;
 }
-.pet-mark img { width: 100%; height: 100%; display: block; }
+.pet-mark img { height: 48px; width: auto; display: block; }
 @keyframes bob { 50% { transform: translate(-50%, calc(-50% - 3px)); } }
 @media (prefers-reduced-motion: reduce) { .pet-mark { animation: none; } }
 
@@ -324,36 +337,24 @@ onMounted(async () => {
 
 /* 底栏 */
 .bottombar {
-  height: 80px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 0 12px;
-  background: linear-gradient(#d9f0fa, #b7dcee);
-  border-top: 1px solid #58b1d8;
+  height: 78px;
+  flex: none;
+  background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27380%27%20height%3D%2778%27%3E%3Cg%20fill%3D%27none%27%20stroke%3D%27%236fc4e4%27%20stroke-opacity%3D%27.40%27%20stroke-width%3D%273%27%20stroke-linecap%3D%27round%27%3E%3Cpath%20d%3D%27M64%2066c-24-8-33-32-17-49%2013-14%2036-11%2044%204%206%2013-3%2026-16%2025-10-1-15-9-10-17%27%2F%3E%3Ccircle%20cx%3D%27158%27%20cy%3D%2728%27%20r%3D%2715%27%2F%3E%3Cpath%20d%3D%27M158%205c15%201%2027%2011%2028%2025%27%2F%3E%3Cpath%20d%3D%27M262%2072c-17-5-25-22-16-36%208-13%2026-14%2034-3%207%2010%201%2023-11%2022%27%2F%3E%3C%2Fg%3E%3Cg%20fill%3D%27none%27%20stroke%3D%27%232f8cb4%27%20stroke-opacity%3D%27.25%27%20stroke-width%3D%273%27%20stroke-linecap%3D%27round%27%3E%3Cpath%20d%3D%27M22%2022c11-9%2026-6%2032%205%27%2F%3E%3Ccircle%20cx%3D%27216%27%20cy%3D%2756%27%20r%3D%2712%27%2F%3E%3Cpath%20d%3D%27M316%2026c13-11%2030-6%2036%207%27%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E"),linear-gradient(180deg,#48a1c8 0%,#449ec5 30%,#439dc4 45%,#45a0c7 62%,#409ac1 100%);
+  background-size: 380px 76px, auto;
+  background-position: -50px 0, 0 0;
+  border-top: 1px solid #2e86ab;
 }
-.slots { display: flex; gap: 3px; }
-.slot {
-  width: 42px;
-  height: 42px;
-  cursor: pointer;
-  font-size: 11px;
-  color: #48788f;
-  background: linear-gradient(#f4fbff, #cde9f5);
-  border: 1px solid #58b1d8;
-  border-radius: 4px;
-}
-.slot:hover { border-color: #338ee1; color: #14506e; }
-.fbtns { display: flex; flex-wrap: wrap; gap: 4px; width: 320px; }
-.fbtn {
-  width: 76px;
-  height: 24px;
-  cursor: pointer;
-  font-size: 12px;
-  color: #14506e;
-  background: linear-gradient(#f4fbff, #cde9f5);
-  border: 1px solid #58b1d8;
-  border-radius: 4px;
-}
-.fbtn:hover { border-color: #338ee1; background: #e4f5fd; }
+.bar-main { flex: 1; display: flex; align-items: center; min-width: 0; padding-right: 24px; }
+.skillzone { position: relative; flex: none; height: 100%; width: 742px; cursor: pointer; }
+.skillzone > img { width: 100%; height: 100%; display: block; }
+.slots { position: absolute; left: 20px; top: 10px; width: 632px; height: 44px; display: flex; gap: 5px; }
+.slot { width: 44px; flex: none; cursor: pointer; }
+.slot:hover { box-shadow: inset 0 0 0 2px rgba(255, 240, 170, 0.65); }
+.pagebtns { position: absolute; left: 653px; top: 7px; width: 47px; height: 46px; cursor: pointer; }
+.pagebtns i { position: absolute; left: 0; width: 100%; height: 50%; }
+.pagebtns i:hover { background: rgba(255, 255, 255, 0.22); }
+.fbtns { flex: 1; display: flex; justify-content: space-evenly; align-items: center; min-width: 0; }
+.fbtn { cursor: pointer; line-height: 0; }
+.fbtn img { width: 60px; height: 60px; }
+.fbtn:hover { filter: brightness(1.13); }
 </style>
