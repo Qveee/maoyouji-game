@@ -241,6 +241,7 @@ onUnmounted(() => window.removeEventListener("resize", fitStage));
   overflow: hidden;
 }
 .shell {
+  flex: none;
   width: 1400px;
   height: 832px;
   margin: 12px auto;
@@ -272,7 +273,7 @@ onUnmounted(() => window.removeEventListener("resize", fitStage));
 
 /* 主区 */
 .main { flex: 1; display: flex; gap: 4px; padding: 4px; min-height: 0; }
-.left { width: 600px; display: flex; flex-direction: column; gap: 4px; min-height: 0; }
+.left { width: 600px; flex: none; min-width: 0; display: flex; flex-direction: column; gap: 4px; min-height: 0; }
 .scene { flex: none; aspect-ratio: 4 / 3; background: #cde9f5; border: 1px solid #58b1d8; overflow: hidden; }
 .mapview { position: relative; width: 100%; height: 100%; overflow: hidden; background: #7fae62; box-shadow: inset 0 0 20px rgba(30, 60, 80, 0.35); }
 .world { position: absolute; left: 0; top: 0; width: 180%; height: 180%; background: #7fae62; }
@@ -337,7 +338,7 @@ onUnmounted(() => window.removeEventListener("resize", fitStage));
 }
 .chatlog p.chat { color: #1e5f3f; }
 
-.center { width: 290px; display: flex; flex-direction: column; gap: 4px; min-height: 0; }
+.center { width: 290px; flex: none; min-width: 0; overflow: hidden; display: flex; flex-direction: column; gap: 4px; min-height: 0; }
 .npc-panel { flex: 3; }
 .npc-panel .panel-head { text-align: center; color: #000; font-weight: bold; }
 .players-panel { flex: 2; }
@@ -357,11 +358,11 @@ onUnmounted(() => window.removeEventListener("resize", fitStage));
 .private-panel { flex: 2; }
 .input-panel { flex: none; height: 38px; display: flex; align-items: center; gap: 5px; padding: 0 6px; }
 .input-panel select {
-  width: 62px; height: 24px; color: #1a1a1a; background: #fff; cursor: pointer;
+  width: 62px; height: 24px; font: 12px "SimSun", "宋体", serif; color: #1a1a1a; background: #fff; cursor: pointer;
   border: 1px solid #7f7f7f; box-shadow: inset 1px 1px 0 #d4d0c8;
 }
 .input-panel input {
-  flex: 1; min-width: 0; height: 24px; padding: 0 6px; color: #111; background: #fff;
+  flex: 1; min-width: 0; height: 24px; line-height: 22px; font: 12px "SimSun", "宋体", serif; padding: 0 6px; color: #111; background: #fff;
   border: 1px solid #7f7f7f; box-shadow: inset 1px 1px 0 #d4d0c8; outline: none;
 }
 .input-panel input:focus { border-color: #3a8ec2; }
