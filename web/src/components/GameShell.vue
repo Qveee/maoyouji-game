@@ -158,6 +158,8 @@ onUnmounted(() => window.removeEventListener("resize", fitStage));
         </div>
       </section>
 
+      <div class="side">
+        <div class="side-top">
       <!-- 中：NPC / 玩家 -->
       <section class="center">
         <div class="panel npc-panel">
@@ -186,7 +188,7 @@ onUnmounted(() => window.removeEventListener("resize", fitStage));
         </div>
       </section>
 
-      <!-- 右：消息窗 + 输入 -->
+      <!-- 右：消息窗 -->
       <section class="right">
         <div class="panel drop-panel">
           <div class="panel-head">世界·掉落公告</div>
@@ -196,6 +198,8 @@ onUnmounted(() => window.removeEventListener("resize", fitStage));
           <div class="panel-head">私人信息</div>
           <div class="body scr"><p class="empty">暂无私信。</p></div>
         </div>
+      </section>
+        </div>
         <div class="panel input-panel">
           <select v-model="channel">
             <option>区域</option><option>世界</option><option>私聊</option><option>公会</option>
@@ -203,7 +207,7 @@ onUnmounted(() => window.removeEventListener("resize", fitStage));
           <input v-model="chatText" maxlength="60" placeholder="在这里输入聊天内容…" @keydown.enter.prevent="sendChat" />
           <button type="button" @click="sendChat">输入</button>
         </div>
-      </section>
+      </div>
     </div>
 
     <!-- 底栏 80px -->
@@ -357,6 +361,8 @@ onUnmounted(() => window.removeEventListener("resize", fitStage));
 .npc .tt.t-orange { color: #d97a00; }
 
 .right { flex: 1; min-width: 300px; display: flex; flex-direction: column; gap: 4px; min-height: 0; }
+.side { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.side-top { flex: 1; min-height: 0; display: flex; gap: 4px; }
 .drop-panel { flex: 2; }
 .private-panel { flex: 2; }
 /* 覆盖 .panel 的 flex-direction: column，让 频道选择/输入框/按钮 保持同一行 */
