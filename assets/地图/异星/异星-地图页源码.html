@@ -1,0 +1,226 @@
+﻿
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312">
+<script language="JavaScript">
+<!--
+function SymError()
+{
+  return true;
+}
+window.onerror = SymError;
+
+//-->
+</script>
+<style type="text/css">
+.pos{
+	left: 0;
+	top: 0;
+	height:19px;
+	padding-top:1px;
+	padding-left:2px;
+	padding-right:2px;
+	background-color:#FFFFE1;
+	filter:alpha(opacity=1);
+	position: absolute;
+	border:0 solid #000000;
+	cursor:hand;
+	color:#000000;
+	font-size:9pt;
+	line-height:12pt;
+	z-index:2;
+}
+.bgMap{
+	left: 0;
+	top: 0;
+	position: absolute;
+	z-index:1;
+}
+</style>
+
+<script src="include/map.js"></script>
+<body bgcolor="#FFFFFF" leftmargin="0" topmargin="0" marginwidth="0" marginheight="0"  onLoad="initMap();" scroll="no">
+
+<span id='p01' class="pos" style="width:63px;left: 6px;top: 33px;" onClick="go(this,this.title);" title="异星08"></span>
+	<span id='p02' class="pos" style="width:57px;left: 42px;top: 83px;" onClick="go(this,this.title);" title="星08"></span>
+	<span id='p03' class="pos" style="width:62px;left: 197px;top: 134px;" onClick="go(this,this.title);" title="异星03"></span>
+	<span id='p04' class="pos" style="width:32px;left: 13px;top: 162px;" onClick="go(this,this.title);" title="星09"></span>
+	<span id='p05' class="pos" style="width:32px;left: 117px;top: 180px;" onClick="go(this,this.title);" title="星10"></span>
+	<span id='p06' class="pos" style="width:33px;left: 22px;top: 290px;" onClick="go(this,this.title);" title="星11"></span>
+	<span id='p07' class="pos" style="width:56px;left: 99px;top: 325px;" onClick="go(this,this.title);" title="异星09">　</span>
+	<span id='p08' class="pos" style="width:37px;left: 0px;top: 381px;" onClick="go(this,this.title);" title="星12"></span>
+	<span id='p09' class="pos" style="width:39px;left: 85px;top: 438px;" onClick="go(this,this.title);" title="星14"></span>
+	<span id='p10' class="pos" style="width:46px;left: 22px;top: 485px;" onClick="go(this,this.title);" title="异星10"></span>
+	<span id='p11' class="pos" style="width:59px;left: 141px;top: 14px;" onClick="go(this,this.title);" title="星07"></span>
+	<span id='p14' class="pos" style="width:56px;left: 342px;top: 54px;" onClick="go(this,this.title);" title="星06"></span>
+	<span id='p15' class="pos" style="width:61px;left: 285px;top: 168px;" onClick="go(this,this.title);" title="星01"></span>
+	<span id='p16' class="pos" style="width:55px;left: 217px;top: 217px;" onClick="go(this,this.title);" title="星02"></span>
+	<span id='p17' class="pos" style="width:67px;left: 359px;top: 218px;" onClick="go(this,this.title);" title="异星01"></span>
+	
+	<span id='p19' class="pos" style="width:43px;left: 253px;top: 292px;" onClick="go(this,this.title);" title="星03"></span>
+	
+	
+	
+	<span id='p23' class="pos" style="width:42px;left: 139px;top: 397px;" onClick="go(this,this.title);" title="星13"></span>
+	<span id='p24' class="pos" style="width:42px;left: 245px;top: 463px;" onClick="go(this,this.title);" title="星15"></span>
+	<span id='p25' class="pos" style="width:46px;left: 422px;top: 314px;" onClick="go(this,this.title);" title="异星02"></span>
+	<span id='p26' class="pos" style="width:45px;left: 388px;top: 383px;" onClick="go(this,this.title);" title="星16"></span>
+	<span id='p27' class="pos" style="width:32px;left: 381px;top: 501px;" onClick="go(this,this.title);" title="星17"></span>
+	<span id='p28' class="pos" style="width:46px;left: 505px;top: 473px;" onClick="go(this,this.title);" title="异星04"></span>
+	
+	<span id='p30' class="pos" style="width:61px;left: 507px;top: 17px;" onClick="go(this,this.title);" title="星25">　　</span>
+	
+	<span id='p32' class="pos" style="width:69px;left: 630px;top: 31px;" onClick="go(this,this.title);" title="异星07">　　</span>
+	<span id='p33' class="pos" style="width:56px;left: 465px;top: 109px;" onClick="go(this,this.title);" title="星05">　</span>
+	<span id='p34' class="pos" style="width:46px;left: 592px;top: 86px;" onClick="go(this,this.title);" title="星24"></span>
+	<span id='p35' class="pos" style="width:44px;left: 632px;top: 177px;" onClick="go(this,this.title);" title="星23"></span>
+	<span id='p36' class="pos" style="width:43px;left: 503px;top: 227px;" onClick="go(this,this.title);" title="星04"></span>
+	<span id='p37' class="pos" style="width:46px;left: 588px;top: 398px;" onClick="go(this,this.title);" title="星19"></span>
+	<span id='p38' class="pos" style="width:46px;left: 531px;top: 320px;" onClick="go(this,this.title);" title="星20"></span>
+	
+	<span id='p40' class="pos" style="width:51px;left: 626px;top: 467px;" onClick="go(this,this.title);" title="异星05"></span>
+	<span id='p41' class="pos" style="width:39px;left: 646px;top: 327px;" onClick="go(this,this.title);" title="星21"></span>
+	<span id='p42' class="pos" style="width:50px;left: 476px;top: 424px;" onClick="go(this,this.title);" title="星18"></span>
+	<span id='p43' class="pos" style="width:61px;left: 589px;top: 225px;" onClick="go(this,this.title);" title="星22">　　</span>
+	<span id='p44' class="pos" style="width:50px;left: 575px;top: 285px;" onClick="go(this,this.title);" title="异星06"></span>
+<!-- ImageReady Slices (70-80[1024].psd) -->
+<table id="__01" width="700" height="525" border="0" cellpadding="0" cellspacing="0">
+	<tr>
+		<td>
+			<img src="images/70-80%5b1024%5d_01.gif" width="140" height="105" alt=""></td>
+		<td>
+			<img src="images/70-80%5b1024%5d_02.gif" width="140" height="105" alt=""></td>
+		<td>
+			<img src="images/70-80%5b1024%5d_03.gif" width="139" height="105" alt=""></td>
+		<td>
+			<img src="images/70-80%5b1024%5d_04.gif" width="140" height="105" alt=""></td>
+		<td>
+			<img src="images/70-80%5b1024%5d_05.gif" width="141" height="105" alt=""></td>
+	</tr>
+	<tr>
+		<td>
+			<img src="images/70-80%5b1024%5d_06.gif" width="140" height="104" alt=""></td>
+		<td>
+			<img src="images/70-80%5b1024%5d_07.gif" width="140" height="104" alt=""></td>
+		<td>
+			<img src="images/70-80%5b1024%5d_08.gif" width="139" height="104" alt=""></td>
+		<td>
+			<img src="images/70-80%5b1024%5d_09.gif" width="140" height="104" alt=""></td>
+		<td>
+			<img src="images/70-80%5b1024%5d_10.gif" width="141" height="104" alt=""></td>
+	</tr>
+	<tr>
+		<td>
+			<img src="images/70-80%5b1024%5d_11.gif" width="140" height="106" alt=""></td>
+		<td>
+			<img src="images/70-80%5b1024%5d_12.gif" width="140" height="106" alt=""></td>
+		<td>
+			<img src="images/70-80%5b1024%5d_13.gif" width="139" height="106" alt=""></td>
+		<td>
+			<img src="images/70-80%5b1024%5d_14.gif" width="140" height="106" alt=""></td>
+		<td>
+			<img src="images/70-80%5b1024%5d_15.gif" width="141" height="106" alt=""></td>
+	</tr>
+	<tr>
+		<td>
+			<img src="images/70-80%5b1024%5d_16.gif" width="140" height="104" alt=""></td>
+		<td>
+			<img src="images/70-80%5b1024%5d_17.gif" width="140" height="104" alt=""></td>
+		<td>
+			<img src="images/70-80%5b1024%5d_18.gif" width="139" height="104" alt=""></td>
+		<td>
+			<img src="images/70-80%5b1024%5d_19.gif" width="140" height="104" alt=""></td>
+		<td>
+			<img src="images/70-80%5b1024%5d_20.gif" width="141" height="104" alt=""></td>
+	</tr>
+	<tr>
+		<td>
+			<img src="images/70-80%5b1024%5d_21.gif" width="140" height="106" alt=""></td>
+		<td>
+			<img src="images/70-80%5b1024%5d_22.gif" width="140" height="106" alt=""></td>
+		<td>
+			<img src="images/70-80%5b1024%5d_23.gif" width="139" height="106" alt=""></td>
+		<td>
+			<img src="images/70-80%5b1024%5d_24.gif" width="140" height="106" alt=""></td>
+		<td>
+			<img src="images/70-80%5b1024%5d_25.gif" width="141" height="106" alt=""></td>
+	</tr>
+</table>
+<script>
+function move(r,isF){
+	if(oObj!=null){
+		with(oObj.style){
+			backgroundColor="#FFFFE1";
+			color="#000000";
+			fontSize="9pt";
+			paddingTop="1px";
+			paddingBottom="0px";
+			paddingLeft="2px";
+			paddingRight="2px";
+			border="1px solid #000000";
+			filter="alpha(opacity=1)";
+			cursor="hand";
+		}
+		var oldStr=oObj.innerHTML;
+		//oObj.innerHTML=oObj.title;
+	}
+	var tds=getAllPos();
+	if (curObj==null || curObj.title!=r){
+		for(var i=0;i<tds.length;i++){
+			if(tds[i].title==r){
+				curObj=tds[i];
+				break;
+			}
+		}
+	}
+	if (curObj!=null){
+		if ( p.openDISPLAYButton==1){
+			try{
+					 curObj.style.filter="alpha(opacity=40)";
+						baoziDiv.style.zIndex=5;
+						baoziDiv.style.position="absolute";
+						baoziDiv.style.display="";
+						//baoziDiv.style.left=curObj.style.left;
+						//baoziDiv.style.top=curObj.style.top;
+						baoziDiv.style.left=curObj.offsetLeft-20;
+						baoziDiv.style.top=curObj.offsetTop-20;
+						baoziDiv.style.filter="alpha(opacity=100)";
+						baoziBgDiv.style.zIndex=4;
+						//baoziBgDiv.style.display="";
+						baoziBgDiv.style.left=curObj.style.left;
+						baoziBgDiv.style.top=curObj.style.top;
+						baoziBgDiv.style.width=baoziDiv.offsetWidth+10;
+						baoziBgDiv.style.height=baoziDiv.offsetHeight+10;			
+						baoziBgDiv.style.filter="alpha(opacity=40)";
+			}catch (ex){alert(ex);}
+		}
+		else{
+				with(curObj.style){
+					backgroundColor="#338EE1";
+					color="#FFFFFF";
+					cursor="default";
+					fontSize="10.5pt";
+					paddingTop="3px";
+					paddingBottom="1px";
+					paddingLeft="3px";
+					paddingRight="2px";	
+				}
+				if (baoziDiv.style.display==""){
+					baoziDiv.style.display="none";
+				}
+		}
+		try{
+					if(isF||p.getAutoCenter()){
+						document.body.scrollLeft=p.delPx(curObj.style.left)-200;
+						document.body.scrollTop=p.delPx(curObj.style.top)-200;
+					}
+		}catch(x){}
+		try{br(r);}catch(x){}
+		oObj=curObj;
+		curObj=null;
+	}
+}
+
+
+
+
+</script>
+</body>

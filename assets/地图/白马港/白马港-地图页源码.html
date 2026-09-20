@@ -1,0 +1,190 @@
+﻿<meta http-equiv="Content-Type" content="text/html; charset=gb2312">
+<script language="JavaScript">
+<!--
+function SymError()
+{
+  return true;
+}
+window.onerror = SymError;
+//-->
+</script>
+<link rel='stylesheet' href='include/map.css'>
+<script src="include/map.js"></script>
+<body topmargin=0 leftmargin=0 onLoad="initMap();" scroll="no">
+<div style="width:753px;height:965px;"> <span class="pos" style="left: 587px;top: 739px;position:absolute; height:19px" onClick="go(this,this.title)" hidefocus=true title="控制中心">控制中心</span> 
+  <span class="pos" style="left: 630px;top: 5px;position:absolute; height:19px" onClick="go(this,this.title)" hidefocus=true title="芦苇荡22">芦苇荡</span> 
+  <!--
+  <span class="pos" style="left: 500px;top: 685px;position:absolute; height:19px" onclick="go(this,this.title)" hidefocus=true title="旅馆">旅馆</span> 
+  <span class="pos" style="left: 460px;top: 655px;position:absolute; height:19px" onclick="go(this,this.title)" hidefocus=true title="旅馆套房">旅馆套房</span> 
+  -->
+  <span class="pos" style="left: 11px;top: 276px;position:absolute; height:19px" onClick="go(this,this.title)" hidefocus=true title="白马港29">&nbsp;29&nbsp;</span> 
+  <span class="pos" style="left: 541px;top: 264px;position:absolute; height:19px" onClick="go(this,this.title)" hidefocus=true title="船坞">船坞</span> 
+  <span class="pos" style="left: 6px;top: 121px;position:absolute; height:19px" onClick="go(this,this.title)" hidefocus=true title="无名湖27">无名湖</span> 
+  <span class="pos" style="left: 321px;top: 141px;position:absolute; height:19px" onClick="go(this,this.title)" hidefocus=true title="白马港27">&nbsp;27&nbsp;</span> 
+  <span class="pos" style="left: 14px;top: 198px;position:absolute; height:19px" onClick="go(this,this.title)" hidefocus=true title="白马港40">&nbsp;40&nbsp;</span> 
+  <span class="pos" style="left: 191px;top: 170px;position:absolute; height:19px" onClick="go(this,this.title)" hidefocus=true title="白马港28">&nbsp;28&nbsp;</span> 
+  <span class="pos" style="left: 419px;top: 38px;position:absolute; height:19px" onClick="go(this,this.title)" hidefocus=true title="白马港30">&nbsp;30&nbsp;</span> 
+  <span class="pos" style="left: 222px;top: 60px;position:absolute; height:19px" onClick="go(this,this.title)" hidefocus=true title="白马港31">&nbsp;31&nbsp;</span> 
+  <span class="pos" style="left: 260px;top: 100px;position:absolute; height:19px" onClick="go(this,this.title)" hidefocus=true title="花坛">&nbsp;花坛&nbsp;</span> 
+  <span class="pos" style="left: 72px;top: 77px;position:absolute; height:19px" onClick="go(this,this.title)" hidefocus=true title="白马港32">&nbsp;32&nbsp;</span> 
+  <span class="pos" style="left: 429px;top: 154px;position:absolute; height:19px" onClick="go(this,this.title)" hidefocus=true title="白马港26">&nbsp;26&nbsp;</span> 
+  <span class="pos" style="left: 628px;top: 91px;position:absolute; height:19px" onClick="go(this,this.title)" hidefocus=true title="白马港25">&nbsp;25&nbsp;</span> 
+  <span class="pos" style="left: 463px;top: 869px;position:absolute; height:19px" onClick="go(this,this.title)" hidefocus=true title="深水港">深水港</span> 
+  <span class="pos" style="left: 325px;top: 45px;position:absolute; height:19px" onClick="go(this,this.title)" hidefocus=true title="白马港39">&nbsp;39&nbsp;</span> 
+  <span class="pos" style="left: 18px;top: 351px;position:absolute; height:19px" onClick="go(this,this.title)" hidefocus=true title="白马港38">&nbsp;38&nbsp;</span> 
+  <span class="pos" style="left: 55px;top: 416px;position:absolute; height:19px" onClick="go(this,this.title)" hidefocus=true title="装备店">装备店</span> 
+  <span class="pos" style="left: 380px; top: 714px; position:absolute; height:19px" onClick="go(this,this.title)" hidefocus=true title="小岛码头">码头</span> 
+  <span class="pos" style="left: 4px;top: 802px;position:absolute; height:19px" onClick="go(this,this.title)" hidefocus=true title="白马河口01">白马河口</span> 
+  <span class="pos" style="left: 111px;top: 582px;position:absolute; height:19px" onClick="go(this,this.title)" hidefocus=true title="仓库">仓库</span> 
+  <span class="pos" style="left: 407px;top: 800px;position:absolute; height:19px" onClick="go(this,this.title)" hidefocus=true title="白马港灯塔">灯塔</span> 
+  <span class="pos" style="left: 518px;top: 179px;position:absolute; height:19px" onClick="go(this,this.title)" hidefocus=true title="白马港33">&nbsp;33&nbsp;</span> 
+  <span class="pos" style="left: 167px;top: 256px;position:absolute; height:19px" onClick="go(this,this.title)" hidefocus=true title="白马港37">&nbsp;37&nbsp;</span> 
+  <span class="pos" style="left: 113px;top: 330px;position:absolute; height:19px" onClick="go(this,this.title)" hidefocus=true title="白马港36">&nbsp;36&nbsp;</span> 
+  <span class="pos" style="left: 306px;top: 251px;position:absolute; height:19px" onClick="go(this,this.title)" hidefocus=true title="白马港35">&nbsp;35&nbsp;</span> 
+  <span class="pos" style="left: 406px;top: 230px;position:absolute; height:19px" onClick="go(this,this.title)" hidefocus=true title="白马港34">&nbsp;34&nbsp;</span> 
+  <span class="pos" style="left: 227px;top: 569px;position:absolute; height:19px" onClick="go(this,this.title)" hidefocus=true title="酒馆">酒馆</span> 
+  <span class="pos" style="left: 200px;top: 539px;position:absolute; height:19px" onClick="go(this,this.title)" hidefocus=true title="白马港44">44</span> 
+  <span class="pos" style="left: 170px;top: 409px;position:absolute; height:19px" onClick="go(this,this.title)" hidefocus=true title="白马港45">45</span> 
+  <span class="pos" style="left: 190px;top: 610px;position:absolute; height:19px" onClick="go(this,this.title)" hidefocus=true title="白马港41">41</span> 
+  <span class="pos" style="left: 635px;top: 221px;position:absolute; height:19px" onClick="go(this,this.title)" hidefocus=true title="造船厂">造船厂</span> 
+  <span class="pos" style="left: 314px;top: 505px;position:absolute; height:19px" onClick="go(this,this.title)" hidefocus=true title="广济镖局">广济镖局</span> 
+  <span class="pos" style="left: 268px;top: 333px;position:absolute; height:19px" onClick="go(this,this.title)" hidefocus=true title="白马港21">&nbsp;21&nbsp;</span> 
+  <span class="pos" style="left: 637px;top: 157px;position:absolute; height:19px" onClick="go(this,this.title)" hidefocus=true title="白马港24">&nbsp;24&nbsp;</span> 
+  <span class="pos" style="left: 363px;top: 343px;position:absolute; height:19px" onClick="go(this,this.title)" hidefocus=true title="托儿所">托儿所</span> 
+  <span class="pos" style="left: 459px;top: 301px;position:absolute; height:19px" onClick="go(this,this.title)" hidefocus=true title="药剂店">药剂店</span> 
+  <span class="pos" style="left: 171px;top: 452px;position:absolute; height:19px" onClick="go(this,this.title)" hidefocus=true title="道具店">道具店</span> 
+  <span class="pos" style="left: 516px;top: 397px;position:absolute; height:19px" onClick="go(this,this.title)" hidefocus=true title="白马港驿站">驿站</span> 
+  <span class="pos" style="left: 596px;top: 421px;position:absolute; height:19px" onClick="go(this,this.title)" hidefocus=true title="防波堤">防波堤</span> 
+  <span class="pos" style="left: 284px;top: 420px;position:absolute; height:19px" onClick="go(this,this.title)" hidefocus=true title="白马港广场">白马港广场</span> 
+  <span class="pos" style="left: 272px;top: 669px;position:absolute; height:19px" onClick="go(this,this.title)" hidefocus=true title="码头">码头</span> 
+  <span class="pos" style="left: 655px;top: 484px;position:absolute; height:19px" onClick="go(this,this.title)" hidefocus=true title="教堂">教堂</span> 
+  <span class="pos" style="left: 88px;top: 715px;position:absolute; height:19px" onClick="go(this,this.title)" hidefocus=true title="芦花餐馆">芦花餐馆</span> 
+  <span class="pos" style="left: 100px;top: 675px;position:absolute; height:19px" onClick="go(this,this.title)" hidefocus=true title="白马港42">42</span> 
+  <span class="pos" style="left: 40px;top: 745px;position:absolute; height:19px" onClick="go(this,this.title)" hidefocus=true title="白马港43">43</span> 
+  <span class="pos" style="left: 196px;top: 704px;position:absolute; height:19px" onClick="go(this,this.title)" hidefocus=true title="渔人小屋">渔人小屋</span> 
+  <span class="pos" style="left: 588px;top: 840px;position:absolute; height:19px" onClick="go(this,this.title)" hidefocus=true title="渔业管理">渔业管理</span> 
+  <span class="pos" style="left: 489px; top: 776px; position:absolute; height:19px" onClick="go(this,this.title)" hidefocus=true title="码头仓库">码头仓库</span> 
+  <span class="pos" style="left: 605px;top: 558px;position:absolute; height:19px" onClick="go(this,this.title)" hidefocus=true title="通天塔">通天塔</span> 
+  <span class="pos" style="left: 498px;top: 633px;position:absolute; height:19px" onClick="go(this,this.title)" hidefocus=true title="芍林寺">芍林寺</span></div>
+<TABLE CELLPADDING="0" CELLSPACING="0" BORDER="0" width="753" height="964" class="bgMap">
+	<TR>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_1.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_2.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_3.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_4.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_5.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_6.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_7.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_8.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_9.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_10.gif"></TD>
+	</TR>
+	<TR>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_11.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_12.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_13.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_14.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_15.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_16.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_17.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_18.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_19.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_20.gif"></TD>
+	</TR>
+	<TR>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_21.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_22.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_23.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_24.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_25.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_26.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_27.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_28.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_29.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_30.gif"></TD>
+	</TR>
+	<TR>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_31.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_32.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_33.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_34.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_35.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_36.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_37.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_38.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_39.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_40.gif"></TD>
+	</TR>
+	<TR>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_41.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_42.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_43.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_44.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_45.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_46.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_47.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_48.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_49.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_50.gif"></TD>
+	</TR>
+	<TR>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_51.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_52.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_53.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_54.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_55.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_56.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_57.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_58.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_59.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_60.gif"></TD>
+	</TR>
+	<TR>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_61.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_62.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_63.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_64.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_65.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_66.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_67.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_68.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_69.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_70.gif"></TD>
+	</TR>
+	<TR>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_71.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_72.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_73.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_74.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_75.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_76.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_77.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_78.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_79.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_80.gif"></TD>
+	</TR>
+	<TR>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_81.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_82.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_83.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_84.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_85.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_86.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_87.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_88.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_89.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_90.gif"></TD>
+	</TR>
+	<TR>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_91.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_92.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_93.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_94.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_95.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_96.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_97.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_98.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_99.gif"></TD>
+		<TD  width="75" height="96"><img src="pic/baimagang/baimagang_100.gif"></TD>
+</TR>
+</TABLE>

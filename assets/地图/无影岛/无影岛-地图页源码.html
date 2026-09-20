@@ -1,0 +1,91 @@
+﻿<meta http-equiv="Content-Type" content="text/html; charset=gb2312">
+<script language="JavaScript">
+<!--
+function SymError()
+{
+  return true;
+}
+window.onerror = SymError;
+//-->
+</script>
+<link rel='stylesheet' href='include/map.css'>
+<script src="include/map.js"></script>
+<body topmargin=0 leftmargin=0 onload="initMap();" scroll="no">
+<div style="width:862px;height:712px;"><span class="pos" style="left: 104px;top: 150px;position:absolute; height:19px" onclick="go(this,this.title)" hidefocus=true title="雾影岛渡口">雾影岛渡口</span>
+      <span class="pos" style="left: 492px;top: 42px;position:absolute; height:19px" onclick="go(this,this.title)" hidefocus=true title="沙滩">沙滩</span>
+      <span class="pos" style="left: 12px;top: 99px;position:absolute; height:19px" onclick="go(this,this.title)" hidefocus=true title="雾影湖渡口">低矮林地</span>
+      <span class="pos" style="left: 562px;top: 134px;position:absolute; height:19px" onclick="go(this,this.title)" hidefocus=true title="东部沙滩">东部沙滩</span>
+      <span class="pos" style="left: 630px;top: 214px;position:absolute; height:19px" onclick="go(this,this.title)" hidefocus=true title="东部浅滩">东部浅滩</span>
+      <span class="pos" style="left: 329px;top: 243px;position:absolute; height:19px" onclick="go(this,this.title)" hidefocus=true title="遗迹大门">遗迹大门</span>
+      <span class="pos" style="left: 397px;top: 306px;position:absolute; height:19px" onclick="go(this,this.title)" hidefocus=true title="遗迹大厅">遗迹大厅</span>
+      <span class="pos" style="left: 475px;top: 243px;position:absolute; height:19px" onclick="go(this,this.title)" hidefocus=true title="遗迹北厅">遗迹北厅</span>
+      <span class="pos" style="left: 349px;top: 468px;position:absolute; height:19px" onclick="go(this,this.title)" hidefocus=true title="遗迹南厅">遗迹南厅</span>
+      <span class="pos" style="left: 550px;top: 459px;position:absolute; height:19px" onclick="go(this,this.title)" hidefocus=true title="水下神殿">水下神殿</span>
+      <span class="pos" style="left: 659px;top: 465px;position:absolute; height:19px" onclick="go(this,this.title)" hidefocus=true title="神殿密室">神殿密室</span>
+      <span class="pos" style="left: 551px;top: 226px;position:absolute; height:19px" onclick="go(this,this.title)" hidefocus=true title="林间小道">林间小道</span>
+      <span class="pos" style="left: 494px;top: 162px;position:absolute; height:19px" onclick="go(this,this.title)" hidefocus=true title="山涧">山涧</span>
+      <span class="pos" style="left: 561px;top: 553px;position:absolute; height:19px" onclick="go(this,this.title)" hidefocus=true title="观景台">观景台</span>
+      <span class="pos" style="left: 454px;top: 108px;position:absolute; height:19px" onclick="go(this,this.title)" hidefocus=true title="北部沙滩">北部沙滩</span>
+      <span class="pos" style="left: 412px;top: 552px;position:absolute; height:19px" onclick="go(this,this.title)" hidefocus=true title="遗迹花园">遗迹花园</span>
+      <span class="pos" style="left: 263px;top: 506px;position:absolute; height:19px" onclick="go(this,this.title)" hidefocus=true title="西部岩滩">西部岩滩</span>
+	  <span class="pos" style="left: 248px;top: 546px;position:absolute; height:19px" onclick="go(this,this.title)" hidefocus=true title="黄金梅林号">黄金梅林号</span>
+      <span class="pos" style="left: 124px;top: 285px;position:absolute; height:19px" onclick="go(this,this.title)" hidefocus=true title="西部岩礁">西部岩礁</span>
+      <span class="pos" style="left: 414px;top: 209px;position:absolute; height:19px" onclick="go(this,this.title)" hidefocus=true title="小道00">小道00</span>
+      <span class="pos" style="left: 164px;top: 339px;position:absolute; height:19px" onclick="go(this,this.title)" hidefocus=true title="小道01">小道01</span>
+      <span class="pos" style="left: 227px;top: 153px;position:absolute; height:19px" onclick="go(this,this.title)" hidefocus=true title="小道02">小道02</span>
+      <span class="pos" style="left: 460px;top: 501px;position:absolute; height:19px" onclick="go(this,this.title)" hidefocus=true title="小道03">小道03</span>
+      <span class="pos" style="left: 419px;top: 384px;position:absolute; height:19px" onclick="go(this,this.title)" hidefocus=true title="小道04">小道04</span>
+      <span class="pos" style="left: 274px;top: 426px;position:absolute; height:19px" onclick="go(this,this.title)" hidefocus=true title="小道05">小道05</span>
+      <span class="pos" style="left: 519px;top: 378px;position:absolute; height:19px" onclick="go(this,this.title)" hidefocus=true title="小道06">小道06</span>
+      <span class="pos" style="left: 337px;top: 366px;position:absolute; height:19px" onclick="go(this,this.title)" hidefocus=true title="小道07">小道07</span>
+      <span class="pos" style="left: 417px;top: 144px;position:absolute; height:19px" onclick="go(this,this.title)" hidefocus=true title="小道08">小道08</span>
+      <span class="pos" style="left: 207px;top: 101px;position:absolute; height:19px" onclick="go(this,this.title)" hidefocus=true title="小道09">小道09</span>
+      <span class="pos" style="left: 378px;top: 82px;position:absolute; height:19px" onclick="go(this,this.title)" hidefocus=true title="小道10">小道10</span>
+      <span class="pos" style="left: 288px;top: 93px;position:absolute; height:19px" onclick="go(this,this.title)" hidefocus=true title="小道11">小道11</span>
+      <span class="pos" style="left: 277px;top: 198px;position:absolute; height:19px" onclick="go(this,this.title)" hidefocus=true title="小道12">小道12</span>
+      <span class="pos" style="left: 224px;top: 380px;position:absolute; height:19px" onclick="go(this,this.title)" hidefocus=true title="小道13">小道13</span>
+      <span class="pos" style="left: 477px;top: 302px;position:absolute; height:19px" onclick="go(this,this.title)" hidefocus=true title="小道14">小道14</span>
+      <span class="pos" style="left: 587px;top: 285px;position:absolute; height:19px" onclick="go(this,this.title)" hidefocus=true title="小道15">小道15</span>
+      <span class="pos" style="left: 348px;top: 162px;position:absolute; height:19px" onclick="go(this,this.title)" hidefocus=true title="小道16">小道16</span>
+      <span class="pos" style="left: 436px;top: 441px;position:absolute; height:19px" onclick="go(this,this.title)" hidefocus=true title="小道17">小道17</span>
+</div>
+
+<TABLE CELLPADDING="0" CELLSPACING="0" BORDER="0" width="862" height="712" class="bgMap">
+	<TR>
+		<TD background="pic/wuyingdao/wuyingdao_1.jpg"></TD>
+		<TD background="pic/wuyingdao/wuyingdao_2.jpg"></TD>
+		<TD background="pic/wuyingdao/wuyingdao_3.jpg"></TD>
+		<TD background="pic/wuyingdao/wuyingdao_4.jpg"></TD>
+		<TD background="pic/wuyingdao/wuyingdao_5.jpg"></TD>
+	</TR>
+	<TR>
+		<TD background="pic/wuyingdao/wuyingdao_6.jpg"></TD>
+		<TD background="pic/wuyingdao/wuyingdao_7.jpg"></TD>
+		<TD background="pic/wuyingdao/wuyingdao_8.jpg"></TD>
+		<TD background="pic/wuyingdao/wuyingdao_9.jpg"></TD>
+		<TD background="pic/wuyingdao/wuyingdao_10.jpg"></TD>
+	</TR>
+	<TR>
+		<TD background="pic/wuyingdao/wuyingdao_11.jpg"></TD>
+		<TD background="pic/wuyingdao/wuyingdao_12.jpg"></TD>
+		<TD background="pic/wuyingdao/wuyingdao_13.jpg"></TD>
+		<TD background="pic/wuyingdao/wuyingdao_14.jpg"></TD>
+		<TD background="pic/wuyingdao/wuyingdao_15.jpg"></TD>
+	</TR>
+	<TR>
+		<TD background="pic/wuyingdao/wuyingdao_16.jpg"></TD>
+		<TD background="pic/wuyingdao/wuyingdao_17.jpg"></TD>
+		<TD background="pic/wuyingdao/wuyingdao_18.jpg"></TD>
+		<TD background="pic/wuyingdao/wuyingdao_19.jpg"></TD>
+		<TD background="pic/wuyingdao/wuyingdao_20.jpg"></TD>
+	</TR>
+	<TR>
+	<TD background="pic/wuyingdao/wuyingdao_21.jpg"></TD>
+	<TD background="pic/wuyingdao/wuyingdao_22.jpg"></TD>
+	<TD background="pic/wuyingdao/wuyingdao_23.jpg"></TD>
+	<TD background="pic/wuyingdao/wuyingdao_24.jpg"></TD>
+	<TD background="pic/wuyingdao/wuyingdao_25.jpg"></TD>
+</TR>
+</TABLE>
+</BODY>
+</HTML>

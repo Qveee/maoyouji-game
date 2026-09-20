@@ -1,0 +1,173 @@
+﻿<html>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312">
+<script language="JavaScript">
+<!--
+function SymError()
+{
+  return true;
+}
+window.onerror = SymError;
+//-->
+</script>
+<link rel='stylesheet' href='include/map.css'>
+<script src="include/map.js"></script>
+<body topmargin=0 leftmargin=0 onLoad="initMap();" scroll="no">
+	<span id='p01' class="pos" style="width:42px;left: 59px;top: 57px;" onClick="go(this,this.title);" title="云岩岛00">云岩岛</span>
+	<span id='p02' class="pos" style="width:42px;left: 144px;top: 109px;" onClick="go(this,this.title);" title="元素岛石碑01">石碑01</span>
+	<span id='p03' class="pos" style="width:43px;left: 219px;top: 168px;" onClick="go(this,this.title);" title="元素岛石碑02">石碑02</span>
+	<span id='p04' class="pos" style="width:32px;left: 49px;top: 179px;" onClick="go(this,this.title);" title="元素岛海01">海01</span>
+	<span id='p05' class="pos" style="width:32px;left: 100px;top: 300px;" onClick="go(this,this.title);" title="元素岛海02">海02</span>
+	<span id='p06' class="pos" style="width:32px;left: 54px;top: 420px;" onClick="go(this,this.title);" title="元素岛海03">海03</span>
+	<span id='p07' class="pos" style="width:53px;left: 222px;top: 430px;" onClick="go(this,this.title);" title="元素岛海04">　海04</span>
+	<span id='p08' class="pos" style="width:42px;left: 118px;top: 556px;" onClick="go(this,this.title);" title="元素岛18">　18　</span>
+	<span id='p09' class="pos" style="width:39px;left: 99px;top: 689px;" onClick="go(this,this.title);" title="元素岛16">　16　</span>
+	<span id='p10' class="pos" style="width:46px;left: 12px;top: 734px;" onClick="go(this,this.title);" title="元素岛石碑13">石碑13</span>
+	<span id='p11' class="pos" style="width:35px;left: 260px;top: 48px;" onClick="go(this,this.title);" title="元素岛1">　1　</span>
+	<span id='p12' class="pos" style="width:43px;left: 385px;top: 94px;" onClick="go(this,this.title);" title="元素岛石碑03">石碑03</span>
+	<span id='p13' class="pos" style="width:40px;left: 498px;top: 25px;" onClick="go(this,this.title);" title="元素岛12">　12　</span>
+	<span id='p14' class="pos" style="width:35px;left: 504px;top: 142px;" onClick="go(this,this.title);" title="元素岛2">　2　</span>
+	<span id='p15' class="pos" style="width:38px;left: 479px;top: 275px;" onClick="go(this,this.title);" title="元素岛4">　4　</span>
+	<span id='p16' class="pos" style="width:37px;left: 476px;top: 333px;" onClick="go(this,this.title);" title="元素岛5">　5　</span>
+	<span id='p17' class="pos" style="width:35px;left: 609px;top: 305px;" onClick="go(this,this.title);" title="元素岛3">　3　</span>
+	<span id='p18' class="pos" style="width:44px;left: 254px;top: 273px;" onClick="go(this,this.title);" title="元素岛竞技场">竞技场</span>
+	<span id='p19' class="pos" style="width:43px;left: 389px;top: 424px;" onClick="go(this,this.title);" title="元素岛石碑12">石碑12</span>
+	<span id='p20' class="pos" style="width:36px;left: 504px;top: 417px;" onClick="go(this,this.title);" title="元素岛6">　6　</span>
+	<span id='p21' class="pos" style="width:44px;left: 517px;top: 460px;" onClick="go(this,this.title);" title="元素岛试验室">试验室</span>
+	<span id='p22' class="pos" style="width:43px;left: 300px;top: 526px;" onClick="go(this,this.title);" title="元素岛废墟">废　墟</span>
+	<span id='p23' class="pos" style="width:42px;left: 236px;top: 674px;" onClick="go(this,this.title);" title="元素岛15">　15　</span>
+	<span id='p24' class="pos" style="width:42px;left: 335px;top: 701px;" onClick="go(this,this.title);" title="元素岛14">　14　</span>
+	<span id='p25' class="pos" style="width:46px;left: 427px;top: 596px;" onClick="go(this,this.title);" title="元素岛石碑11">石碑11</span>
+	<span id='p26' class="pos" style="width:42px;left: 500px;top: 641px;" onClick="go(this,this.title);" title="元素岛喷泉">喷　泉</span>
+	<span id='p27' class="pos" style="width:55px;left: 492px;top: 744px;" onClick="go(this,this.title);" title="元素岛残破大楼">残破大楼</span>
+	<span id='p28' class="pos" style="width:43px;left: 634px;top: 724px;" onClick="go(this,this.title);" title="元素岛石碑10">石碑10</span>
+	<span id='p29' class="pos" style="width:43px;left: 634px;top: 129px;" onClick="go(this,this.title);" title="元素岛石碑04">石碑04</span>
+	<span id='p30' class="pos" style="width:40px;left: 688px;top: 38px;" onClick="go(this,this.title);" title="元素岛11">　11　</span>
+	<span id='p31' class="pos" style="width:40px;left: 809px;top: 17px;" onClick="go(this,this.title);" title="元素岛10">　10　</span>
+	<span id='p32' class="pos" style="width:37px;left: 810px;top: 91px;" onClick="go(this,this.title);" title="元素岛9">　9　</span>
+	<span id='p33' class="pos" style="width:37px;left: 744px;top: 160px;" onClick="go(this,this.title);" title="元素岛8">　8　</span>
+	<span id='p34' class="pos" style="width:44px;left: 918px;top: 163px;" onClick="go(this,this.title);" title="元素岛石碑05">石碑05</span>
+	<span id='p35' class="pos" style="width:44px;left: 908px;top: 242px;" onClick="go(this,this.title);" title="元素岛石碑06">石碑06</span>
+	<span id='p36' class="pos" style="width:43px;left: 752px;top: 305px;" onClick="go(this,this.title);" title="元素岛桥头">桥　头</span>
+	<span id='p37' class="pos" style="width:43px;left: 911px;top: 565px;" onClick="go(this,this.title);" title="元素岛石碑08">石碑08</span>
+	<span id='p38' class="pos" style="width:46px;left: 736px;top: 516px;" onClick="go(this,this.title);" title="元素岛石碑07">石碑07</span>
+	<span id='p39' class="pos" style="width:42px;left: 854px;top: 714px;" onClick="go(this,this.title);" title="元素岛石碑09">石碑09</span>
+	<span id='p40' class="pos" style="width:38px;left: 962px;top: 749px;" onClick="go(this,this.title);" title="元素岛海07">海 07</span>
+	<span id='p41' class="pos" style="width:39px;left: 792px;top: 595px;" onClick="go(this,this.title);" title="元素岛海06">海 06</span>
+	<span id='p42' class="pos" style="width:46px;left: 648px;top: 591px;background:brown" onClick="go(this,this.title);" title="元素岛13">　1 3</span>
+	<span id='p43' class="pos" style="width:37px;left: 889px;top: 364px;" onClick="go(this,this.title);" title="元素岛7">　7　</span>
+	<span id='p44' class="pos" style="width:39px;left: 661px;top: 404px;" onClick="go(this,this.title);" title="元素岛海05">海 05</span>
+	
+	<!-- ImageReady Slices (daditu.jpg) -->
+    <table id="__01" width="1024" height="776" border="0" cellpadding="0" cellspacing="0">
+	<tr>
+		<td>
+			<img src="images/daditu_01.jpg" width="205" height="76" alt=""></td>
+		<td>
+			<img src="images/daditu_02.jpg" width="205" height="76" alt=""></td>
+		<td>
+			<img src="images/daditu_03.jpg" width="204" height="76" alt=""></td>
+		<td>
+			<img src="images/daditu_04.jpg" width="205" height="76" alt=""></td>
+		<td>
+			<img src="images/daditu_05.jpg" width="205" height="76" alt=""></td>
+	</tr>
+	<tr>
+		<td>
+			<img src="images/daditu_06.jpg" width="205" height="83" alt=""></td>
+		<td>
+			<img src="images/daditu_07.jpg" width="205" height="83" alt=""></td>
+		<td>
+			<img src="images/daditu_08.jpg" width="204" height="83" alt=""></td>
+		<td>
+			<img src="images/daditu_09.jpg" width="205" height="83" alt=""></td>
+		<td>
+			<img src="images/daditu_10.jpg" width="205" height="83" alt=""></td>
+	</tr>
+	<tr>
+		<td>
+			<img src="images/daditu_11.jpg" width="205" height="87" alt=""></td>
+		<td>
+			<img src="images/daditu_12.jpg" width="205" height="87" alt=""></td>
+		<td>
+			<img src="images/daditu_13.jpg" width="204" height="87" alt=""></td>
+		<td>
+			<img src="images/daditu_14.jpg" width="205" height="87" alt=""></td>
+		<td>
+			<img src="images/daditu_15.jpg" width="205" height="87" alt=""></td>
+	</tr>
+	<tr>
+		<td>
+			<img src="images/daditu_16.jpg" width="205" height="84" alt=""></td>
+		<td>
+			<img src="images/daditu_17.jpg" width="205" height="84" alt=""></td>
+		<td>
+			<img src="images/daditu_18.jpg" width="204" height="84" alt=""></td>
+		<td>
+			<img src="images/daditu_19.jpg" width="205" height="84" alt=""></td>
+		<td>
+			<img src="images/daditu_20.jpg" width="205" height="84" alt=""></td>
+	</tr>
+	<tr>
+		<td>
+			<img src="images/daditu_21.jpg" width="205" height="83" alt=""></td>
+		<td>
+			<img src="images/daditu_22.jpg" width="205" height="83" alt=""></td>
+		<td>
+			<img src="images/daditu_23.jpg" width="204" height="83" alt=""></td>
+		<td>
+			<img src="images/daditu_24.jpg" width="205" height="83" alt=""></td>
+		<td>
+			<img src="images/daditu_25.jpg" width="205" height="83" alt=""></td>
+	</tr>
+	<tr>
+		<td>
+			<img src="images/daditu_26.jpg" width="205" height="89" alt=""></td>
+		<td>
+			<img src="images/daditu_27.jpg" width="205" height="89" alt=""></td>
+		<td>
+			<img src="images/daditu_28.jpg" width="204" height="89" alt=""></td>
+		<td>
+			<img src="images/daditu_29.jpg" width="205" height="89" alt=""></td>
+		<td>
+			<img src="images/daditu_30.jpg" width="205" height="89" alt=""></td>
+	</tr>
+	<tr>
+		<td>
+			<img src="images/daditu_31.jpg" width="205" height="97" alt=""></td>
+		<td>
+			<img src="images/daditu_32.jpg" width="205" height="97" alt=""></td>
+		<td>
+			<img src="images/daditu_33.jpg" width="204" height="97" alt=""></td>
+		<td>
+			<img src="images/daditu_34.jpg" width="205" height="97" alt=""></td>
+		<td>
+			<img src="images/daditu_35.jpg" width="205" height="97" alt=""></td>
+	</tr>
+	<tr>
+		<td>
+			<img src="images/daditu_36.jpg" width="205" height="101" alt=""></td>
+		<td>
+			<img src="images/daditu_37.jpg" width="205" height="101" alt=""></td>
+		<td>
+			<img src="images/daditu_38.jpg" width="204" height="101" alt=""></td>
+		<td>
+			<img src="images/daditu_39.jpg" width="205" height="101" alt=""></td>
+		<td>
+			<img src="images/daditu_40.jpg" width="205" height="101" alt=""></td>
+	</tr>
+	<tr>
+		<td>
+			<img src="images/daditu_41.jpg" width="205" height="76" alt=""></td>
+		<td>
+			<img src="images/daditu_42.jpg" width="205" height="76" alt=""></td>
+		<td>
+			<img src="images/daditu_43.jpg" width="204" height="76" alt=""></td>
+		<td>
+			<img src="images/daditu_44.jpg" width="205" height="76" alt=""></td>
+		<td>
+			<img src="images/daditu_45.jpg" width="205" height="76" alt=""></td>
+	</tr>
+</table>
+<!-- End ImageReady Slices -->
+</body>
+</html>

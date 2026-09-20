@@ -1,0 +1,946 @@
+{
+  "广场小道": {
+    "npcs": [
+      {
+        "idx": 0,
+        "name": "老赵",
+        "raw": "老赵",
+        "title": "",
+        "title_color": "",
+        "uid": 162473729198,
+        "pos": 0
+      },
+      {
+        "idx": 1,
+        "name": "任务板",
+        "raw": "任务板",
+        "title": "使命",
+        "title_color": "green",
+        "uid": 162493990108,
+        "pos": 0
+      },
+      {
+        "idx": 2,
+        "name": "衙役",
+        "raw": "衙役",
+        "title": "官衙",
+        "title_color": "blue",
+        "uid": 50900837335788,
+        "pos": 0
+      }
+    ],
+    "chats": {
+      "老赵": "村子里面一定有宝贝...",
+      "任务板": "猫隐村的治安靠大家和我一起努力。同时，我们也需要收集物资作为日常开销。<table height=6 width=1 cellpadding=0 cellspacing=0><tr><td></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/task1.gif></td><td width=5></td><td><a href=# onclick=\"p.cmd('showRoomTask all');p.closeTaskTalk();return false;\">任务列表</a></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=# onclick=\"p.cmd('showRoomTask');p.closeTaskTalk();return false;\">我能帮什么忙？</a></td></tr></table>",
+      "衙役": "保卫一方平安是我的责任!<table height=7 width=1 cellpadding=0 cellspacing=0><tr><td></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=# onclick=\"p.closeRenPic();return false;\">离开</a></td></tr></table><br>"
+    }
+  },
+  "村长小屋": {
+    "npcs": [
+      {
+        "idx": 0,
+        "name": "肥猫",
+        "raw": "肥猫",
+        "title": "猫隐村村长",
+        "title_color": "blue",
+        "uid": 50902296121308,
+        "pos": 1
+      }
+    ],
+    "chats": {
+      "肥猫": "<br><table height=7 width=1 cellpadding=0 cellspacing=0><tr><td></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/task1.gif></td><td width=5></td><td><a href=# onclick=\"p.cmd('taskTalk 2512340 pettask.daily.relation.JingHuaXuQiu 0,1,');p.closeRenPic();return false;\">精华需求</a></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/task1.gif></td><td width=5></td><td><a href=# onclick=\"p.cmd('ttt 1');return false;\">我能为猫隐村做些什么事情?</a></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/sell.gif></td><td width=5></td><td><a href=# onclick=\"p.cmd('list');return false;\">我能在您这里买到什么好东西?</a></td></tr></table>"
+    }
+  },
+  "装备店": {
+    "npcs": [
+      {
+        "idx": 0,
+        "name": "欧老板",
+        "raw": "欧老板",
+        "title": "",
+        "title_color": "",
+        "uid": 50904180385938,
+        "pos": 0
+      },
+      {
+        "idx": 1,
+        "name": "李金斗",
+        "raw": "李金斗",
+        "title": "当铺老板",
+        "title_color": "green",
+        "uid": 50904200646848,
+        "pos": 0
+      }
+    ],
+    "chats": {
+      "欧老板": "我这里有些不错的东西!<br><table height=7 width=1 cellpadding=0 cellspacing=0><tr><td></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=# onclick=\"cmd('list');return false;\">我能在这里买到什么</a></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=# onclick=\"cmd('foo xiuli');return false;\">修理装备</a></td></tr></table>",
+      "李金斗": "<br><font color=red>【卖物品】</font> 点 <a href=# onclick=p.cmd('i');>[道具]</a> 点选一个物品然后选[卖掉] ."
+    }
+  },
+  "道具店": {
+    "npcs": [
+      {
+        "idx": 0,
+        "name": "道具店老板",
+        "raw": "道具店老板",
+        "title": "",
+        "title_color": "",
+        "uid": 50906084911478,
+        "pos": 2
+      },
+      {
+        "idx": 1,
+        "name": "李金斗",
+        "raw": "李金斗",
+        "title": "当铺老板",
+        "title_color": "green",
+        "uid": 50906105172388,
+        "pos": 0
+      },
+      {
+        "idx": 2,
+        "name": "王小二",
+        "raw": "王小二",
+        "title": "道具店跑堂",
+        "title_color": "blue",
+        "uid": 50906125433298,
+        "pos": 1
+      }
+    ],
+    "chats": {
+      "道具店老板": "你好啊!要买点什么?<br><table height=7 width=1 cellpadding=0 cellspacing=0><tr><td></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/task2.gif></td><td width=5></td><td><a href=# onclick=\"p.cmd('taskTalk 2512527 pettask.maoyin.DaoJuDianLaoBanDeYaoQing 1,1,');p.closeRenPic();return false;\">道具店老板的邀请</a></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=# onclick=\"cmd('list');return false;\">我能在这里买到什么</a></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=# onclick=\"showBakPetItemList();\">取回我的道具</a></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=# onclick=\"ShowLostItemList();p.closeTaskTalk();return false;\">失物招领。</a></td></tr></table>",
+      "李金斗": "<br><font color=red>【卖物品】</font> 点 <a href=# onclick=p.cmd('i');>[道具]</a> 点选一个物品然后选[卖掉] .",
+      "王小二": "欢迎光临。 <br>本店可以帮您寄卖道具。点<a href=# onclick=\"p.cmd('i');return false;\">道具</a>列表，选择一个道具，选择“寄卖”操作即可。<br><br><table height=7 width=1 cellpadding=0 cellspacing=0><tr><td></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/task1.gif></td><td width=5></td><td><a href=# onclick=\"p.cmd('taskTalk 2512529 pettask.mopcity.PiHuoDingDan 0,');p.closeRenPic();return false;\">皮货订单</a></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href='/consign/index.jsp' target='_blank'>道具市场</a></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=# onclick=\"p.cmd('howToConsign');\">寄卖说明</a></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=# onclick=\"p.cmd('givejinnang');\">领取锦囊</a></td></tr></table>"
+    }
+  },
+  "教堂": {
+    "npcs": [
+      {
+        "idx": 0,
+        "name": "圣殿守护者",
+        "raw": "圣殿守护者",
+        "title": "",
+        "title_color": "",
+        "uid": 50857397944748,
+        "pos": -1
+      },
+      {
+        "idx": 1,
+        "name": "修女",
+        "raw": "修女",
+        "title": "",
+        "title_color": "",
+        "uid": 50857418205658,
+        "pos": 0
+      },
+      {
+        "idx": 2,
+        "name": "圣殿守护者",
+        "raw": "圣殿守护者",
+        "title": "",
+        "title_color": "",
+        "uid": 50857438466568,
+        "pos": -1
+      }
+    ],
+    "chats": {
+      "圣殿守护者": "...<table height=7 width=1 cellpadding=0 cellspacing=0><tr><td></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=# onclick=\"p.closeRenPic();return false;\">离开</a></td></tr></table><br>",
+      "修女": "愿神与你同在<br><table height=7 width=1 cellpadding=0 cellspacing=0><tr><td></td></tr></table>"
+    }
+  },
+  "仓库": {
+    "npcs": [
+      {
+        "idx": 0,
+        "name": "物品保管员",
+        "raw": "物品保管员",
+        "title": "",
+        "title_color": "",
+        "uid": 50908880917058,
+        "pos": 0
+      },
+      {
+        "idx": 1,
+        "name": "<font color=yellow>娜</font><font color=green>娜</font><font color=orange>的</font> 虫",
+        "raw": "虫",
+        "title": "想",
+        "title_color": "red",
+        "uid": 50908901177968,
+        "pos": 0
+      }
+    ],
+    "chats": {
+      "物品保管员": "天气不错!有什么东西交给我保管就可以了,点开道具栏,然后点选一个物品然后选[寄存].<br><table height=7 width=1 cellpadding=0 cellspacing=0><tr><td></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=# onclick=\"p.cmd('getItems');\">查看我的储物箱</a></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=# onclick=\"p.cmd('kuorongitems');\">提高行囊上限</a></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=# onclick=\"showCunList();\">快速寄存</a></td></tr></table\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000<script>parent.reOnlineNum(0,-1,1547203)</\u0000\u0000\u0000\u0000\u0000\u0000\u0000<script>parent.reOnlineNum(0,-1,1547203)</\u0000\u0000\u0000\u0000\u0000\u0000\u0000<script>p.showRenPic(",
+      "虫": "我会很多合成配方啊。<br>（微缩的笑着说）不过学配方是有条件的。要不要学啊？<br><table height=7 width=1 cellpadding=0 cellspacing=0><tr><td></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=# onclick=\"p.cmd('showFormula map.maoyin');p.closeRenPic();return false;\">我要,我要啊。</a></td></tr></table>"
+    }
+  },
+  "猫隐村驿站": {
+    "npcs": [
+      {
+        "idx": 0,
+        "name": "专用空姐",
+        "raw": "专用空姐",
+        "title": "",
+        "title_color": "",
+        "uid": 50897717155648,
+        "pos": 0
+      },
+      {
+        "idx": 1,
+        "name": "猫扑快递公司",
+        "raw": "猫扑快递公司",
+        "title": "",
+        "title_color": "",
+        "uid": 50897737416558,
+        "pos": 0
+      },
+      {
+        "idx": 2,
+        "name": "客房经理",
+        "raw": "客房经理",
+        "title": "旅馆",
+        "title_color": "orange",
+        "uid": 50897757677468,
+        "pos": 0
+      },
+      {
+        "idx": 3,
+        "name": "焦急的大妈",
+        "raw": "焦急的大妈",
+        "title": "",
+        "title_color": "",
+        "uid": 50897777938378,
+        "pos": 0
+      }
+    ],
+    "chats": {
+      "专用空姐": "驿站可以让您立刻到达其他城市，<span class=key>1-10级</span>是免费的哦~<br><table height=7 width=1 cellpadding=0 cellspacing=0><tr><td></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=# onclick=\"p.cmd('selFly');return false;\">搭乘飞机</a></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=# onclick=\"p.cmd('savechuansong');return false;\">将这里设置成保存点</a></td></tr></table><\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000<script>p.showRenPic(",
+      "猫扑快递公司": "快,我忙的很!<br><br><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=# onclick='p.showKuaiDi(1);return false;'>收取货物</a></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=# onclick='p.showKuaiDi(2);return false;'>发送货物</a></td></tr></table><br>",
+      "客房经理": "欢迎光临！<br>我可带您进入旅馆。&nbsp;<br><table height=6 width=1 cellpadding=0 cellspacing=0><tr><td></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=# onclick=\"p.cmd('go 旅馆');p.closeTaskTalk();return false;\">进入 猫隐村旅馆</a></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/sell.gif></td><td width=5></td><td><a href=# onclick=\"p.cmd('rentRoom');p.closeTaskTalk();return false;\">租用套房、延长使用时间。</a> </td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=# onclick=\"p.cmd('go 旅馆套房');p.closeTaskTalk();return false;\">进入 猫隐村旅馆套房</a></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/sell.gif></td><td width=5></td><td><a href=# onclick=\"p.cmd('rentLvGuanTe');p.closeTaskTalk();return false;\">租用特级旅馆套房、延长使用时间。</a> </td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=# onclick=\"p.cmd('LvGuanTe');p.closeTaskTalk();return false;\">进入 猫隐村特级旅馆套房</a></td></tr></table><table height=6 width=1 cellpadding=0 cellspacing=0><tr><td></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=# onclick=\"p.cmd('getRentInfo 3');p.closeTaskTalk();return false;\">了解 套房 以及 租用细则</a></td></tr></table>",
+      "焦急的大妈": "哎，怎么这时候伤到脚。"
+    }
+  },
+  "街道办事处": {
+    "npcs": [
+      {
+        "idx": 0,
+        "name": "张大娘",
+        "raw": "张大娘",
+        "title": "",
+        "title_color": "",
+        "uid": 50908333872488,
+        "pos": 0
+      },
+      {
+        "idx": 1,
+        "name": "狱卒",
+        "raw": "狱卒",
+        "title": "",
+        "title_color": "",
+        "uid": 50908354133398,
+        "pos": 0
+      },
+      {
+        "idx": 2,
+        "name": "mop.com",
+        "raw": "mop.com",
+        "title": "",
+        "title_color": "",
+        "uid": 50908374394308,
+        "pos": 0
+      },
+      {
+        "idx": 3,
+        "name": "梅姊姊",
+        "raw": "梅姊姊",
+        "title": "绝世媚妞",
+        "title_color": "red",
+        "uid": 50908394655218,
+        "pos": 0
+      },
+      {
+        "idx": 4,
+        "name": "公会专员",
+        "raw": "公会专员",
+        "title": "",
+        "title_color": "",
+        "uid": 50908414916128,
+        "pos": 0
+      }
+    ],
+    "chats": {
+      "张大娘": "带着红袖箍,眼里容不得半粒沙子,为人确非常热心的张大娘.</br><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=\"#\" onclick=\"if(confirm('确认花费20银币雇佣张大娘?')){p.cmd('buy fitems.pet.zhaohuan.XiuGu 1');}\">雇佣张大娘</a></td></tr></table><table height=7 width=1 cellpadding=0 cellspacing=0><tr><td></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=# onclick=\"p.closeRenPic();return false;\">离开</a></td></tr></table><br>",
+      "狱卒": "我是负责缉拿,看押犯人的兵卒.</br><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=\"#\" onclick=\"if(confirm('确认花费60银币雇佣狱卒?')){p.cmd('buy fitems.pet.zhaohuan.JingGun 1');}\">雇佣狱卒</a></td></tr></table><table height=7 width=1 cellpadding=0 cellspacing=0><tr><td></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=# onclick=\"p.closeRenPic();return false;\">离开</a></td></tr></table><br>",
+      "mop.com": "我是光荣的mop.com</br><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=\"#\" onclick=\"if(confirm('确认花费100银币雇佣mop.com?')){p.cmd('buy fitems.pet.zhaohuan.JuEMP 1');}\">雇佣mop.com</a></td></tr></table><table height=7 width=1 cellpadding=0 cellspacing=0><tr><td></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=# onclick=\"p.closeRenPic();return false;\">离开</a></td></tr></table><br>",
+      "公会专员": "我想,也许你不需要我再告诉你如何创建一个公会.<br><br>"
+    }
+  },
+  "比武场": {
+    "npcs": [
+      {
+        "idx": 0,
+        "name": "修女",
+        "raw": "修女",
+        "title": "",
+        "title_color": "",
+        "uid": 1146809519728,
+        "pos": 0
+      },
+      {
+        "idx": 1,
+        "name": "mop.com",
+        "raw": "mop.com",
+        "title": "",
+        "title_color": "",
+        "uid": 15006203961588,
+        "pos": 0
+      },
+      {
+        "idx": 2,
+        "name": "mop.com",
+        "raw": "mop.com",
+        "title": "",
+        "title_color": "",
+        "uid": 26571090867768,
+        "pos": 0
+      },
+      {
+        "idx": 3,
+        "name": "mop.com",
+        "raw": "mop.com",
+        "title": "",
+        "title_color": "",
+        "uid": 38644708963138,
+        "pos": 0
+      },
+      {
+        "idx": 4,
+        "name": "mop.com",
+        "raw": "mop.com",
+        "title": "",
+        "title_color": "",
+        "uid": 49450338527978,
+        "pos": 0
+      }
+    ],
+    "chats": {
+      "修女": "愿神与你同在<br><table height=7 width=1 cellpadding=0 cellspacing=0><tr><td></td></tr></table>",
+      "mop.com": "我是光荣的mop.com</br><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=\"#\" onclick=\"if(confirm('确认花费100银币雇佣mop.com?')){p.cmd('buy fitems.pet.zhaohuan.JuEMP 1');}\">雇佣mop.com</a></td></tr></table><table height=7 width=1 cellpadding=0 cellspacing=0><tr><td></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=# onclick=\"p.closeRenPic();return false;\">离开</a></td></tr></table><br>"
+    }
+  },
+  "宠物托儿所": {
+    "npcs": [
+      {
+        "idx": 0,
+        "name": "明美",
+        "raw": "明美",
+        "title": "骑乘训练师",
+        "title_color": "blue",
+        "uid": 50908921438878,
+        "pos": 0
+      }
+    ],
+    "chats": {
+      "明美": "每次骑乘都有一种特别的感觉。。。<br><table height=7 width=1 cellpadding=0 cellspacing=0><tr><td></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=# onclick=\"cmd('aboutchengzhang');return false;\">关于坐骑成长</a></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=# onclick=\"cmd('aboutbugai');return false;\">关于坐骑“补钙”</a></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=# onclick=\"p.closeTaskTalk();return false;\">离开~</a></td></tr></table\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000<script>p.addMessage('roomReader',"
+    }
+  },
+  "宠物研究所": {
+    "npcs": [
+      {
+        "idx": 0,
+        "name": "洛克洛",
+        "raw": "洛克洛",
+        "title": "帝国研究师",
+        "title_color": "blue",
+        "uid": 50630901231858,
+        "pos": 0
+      },
+      {
+        "idx": 1,
+        "name": "封印师",
+        "raw": "封印师",
+        "title": "",
+        "title_color": "",
+        "uid": 50630921492768,
+        "pos": 0
+      },
+      {
+        "idx": 2,
+        "name": "守护灵媒",
+        "raw": "守护灵媒",
+        "title": "",
+        "title_color": "",
+        "uid": 50630941753678,
+        "pos": 2
+      },
+      {
+        "idx": 3,
+        "name": "物化灵媒",
+        "raw": "物化灵媒",
+        "title": "",
+        "title_color": "",
+        "uid": 50630962014588,
+        "pos": 0
+      },
+      {
+        "idx": 4,
+        "name": "守护灵保姆",
+        "raw": "守护灵保姆",
+        "title": "",
+        "title_color": "",
+        "uid": 50630982275498,
+        "pos": 1
+      },
+      {
+        "idx": 5,
+        "name": "克拉拉",
+        "raw": "克拉拉",
+        "title": "守护灵研究师",
+        "title_color": "blue",
+        "uid": 50631002536408,
+        "pos": 0
+      }
+    ],
+    "chats": {
+      "洛克洛": "为了鲜血和荣誉!<br><table height=7 width=1 cellpadding=0 cellspacing=0><tr><td></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=/other/mystu.jsp target=_blank>查看我在线的学生</a></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=/other/listNewbie.jsp target=_blank>查找目前没有老师的新手</a></td></tr></table>",
+      "封印师": "【解除封印】 在我这里使用[封印之蛋]即可<table height=7 width=1 cellpadding=0 cellspacing=0><tr><td></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=# onclick=\"p.closeRenPic();return false;\">离开</a></td></tr></table><br>",
+      "守护灵媒": "你好，我是守护灵媒，我可以帮助你获得自己的守护灵。<br><table height=7 width=1 cellpadding=0 cellspacing=0><tr><td></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/task2.gif></td><td width=5></td><td><a href=# onclick=\"p.cmd('taskTalk 2498947 pettask.maoyin.BuZhuoShiYan 0,1,');p.closeRenPic();return false;\">捕捉试验</a></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href='http://www.pet.imop.com/html/6/8/7849.htm' target=_blank>什么是守护灵？</a></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=# onclick=\"cmd('listP');return false;\">购买守护灵相关的道具。</a></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=# onclick=\"cmd('jianding look');return false;\">鉴定一个守护灵晶。</a></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=# onclick=\"cmd('jianding all');return false;\">鉴定所有的守护灵晶。</a></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=# onclick=\"cmd('kuorongshls');return false;\">增加一个守护灵栏位。</a></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=# onclick=\"cmd('whichcanfeny');return false;\">都有哪些怪物可以封印做守护灵呢?</a></td></tr></table>",
+      "物化灵媒": "你好，我是物化灵媒，我可以把你的守护灵物化成灵珠和龙珠，龙珠用来提升武器属性，灵珠提升防具属性。<br><table height=7 width=1 cellpadding=0 cellspacing=0><tr><td></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href='http://www.pet.imop.com/html/6/8/11283.htm' target=_blank>物化宠物详细介绍</a></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=# onclick=\"cmd('shengjidan 灵丹');return false;\">灵丹升级</a></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=# onclick=\"cmd('shengjidan 龙丹青');return false;\">龙丹【青】升级</a></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=# onclick=\"cmd('shengjidan 龙丹红');return false;\">龙丹【红】升级</a></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=# onclick=\"cmd('shengjizhu 灵珠');return false;\">灵珠升级</a></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=# onclick=\"cmd('shengjizhu 龙珠青');return false;\">龙珠【青】升级</a></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=# onclick=\"cmd('shengjizhu 龙珠红');return false;\">龙珠【红】升级</a></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=# onclick=\"p.closeRenPic();return false;\">再见我还有别的事情要做。</a></td></tr></table>",
+      "守护灵保姆": "我很会照顾守护灵哟！<br><table height=7 width=1 cellpadding=0 cellspacing=0><tr><td></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/task1.gif></td><td width=5></td><td><a href=# onclick=\"p.cmd('taskTalk 2498949 pettask.daily.MianFeiWeiShiSHL 0,');p.closeRenPic();return false;\">进行今天的免费喂食</a></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/task1.gif></td><td width=5></td><td><a href=# onclick=\"p.cmd('taskTalk 2498949 pettask.maoyin.ZengSongYiWangItem 0,1,');p.closeRenPic();return false;\">赠送技能遗忘道具</a></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=# onclick=\"cmd('jiandingshl select');return false;\">鉴定天生技能</a></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=# onclick=\"cmd('tuoguanshl select');return false;\">请帮我照顾我的守护灵</a></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=# onclick=\"cmd('aboutshltuoguan');return false;\">守护灵的托管费多少？</a></td></tr></table>",
+      "克拉拉": "我是猫隐大陆的守护灵研究师，在这个大陆上就没人比我更了解守护灵了。嗬嗬嗬~~ 对守护灵你有什么问题想请~~教~~么<br><table height=7 width=1 cellpadding=0 cellspacing=0><tr><td></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=# onclick=\"cmd('aboutbornskill');return false;\">什么是天生技能？</a></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=# onclick=\"cmd('aboutrefreshbornskill');return false;\">如何获得天生技能？</a></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=# onclick=\"cmd('aboutlingqi');return false;\">什么是灵气值？</a></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=# onclick=\"cmd('aboutshljinghua');return false;\">什么是守护灵精华？</a></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=# onclick=\"cmd('aboutlingqijinghua');return false;\">什么是守护灵的偏好？灵气精华又是什么？</a></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=# onclick=\"cmd('aboutshlpianhao');return false;\">请问姐姐，什么是蓝色小药丸呢~？</a></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=# onclick=\"p.closeTaskTalk();return false;\">离开~</a></td></tr></table>"
+    }
+  },
+  "村口": {
+    "npcs": [
+      {
+        "idx": 0,
+        "name": "流浪歌手小牙",
+        "raw": "流浪歌手小牙",
+        "title": "",
+        "title_color": "",
+        "uid": 50914574232768,
+        "pos": 0
+      },
+      {
+        "idx": 1,
+        "name": "衙役",
+        "raw": "衙役",
+        "title": "官衙",
+        "title_color": "blue",
+        "uid": 50914594493678,
+        "pos": 0
+      },
+      {
+        "idx": 2,
+        "name": "衙役",
+        "raw": "衙役",
+        "title": "官衙",
+        "title_color": "blue",
+        "uid": 50827188927938,
+        "pos": 0
+      }
+    ],
+    "chats": {
+      "流浪歌手小牙": "我的幸运数字是..... 53535353<table height=7 width=1 cellpadding=0 cellspacing=0><tr><td></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=# onclick=\"p.closeRenPic();return false;\">离开</a></td></tr></table><br>",
+      "衙役": "保卫一方平安是我的责任!<table height=7 width=1 cellpadding=0 cellspacing=0><tr><td></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=# onclick=\"p.closeRenPic();return false;\">离开</a></td></tr></table><br>"
+    }
+  },
+  "猫隐村小径": {
+    "npcs": [
+      {
+        "idx": 0,
+        "name": "吾善贴图",
+        "raw": "吾善贴图",
+        "title": "微缩神教",
+        "title_color": "red",
+        "uid": 50906044389658,
+        "pos": 0
+      },
+      {
+        "idx": 1,
+        "name": "衙役",
+        "raw": "衙役",
+        "title": "官衙",
+        "title_color": "blue",
+        "uid": 50914594493678,
+        "pos": 0
+      }
+    ],
+    "chats": {
+      "吾善贴图": "嘿嘿嘿嘿..."
+    }
+  },
+  "池边小道": {
+    "npcs": [
+      {
+        "idx": 0,
+        "name": "小胖",
+        "raw": "小胖",
+        "title": "",
+        "title_color": "",
+        "uid": 50908435177038,
+        "pos": 0
+      },
+      {
+        "idx": 1,
+        "name": "小明",
+        "raw": "小明",
+        "title": "",
+        "title_color": "",
+        "uid": 50908455437948,
+        "pos": 0
+      }
+    ],
+    "chats": {
+      "小胖": "如果遇到什么问题,这里有很多朋友愿意帮助你的哦!<table height=7 width=1 cellpadding=0 cellspacing=0><tr><td></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=# onclick=\"p.cmd('fudao needhelp');return false;\">我有很多不懂的地方,我需要帮助!</a></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=# onclick=\"p.cmd('fudao inputfudao');return false;\">我已经找到了我的辅导员</a></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=# onclick=\"p.cmd('showGifts');return false;\">领取礼物!</a></td></tr></table><br>",
+      "小明": "……"
+    }
+  },
+  "后村小道": {
+    "npcs": [
+      {
+        "idx": 0,
+        "name": "傻二",
+        "raw": "傻二",
+        "title": "",
+        "title_color": "",
+        "uid": 50915749365548,
+        "pos": 1
+      },
+      {
+        "idx": 1,
+        "name": "范坚强",
+        "raw": "范坚强",
+        "title": "",
+        "title_color": "",
+        "uid": 50915769626458,
+        "pos": 0
+      },
+      {
+        "idx": 2,
+        "name": "衙役",
+        "raw": "衙役",
+        "title": "官衙",
+        "title_color": "blue",
+        "uid": 50654788844748,
+        "pos": 0
+      }
+    ],
+    "chats": {
+      "傻二": "你终于回来啦,我的心儿起了波澜",
+      "范坚强": "想当年,我可是纵横江湖一桶猫扑的神教教主那...<br><table height=7 width=1 cellpadding=0 cellspacing=0><tr><td></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=# onclick=\"cmd('lipin');return false;\">使用验证码领取礼品包</a></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=http://www.pet.imop.com/guide/node.html target=_blank>获得验证码的方法</a></td></tr></table><br>",
+      "衙役": "保卫一方平安是我的责任!<table height=7 width=1 cellpadding=0 cellspacing=0><tr><td></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=# onclick=\"p.closeRenPic();return false;\">离开</a></td></tr></table><br>"
+    }
+  },
+  "后村谷地": {
+    "npcs": [],
+    "chats": {}
+  },
+  "后村林地": {
+    "npcs": [
+      {
+        "idx": 0,
+        "name": "懒得动的小臭",
+        "raw": "懒得动的小臭",
+        "title": "",
+        "title_color": "",
+        "uid": 11692036978,
+        "pos": 0
+      },
+      {
+        "idx": 1,
+        "name": "衙役",
+        "raw": "衙役",
+        "title": "官衙",
+        "title_color": "blue",
+        "uid": 50827188927938,
+        "pos": 0
+      },
+      {
+        "idx": 2,
+        "name": "衙役",
+        "raw": "衙役",
+        "title": "官衙",
+        "title_color": "blue",
+        "uid": 50906064650568,
+        "pos": 0
+      }
+    ],
+    "chats": {
+      "懒得动的小臭": "走不动呀…但是又很想走一走。<table height=7 width=1 cellpadding=0 cellspacing=0><tr><td></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=# onclick=\"p.closeRenPic();return false;\">离开</a></td></tr></table><br>",
+      "衙役": "保卫一方平安是我的责任!<table height=7 width=1 cellpadding=0 cellspacing=0><tr><td></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=# onclick=\"p.closeRenPic();return false;\">离开</a></td></tr></table><br>"
+    }
+  },
+  "牧野草原03": {
+    "npcs": [
+      {
+        "idx": 0,
+        "name": "小牧童",
+        "raw": "小牧童",
+        "title": "",
+        "title_color": "",
+        "uid": 50792846685488,
+        "pos": 1
+      },
+      {
+        "idx": 1,
+        "name": "草原蝎",
+        "raw": "草原蝎",
+        "title": "",
+        "title_color": "",
+        "uid": 50792866946398,
+        "pos": -1
+      },
+      {
+        "idx": 2,
+        "name": "小鸡",
+        "raw": "小鸡",
+        "title": "",
+        "title_color": "",
+        "uid": 50792887207308,
+        "pos": -1
+      },
+      {
+        "idx": 3,
+        "name": "小鸡",
+        "raw": "小鸡",
+        "title": "",
+        "title_color": "",
+        "uid": 50792907468218,
+        "pos": -1
+      },
+      {
+        "idx": 4,
+        "name": "小鸡",
+        "raw": "小鸡",
+        "title": "",
+        "title_color": "",
+        "uid": 50792927729128,
+        "pos": -1
+      },
+      {
+        "idx": 5,
+        "name": "红蘑菇",
+        "raw": "红蘑菇",
+        "title": "",
+        "title_color": "",
+        "uid": 50792947990038,
+        "pos": -1
+      },
+      {
+        "idx": 6,
+        "name": "草原蝎",
+        "raw": "草原蝎",
+        "title": "",
+        "title_color": "",
+        "uid": 50792968250948,
+        "pos": -1
+      },
+      {
+        "idx": 7,
+        "name": "绿毛虫",
+        "raw": "绿毛虫",
+        "title": "",
+        "title_color": "",
+        "uid": 50792988511858,
+        "pos": -1
+      },
+      {
+        "idx": 8,
+        "name": "草原蝎",
+        "raw": "草原蝎",
+        "title": "",
+        "title_color": "",
+        "uid": 50793008772768,
+        "pos": -1
+      },
+      {
+        "idx": 9,
+        "name": "草原蝎",
+        "raw": "草原蝎",
+        "title": "",
+        "title_color": "",
+        "uid": 50793029033678,
+        "pos": -1
+      },
+      {
+        "idx": 10,
+        "name": "小鸡",
+        "raw": "小鸡",
+        "title": "",
+        "title_color": "",
+        "uid": 50793049294588,
+        "pos": -1
+      }
+    ],
+    "chats": {
+      "小牧童": "猫隐西村的<span class=key>元太公</span>一直在找一种<span class=key>奇怪的蛋</span>，听说在<span class=key>芦苇荡</span>的<span class=key>钳嘴龟</span>才有，要不你去看看，如果能找到，就给元太公送去吧。<table height=6 width=1 cellpadding=0 cellspacing=0><tr><td></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=# onclick=\"p.cmd('beginQiGuaiDeDan');return false;\">好。我也想看看这个奇怪的蛋</a></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=# onclick=\"p.closeTaskTalk();return false;\">懒得管~</a></td></tr></table>",
+      "草原蝎": "...<table height=7 width=1 cellpadding=0 cellspacing=0><tr><td></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=# onclick=\"p.closeRenPic();return false;\">离开</a></td></tr></table><br>",
+      "小鸡": "...<table height=7 width=1 cellpadding=0 cellspacing=0><tr><td></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=# onclick=\"p.closeRenPic();return false;\">离开</a></td></tr></table><br>",
+      "红蘑菇": "...<table height=7 width=1 cellpadding=0 cellspacing=0><tr><td></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=# onclick=\"p.closeRenPic();return false;\">离开</a></td></tr></table><br>"
+    }
+  },
+  "猫隐村广场": {
+    "npcs": [
+      {
+        "idx": 0,
+        "name": "木静静",
+        "raw": "木静静",
+        "title": "美女教官",
+        "title_color": "red",
+        "uid": 33796689788,
+        "pos": 0
+      },
+      {
+        "idx": 1,
+        "name": "新手福音-戈多",
+        "raw": "新手福音-戈多",
+        "title": "",
+        "title_color": "",
+        "uid": 33816950698,
+        "pos": 1
+      },
+      {
+        "idx": 2,
+        "name": "钱大伯",
+        "raw": "钱大伯",
+        "title": "双倍经验",
+        "title_color": "orange",
+        "uid": 34060081618,
+        "pos": 1
+      },
+      {
+        "idx": 3,
+        "name": "宝石手工艺人",
+        "raw": "宝石手工艺人",
+        "title": "",
+        "title_color": "",
+        "uid": 34080342528,
+        "pos": 0
+      },
+      {
+        "idx": 4,
+        "name": "饰品大师",
+        "raw": "饰品大师",
+        "title": "",
+        "title_color": "",
+        "uid": 34100603438,
+        "pos": 2
+      }
+    ],
+    "chats": {
+      "木静静": "<br><font color=red><b>目前无法进入大逃杀岛!</b><br>具体信息请参看新学员杀戮指导!</font><table height=7 width=1 cellpadding=0 cellspacing=0><tr><td></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=http://www.pet.imop.com/guide/br.html target=_blank>新学员杀戮指导</a></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=# onclick=\"cmd('aboutF 1');return false;\">交纳 <font color=008800>大逃杀奖章</font></a></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/sell.gif></td><td width=5></td><td><a href=# onclick=\"cmd('list');return false;\">蕃薯团可以提供什么好东西?</a></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/task1.gif></td><td width=5></td><td><a href=# onclick=\"p.cmd('taskTalk 1668 pettask.daily.relation.FanShuTuanDeQingQiu 0,1');p.closeRenPic();return false;\">蕃薯团的请求</a></td></tr></table><br\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000<script>p.addCM(",
+      "新手福音-戈多": "还有不明白的地方,可以在聊天窗口中和别的玩家交流,游戏,交流,这才是游戏的乐趣。<br><table height=7 width=1 cellpadding=0 cellspacing=0><tr><td></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/task2.gif></td><td width=5></td><td><a href=# onclick=\"p.cmd('taskTalk 1669 pettask.maoyin.DaoJuDianLaoBanDeYaoQing 0,');p.closeRenPic();return false;\">道具店老板的邀请</a></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/task1.gif></td><td width=5></td><td><a href=# onclick=\"p.cmd('taskTalk 1669 pettask.ring.ReXinZhuRen 0,2,');p.closeRenPic();return false;\">热心助人</a></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=# onclick=\"p.overTaskCmd('getGold');p.closeTaskTalk();return false;\">领取更多的新人奖励</a></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/sell.gif></td><td width=5></td><td><a href=# onclick=\"p.cmd('showhunshilists');return false;\">兑换魂石结晶</a></td></tr></table>",
+      "钱大伯": "嘿，这里有好吃的糖果。<br><table height=7 width=1 cellpadding=0 cellspacing=0><tr><td></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/task1.gif></td><td width=5></td><td><a href=# onclick=\"p.cmd('taskTalk 1681 pettask.maoyin.QianDaBoDeZhiYin 0,');p.closeRenPic();return false;\">钱大伯的指引</a></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=# onclick=\"cmd('giveTongNianEnc');return false;\">无限量免费领取童年礼物</a></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=# onclick='p.showReceive();return false;'>领取我的赠品</a></td></tr></table>",
+      "宝石手工艺人": "要宝石吗？便宜卖啦。 <br><table height=7 width=1 cellpadding=0 cellspacing=0><tr><td></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=# onclick=\"cmd('listMM');return false;\">我想买宝石</a></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=# onclick=\"cmd('wantMM');return false;\">哪里可以弄到MM呀？</a></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=# onclick=\"if (confirm('确定要花费1金币，购买能量石粉末吗？')) {cmd('wantFenMo');return false;}\">我想买能量石粉末</a></td></tr></table>",
+      "饰品大师": "每隔１０级来看我一次都会有惊喜啊。<br><table height=7 width=1 cellpadding=0 cellspacing=0><tr><td></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/task2.gif></td><td width=5></td><td><a href=# onclick=\"p.cmd('taskTalk 1683 pettask.maoyin.XuQiuYuanLiao 0,1,');p.closeRenPic();return false;\">需求原料</a></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=# onclick=\"cmd('shenfuhelp 1');return false;\">八卦神符是什么呢？</a></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=# onclick=\"cmd('shenfuhelp 2');return false;\">八卦神符的镶嵌槽有什么特别的？</a></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=# onclick=\"cmd('shenfuhelp 3');return false;\">八卦神符如何激活？</a></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=# onclick=\"cmd('shenfuhelp 4');return false;\">神符石是什么东西？</a></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=# onclick=\"cmd('shenfuhelp 5');return false;\">听说还有一种金色的神符石？</a></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=# onclick=\"cmd('shenfuhelp 6');return false;\">神符石能抽取什么装备的属性呢？</a></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=# onclick=\"cmd('shenfuhelp 7');return false;\">神符后悔药有什么用？</a></td></tr></table>"
+    }
+  },
+  "西村口": {
+    "npcs": [
+      {
+        "idx": 0,
+        "name": "绿毛虫",
+        "raw": "绿毛虫",
+        "title": "",
+        "title_color": "",
+        "uid": 50908941699788,
+        "pos": -1
+      },
+      {
+        "idx": 1,
+        "name": "绿毛虫",
+        "raw": "绿毛虫",
+        "title": "",
+        "title_color": "",
+        "uid": 50908961960698,
+        "pos": -1
+      },
+      {
+        "idx": 2,
+        "name": "绿毛虫",
+        "raw": "绿毛虫",
+        "title": "",
+        "title_color": "",
+        "uid": 50908982221608,
+        "pos": -1
+      },
+      {
+        "idx": 3,
+        "name": "泡泡",
+        "raw": "泡泡",
+        "title": "",
+        "title_color": "",
+        "uid": 50909002482518,
+        "pos": -1
+      },
+      {
+        "idx": 4,
+        "name": "泡泡",
+        "raw": "泡泡",
+        "title": "",
+        "title_color": "",
+        "uid": 50909022743428,
+        "pos": -1
+      },
+      {
+        "idx": 5,
+        "name": "泡泡",
+        "raw": "泡泡",
+        "title": "",
+        "title_color": "",
+        "uid": 50909043004338,
+        "pos": -1
+      },
+      {
+        "idx": 6,
+        "name": "泡泡",
+        "raw": "泡泡",
+        "title": "",
+        "title_color": "",
+        "uid": 50909063265248,
+        "pos": -1
+      },
+      {
+        "idx": 7,
+        "name": "绿毛虫",
+        "raw": "绿毛虫",
+        "title": "",
+        "title_color": "",
+        "uid": 50909083526158,
+        "pos": -1
+      },
+      {
+        "idx": 8,
+        "name": "绿毛虫",
+        "raw": "绿毛虫",
+        "title": "",
+        "title_color": "",
+        "uid": 50909103787068,
+        "pos": -1
+      },
+      {
+        "idx": 9,
+        "name": "泡泡",
+        "raw": "泡泡",
+        "title": "",
+        "title_color": "",
+        "uid": 50909124047978,
+        "pos": -1
+      },
+      {
+        "idx": 10,
+        "name": "泡泡",
+        "raw": "泡泡",
+        "title": "",
+        "title_color": "",
+        "uid": 50909144308888,
+        "pos": -1
+      },
+      {
+        "idx": 11,
+        "name": "泡泡",
+        "raw": "泡泡",
+        "title": "",
+        "title_color": "",
+        "uid": 50909164569798,
+        "pos": -1
+      },
+      {
+        "idx": 12,
+        "name": "泡泡",
+        "raw": "泡泡",
+        "title": "",
+        "title_color": "",
+        "uid": 50909184830708,
+        "pos": -1
+      },
+      {
+        "idx": 13,
+        "name": "泡泡",
+        "raw": "泡泡",
+        "title": "",
+        "title_color": "",
+        "uid": 50909205091618,
+        "pos": -1
+      },
+      {
+        "idx": 14,
+        "name": "泡泡",
+        "raw": "泡泡",
+        "title": "",
+        "title_color": "",
+        "uid": 50909225352528,
+        "pos": -1
+      },
+      {
+        "idx": 15,
+        "name": "泡泡",
+        "raw": "泡泡",
+        "title": "",
+        "title_color": "",
+        "uid": 50909245613438,
+        "pos": -1
+      },
+      {
+        "idx": 16,
+        "name": "绿毛虫",
+        "raw": "绿毛虫",
+        "title": "",
+        "title_color": "",
+        "uid": 50909265874348,
+        "pos": -1
+      },
+      {
+        "idx": 17,
+        "name": "绿毛虫",
+        "raw": "绿毛虫",
+        "title": "",
+        "title_color": "",
+        "uid": 50909286135258,
+        "pos": -1
+      },
+      {
+        "idx": 18,
+        "name": "绿毛虫",
+        "raw": "绿毛虫",
+        "title": "",
+        "title_color": "",
+        "uid": 50909306396168,
+        "pos": -1
+      },
+      {
+        "idx": 19,
+        "name": "泡泡",
+        "raw": "泡泡",
+        "title": "",
+        "title_color": "",
+        "uid": 50909326657078,
+        "pos": -1
+      },
+      {
+        "idx": 20,
+        "name": "焦虑的爷爷",
+        "raw": "焦虑的爷爷",
+        "title": "",
+        "title_color": "",
+        "uid": 50909346917988,
+        "pos": 0
+      },
+      {
+        "idx": 21,
+        "name": "泡泡",
+        "raw": "泡泡",
+        "title": "",
+        "title_color": "",
+        "uid": 50961336413048,
+        "pos": -1
+      }
+    ],
+    "chats": {
+      "绿毛虫": "...<table height=7 width=1 cellpadding=0 cellspacing=0><tr><td></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=# onclick=\"p.closeRenPic();return false;\">离开</a></td></tr></table><br>",
+      "泡泡": "...<table height=7 width=1 cellpadding=0 cellspacing=0><tr><td></td></tr></table><table border=0 cellspacing=0 cellpadding=0><tr><td valign=top><img src=img/button/talk.gif></td><td width=5></td><td><a href=# onclick=\"p.closeRenPic();return false;\">离开</a></td></tr></table><br>",
+      "焦虑的爷爷": "六一活动已经结束啦，下次再来吧！"
+    }
+  }
+}

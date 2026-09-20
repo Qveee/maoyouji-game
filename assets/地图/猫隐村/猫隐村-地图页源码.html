@@ -1,0 +1,125 @@
+﻿<meta http-equiv="Content-Type" content="text/html; charset=gb2312">
+<script language="JavaScript">
+<!--
+function SymError()
+{
+  return true;
+}
+window.onerror = SymError;
+//-->
+</script>
+<link rel='stylesheet' href='include/map.css'>
+<script src="include/map.js"></script>
+<body topmargin=0 leftmargin=0 onLoad="initMap();" scroll="no">
+
+<div style="width:800px;height:600px;">
+<span class="pos" style="left: 188px;top: 157px;" onClick="go(this,this.title);" hidefocus=true title="街道办事处" id="街道办事处">街道办事处</span> 
+      <span class="pos" style="left: 497px;top: 419px;" onClick="go(this,this.title);" hidefocus=true title="仓库" id="仓库" >仓库</span> 
+      <span class="pos" style="left: 281px;top: 116px;" onClick="go(this,this.title);" hidefocus=true title="村长小屋" id="村长小屋">村长小屋</span> 
+      <span class="pos" style="left: 387px;top: 160px;" onClick="go(this,this.title);" hidefocus=true title="装备店" id="装备店">装备店</span> 
+      <span class="pos" style="left: 536px;top: 178px;" onClick="go(this,this.title);" hidefocus=true title="教堂" id="教堂">教堂</span> 
+      <span class="pos" style="left: 273px;top: 198px;" onClick="go(this,this.title);" hidefocus=true title="后村小道" id="后村小道">后村小道</span> 
+      <span class="pos" style="left: 219px;top: 366px;" onClick="go(this,this.title);" hidefocus=true title="猫隐村小径" id="猫隐村小径">猫隐村小径</span> 
+      <span class="pos" style="left: 93px;top: 196px;" onClick="go(this,this.title);" hidefocus=true title="比武场" id="比武场">比武场</span> 
+      <!--<span class="pos" style="left: 552px;top: 343px;" onClick="go(this,this.title);" hidefocus=true title="生死竞技场" id="生死竞技场">生死竞技</span> -->
+      <span class="pos" style="left: 306px;top: 340px;" onClick="go(this,this.title);" hidefocus=true title="猫隐村广场" id="猫隐村广场">猫隐村广场</span> 
+      <span class="pos" style="left: 313px;top: 494px;" onClick="go(this,this.title);" hidefocus=true title="村口" id="村口">村口</span> 
+      <span class="pos" style="left: 410px;top: 270px;" onClick="go(this,this.title);" hidefocus=true title="道具店" id="道具店">道具店</span> 
+      <span class="pos" style="left: 45px;top: 293px;" onClick="go(this,this.title);" hidefocus=true title="宠物托儿所" id="宠物托儿所">宠物托儿所</span> 
+      <span class="pos" style="left: 445px;top: 499px;" onClick="go(this,this.title);" hidefocus=true title="宠物研究所" id="宠物研究所">宠物研究所</span> 
+      <span class="pos" style="left: 185px;top: 449px;" onClick="go(this,this.title);" hidefocus=true title="猫隐村驿站" id="猫隐村驿站">驿站</span> 
+<!--
+      <span class="pos" style="left: 108px;top: 456px;" onclick="go(this,this.title);" hidefocus=true title="旅馆">旅馆</span> 
+      <span class="pos" style="left: 60px;top: 410px;" onclick="go(this,this.title);" hidefocus=true title="旅馆套房">旅馆套房</span> 
+      -->
+      <span class="pos" style="left: 349px;top: 570px;" onClick="go(this,this.title)" hidefocus=true title="牧野草原03"><font color=red>牧野草原</font></span> 
+<!--  
+     <span class="pos" style="left: 21px;top: 16px;" onClick="go(this,this.title)" hidefocus=true title="北牧野草原01"><font color=red>北牧野草原</font></span> 
+-->
+      <span class="pos" style="left: 419px;top: 379px;" onClick="go(this,this.title)" hidefocus=true title="广场小道">广场小道</span> 
+      <span class="pos" style="left: 148px;top: 53px;" onClick="go(this,this.title)" hidefocus=true title="后村林地">后村林地</span> 
+      <span class="pos" style="left: 51px;top: 90px;" onClick="go(this,this.title)" hidefocus=true title="后村谷地">后村谷地</span> 
+      <span class="pos" style="left: 216px;top: 292px;" onClick="go(this,this.title)" hidefocus=true title="池边小道" id="池边小道">池边小道</span> 
+      <span class="pos" style="left: 190px;top: 538px;" onClick="go(this,this.title)" hidefocus=true title="西村口"><font color=red>猫隐西村</font></span> 
+</div>
+<div id="mmdxrz" style="display:none;">
+<img src="pic/xinshoucun/mmdxrz/mop1.gif" style="z-index:1000; position: absolute; left: 314px; top: 360px; width: 38px; height: 131px;">
+<img src="pic/xinshoucun/mmdxrz/mop2.gif" style="z-index:1000; position: absolute; left: 338px; top: 527px; width: 21px; height: 31px;">
+</div>
+<div id="xzsf" style="display:none;">
+<img src="pic/xinshoucun/xzsf/1.gif" style="z-index:1000; position: absolute; left: 310px; top: 360px; width: 42px; height: 123px;">
+<img src="pic/xinshoucun/xzsf/2.gif" style="z-index:1000; position: absolute; left: 265px; top: 503px; width: 21px; height: 41px;"></div>
+<TABLE CELLPADDING="0" CELLSPACING="0" BORDER="0" width="800" height="600" class="bgMap">
+	<TR>
+		<TD><img src="pic/maoyin.jpg" width="800" height="600" border="0" usemap="#Map"/></TD>
+	</TR>
+	<!--<TR>
+		<TD><img src="pic/maoyin/maoyin_1.gif" width="160" height="120" border="0" usemap="#testarea"/></TD>
+		<TD background="pic/maoyin/maoyin_2.gif"></TD>
+		<TD background="pic/maoyin/maoyin_3.gif"></TD>
+		<TD background="pic/maoyin/maoyin_4.gif"></TD>
+		<TD background="pic/maoyin/maoyin_5.gif"></TD>
+	</TR>
+	<TR>
+		<TD background="pic/maoyin/maoyin_6.gif"></TD>
+		<TD background="pic/maoyin/maoyin_7.gif"></TD>
+		<TD background="pic/maoyin/maoyin_8.gif"></TD>
+		<TD background="pic/maoyin/maoyin_9.gif"></TD>
+		<TD background="pic/maoyin/maoyin_10.gif"></TD>
+	</TR>
+	<TR>
+		<TD background="pic/maoyin/maoyin_11.gif"></TD>
+		<TD background="pic/maoyin/maoyin_12.gif"></TD>
+		<TD background="pic/maoyin/maoyin_13.gif"></TD>
+		<TD background="pic/maoyin/maoyin_14.gif"></TD>
+		<TD background="pic/maoyin/maoyin_15.gif"></TD>
+	</TR>
+	<TR>
+		<TD background="pic/maoyin/maoyin_16.gif"></TD>
+		<TD background="pic/maoyin/maoyin_17.gif"></TD>
+		<TD background="pic/maoyin/maoyin_18.gif"></TD>
+		<TD background="pic/maoyin/maoyin_19.gif"></TD>
+		<TD background="pic/maoyin/maoyin_20.gif"></TD>
+	</TR>
+	<TR>
+	<TD background="pic/maoyin/maoyin_21.gif"></TD>
+	<TD background="pic/maoyin/maoyin_22.gif"></TD>
+	<TD background="pic/maoyin/maoyin_23.gif"></TD>
+	<TD background="pic/maoyin/maoyin_24.gif"></TD>
+	<TD background="pic/maoyin/maoyin_25.gif"></TD>
+</TR>-->
+<map name="Map" id="map2">
+<script>
+var id1 = document.getElementById("街道办事处");
+var id2 = document.getElementById("装备店");
+var id3 = document.getElementById("村长小屋");
+var id4 = document.getElementById("仓库");
+var id6 = document.getElementById("教堂");
+var id5 = document.getElementById("后村小道");
+var id7 = document.getElementById("比武场");
+//var id8 = document.getElementById("生死竞技场");
+var id9 = document.getElementById("猫隐村广场");
+var id10 = document.getElementById("村口");
+var id11 = document.getElementById("宠物研究所");
+var id12 = document.getElementById("宠物托儿所");
+var id13 = document.getElementById("道具店");
+var id14 = document.getElementById("猫隐村驿站");
+var id15 = document.getElementById("池边小道");
+</script>
+<area shape="rect" coords="174,83,222,172"  onClick="javascript:go(id1,id1.title);"/>
+<area shape="rect" coords="521,360,587,438"  onClick="javascript:go(id4,id4.title);"/>
+<area shape="rect" coords="397,104,475,164"  onClick="javascript:go(id2,id2.title);"/>
+<area shape="rect" coords="245,64,318,121"  onClick="javascript:go(id3,id3.title);"/>
+<area shape="rect" coords="283,170,337,208"  onClick="javascript:go(id5,id5.title);"/>
+<area shape="rect" coords="551,93,613,187"  onClick="javascript:go(id6,id6.title);"/>
+<!-- <area shape="rect" coords="538,287,642,341"  onClick="javascript:go(id8,id8.title);"/> -->
+<area shape="rect" coords="39,139,137,195"  onClick="javascript:go(id7,id7.title);"/>
+<area shape="rect" coords="303,416,381,484"  onClick="javascript:go(id10,id10.title);"/>
+<area shape="rect" coords="320,265,359,340"  onClick="javascript:go(id9,id9.title);"/>
+<area shape="rect" coords="424,204,516,258"  onClick="go(id13,id13.title);"/>
+<area shape="rect" coords="14,210,101,285"  onClick="javascript:go(id12,id12.title);"/>
+<area shape="rect" coords="478,454,539,519"  onClick="go(id11,id11.title);"/>
+<area shape="rect" coords="159,366,217,460"  onClick="javascript:go(id14,id14.title);"/>
+<area shape="rect" coords="216,269,257,310"  onClick="javascript:go(id15,id15.title);"/>
+</map>
+</TABLE>

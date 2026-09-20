@@ -1,0 +1,121 @@
+﻿<html>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312">
+<script language="JavaScript">
+<!--
+function SymError()
+{
+  return true;
+}
+window.onerror = SymError;
+//-->
+</script>
+<link rel='stylesheet' href='include/map.css'>
+<script src="include/map.js"></script>
+<body bgcolor="#FFFFFF" leftmargin="0" topmargin="0" marginwidth="0" marginheight="0" onLoad="initMap();" scroll="no">
+<span id='p01' class="pos" style="width:43px;left: 44px;top: 256px;" onClick="go(this,this.title);" title="机械岛出口">出口</span>
+	<span id='p09' class="pos" style="width:46px;left: 81px;top: 104px;" onClick="go(this,this.title);" title="机械岛01">　01</span>
+	<span id='p03' class="pos" style="width:48px;left: 279px;top: 46px;" onClick="go(this,this.title);" title="机械岛试验区1">试验区1</span>
+	<span id='p04' class="pos" style="width:55px;left: 201px;top: 190px;" onClick="go(this,this.title);" title="机械树林">机械树林</span>
+	<span id='p09' class="pos" style="width:46px;left: 110px;top: 413px;" onClick="go(this,this.title);" title="机械岛02">　02</span>
+	<span id='p09' class="pos" style="width:46px;left: 86px;top: 541px;" onClick="go(this,this.title);" title="机械岛03">　03</span>
+	<span id='p09' class="pos" style="width:46px;left: 303px;top: 507px;" onClick="go(this,this.title);" title="机械岛04">　04</span>
+	<span id='p09' class="pos" style="width:46px;left: 417px;top: 383px;" onClick="go(this,this.title);" title="机械岛05">　05</span>
+	<span id='p09' class="pos" style="width:46px;left: 401px;top: 639px;" onClick="go(this,this.title);" title="机械岛06">　06</span>
+	<span id='p09' class="pos" style="width:46px;left: 674px;top: 395px;" onClick="go(this,this.title);" title="机械岛07">　07</span>
+	<span id='p11' class="pos" style="width:47px;left: 683px;top: 237px;" onClick="go(this,this.title);" title="机械岛08">　08　</span>
+	<span id='p13' class="pos" style="width:44px;left: 743px;top: 92px;" onClick="go(this,this.title);" title="机械岛09">　09　</span>
+	<span id='p13' class="pos" style="width:44px;left: 891px;top: 180px;" onClick="go(this,this.title);" title="机械岛10">　10　</span>
+	<span id='p14' class="pos" style="width:44px;left: 846px;top: 305px;" onClick="go(this,this.title);" title="机械岛11">　11　</span>
+	<span id='p15' class="pos" style="width:46px;left: 871px;top: 472px;" onClick="go(this,this.title);" title="机械岛12">　12　</span>
+	<span id='p16' class="pos" style="width:43px;left: 841px;top: 620px;" onClick="go(this,this.title);" title="机械岛13">　13　</span>
+	<span id='p17' class="pos" style="width:52px;left: 506px;top: 49px;" onClick="go(this,this.title);" title="机械岛试验区2">试验区2</span>
+	<span id='p18' class="pos" style="width:44px;left: 421px;top: 144px;" onClick="go(this,this.title);" title="机械岛加工厂">加工厂</span>
+	<span id='p19' class="pos" style="width:43px;left: 360px;top: 257px;" onClick="go(this,this.title);" title="机械岛接待室">接待室</span>
+	<span id='p20' class="pos" style="width:45px;left: 529px;top: 259px;" onClick="go(this,this.title);" title="机械岛研究室">研究室</span>
+	<span id='p21' class="pos" style="width:55px;left: 552px;top: 531px;" onClick="go(this,this.title);" title="机械岛前研究室">前研究室</span>
+	
+
+<!-- ImageReady Slices (机械岛1024.jpg) -->
+<table id="__01" width="1024" height="768" border="0" cellpadding="0" cellspacing="0">
+	<tr>
+		<td width="256">
+			<img src="images/jixiedao_01.jpg" width="256" height="96" alt=""></td>
+		<td width="256">
+			<img src="images/jixiedao_02.jpg" width="256" height="96" alt=""></td>
+		<td width="256">
+			<img src="images/jixiedao_03.jpg" width="256" height="96" alt=""></td>
+		<td width="256">
+			<img src="images/jixiedao_04.jpg" width="256" height="96" alt=""></td>
+	</tr>
+	<tr>
+		<td>
+			<img src="images/jixiedao_05.jpg" width="256" height="96" alt=""></td>
+		<td>
+			<img src="images/jixiedao_06.jpg" width="256" height="96" alt=""></td>
+		<td>
+			<img src="images/jixiedao_07.jpg" width="256" height="96" alt=""></td>
+		<td>
+			<img src="images/jixiedao_08.jpg" width="256" height="96" alt=""></td>
+	</tr>
+	<tr>
+		<td>
+			<img src="images/jixiedao_09.jpg" width="256" height="96" alt=""></td>
+		<td>
+			<img src="images/jixiedao_10.jpg" width="256" height="96" alt=""></td>
+		<td>
+			<img src="images/jixiedao_11.jpg" width="256" height="96" alt=""></td>
+		<td>
+			<img src="images/jixiedao_12.jpg" width="256" height="96" alt=""></td>
+	</tr>
+	<tr>
+		<td>
+			<img src="images/jixiedao_13.jpg" width="256" height="96" alt=""></td>
+		<td>
+			<img src="images/jixiedao_14.jpg" width="256" height="96" alt=""></td>
+		<td>
+			<img src="images/jixiedao_15.jpg" width="256" height="96" alt=""></td>
+		<td>
+			<img src="images/jixiedao_16.jpg" width="256" height="96" alt=""></td>
+	</tr>
+	<tr>
+		<td>
+			<img src="images/jixiedao_17.jpg" width="256" height="96" alt=""></td>
+		<td><img src="images/jixiedao_18.jpg" width="256" height="96" alt=""></td>
+		<td>
+			<img src="images/jixiedao_19.jpg" width="256" height="96" alt=""></td>
+		<td>
+			<img src="images/jixiedao_20.jpg" width="256" height="96" alt=""></td>
+	</tr>
+	<tr>
+		<td>
+			<img src="images/jixiedao_21.jpg" width="256" height="96" alt=""></td>
+		<td>
+			<img src="images/jixiedao_22.jpg" width="256" height="96" alt=""></td>
+		<td>
+			<img src="images/jixiedao_23.jpg" width="256" height="96" alt=""></td>
+		<td>
+			<img src="images/jixiedao_24.jpg" width="256" height="96" alt=""></td>
+	</tr>
+	<tr>
+		<td><img src="images/jixiedao_25.jpg" width="256" height="96" alt=""></td>
+		<td>
+			<img src="images/jixiedao_26.jpg" width="256" height="96" alt=""></td>
+		<td>
+			<img src="images/jixiedao_27.jpg" width="256" height="96" alt=""></td>
+		<td>
+			<img src="images/jixiedao_28.jpg" width="256" height="96" alt=""></td>
+	</tr>
+	<tr>
+		<td>
+			<img src="images/jixiedao_29.jpg" width="256" height="96" alt=""></td>
+		<td>
+			<img src="images/jixiedao_30.jpg" width="256" height="96" alt=""></td>
+		<td>
+			<img src="images/jixiedao_31.jpg" width="256" height="96" alt=""></td>
+		<td>
+			<img src="images/jixiedao_32.jpg" width="256" height="96" alt=""></td>
+	</tr>
+</table>
+<!-- End ImageReady Slices -->
+</body>
+</html>

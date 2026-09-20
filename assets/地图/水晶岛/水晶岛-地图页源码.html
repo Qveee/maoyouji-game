@@ -1,0 +1,155 @@
+﻿<meta http-equiv="Content-Type" content="text/html; charset=gb2312">
+<script language="JavaScript">
+<!--
+function SymError()
+{
+  return true;
+}
+window.onerror = SymError;
+//-->
+</script>
+<link rel='stylesheet' href='include/map.css'>
+<script src="include/map.js"></script>
+<body topmargin=0 leftmargin=0 onLoad="initMap();" scroll="no">
+<div style="width:795px;height:670px;">
+  <span class="pos" style="left: 48px;top: 52px;position:absolute; height:19px" onClick="go(this,this.title)" hidefocus=true title="出口">出口</span> 
+  <span class="pos" style="left: 15px;top: 249px;position:absolute; height:19px" onClick="go(this,this.title)" hidefocus=true title="水晶岛01">01</span> 
+  <span class="pos" style="left: 92px;top: 303px;position:absolute; height:19px" onClick="go(this,this.title)" hidefocus=true title="水晶岛02">02</span> 
+  <span class="pos" style="left: 179px;top: 190px;position:absolute; height:19px" onClick="go(this,this.title)" hidefocus=true title="水晶岛03">03</span>
+  <span class="pos" style="left: 280px;top: 125px;position:absolute; height:19px" onClick="go(this,this.title)" hidefocus=true title="水晶岛04">04</span> 
+  <span class="pos" style="left: 406px;top: 74px;position:absolute; height:19px" onClick="go(this,this.title)" hidefocus=true title="水晶岛05">05</span> 
+  <span class="pos" style="left: 555px;top: 141px;position:absolute; height:19px" onClick="go(this,this.title)" hidefocus=true title="水晶岛06">06</span> 
+  <span class="pos" style="left: 557px;top: 417px;position:absolute; height:19px" onClick="go(this,this.title)" hidefocus=true title="水晶岛07">07</span> 
+  <span class="pos" style="left: 690px;top: 560px;position:absolute; height:19px" onClick="go(this,this.title)" hidefocus=true title="水晶岛08">08</span>
+  <span class="pos" style="left: 432px;top: 239px;position:absolute; height:19px" onClick="go(this,this.title)" hidefocus=true title="蓝晶峰">蓝晶峰</span> 
+  <span class="pos" style="left: 342px;top: 285px;position:absolute; height:19px" onClick="go(this,this.title)" hidefocus=true title="蓝晶滩">蓝晶滩</span> 
+  <span class="pos" style="left: 599px;top: 267px; position:absolute; height:19px" onClick="go(this,this.title)" hidefocus=true title="碧海心">碧海心</span>
+  <span class="pos" style="left: 244px;top: 353px;position:absolute; height:19px" onClick="go(this,this.title)" hidefocus=true title="晶海角">晶海角</span>  
+  <span class="pos" style="left: 52px;top: 520px; position:absolute; height:19px" onClick="go(this,this.title)" hidefocus=true title="云晶地">云晶地</span>
+  <span class="pos" style="left: 239px;top: 501px;position:absolute; height:19px" onClick="go(this,this.title)" hidefocus=true title="林晶园">林晶园</span> 
+  <span class="pos" style="left: 154px;top: 592px;position:absolute; height:19px" onClick="go(this,this.title)" hidefocus=true title="晶脉之心">晶脉之心</span>
+  <span class="pos" style="left: 423px;top: 568px;position:absolute; height:19px" onClick="go(this,this.title)" hidefocus=true title="风化晶林">风化晶林</span></div>
+<!-- ImageReady Slices (水晶岛地图 原图.jpg) -->
+<table width="798" height="679" border="0" cellpadding="0" cellspacing="0" class="bgMap">
+	<tr>
+		<td>
+			<img src="pic/shuijingdao/ShuiJingDao_01.jpg" width="160" height="69" alt=""></td> 
+		<td>
+			<img src="pic/shuijingdao/ShuiJingDao_02.jpg" width="159" height="69" alt=""></td>
+		<td>
+			<img src="pic/shuijingdao/ShuiJingDao_03.jpg" width="160" height="69" alt=""></td>
+		<td>
+			<img src="pic/shuijingdao/ShuiJingDao_04.jpg" width="159" height="69" alt=""></td>
+		<td>
+			<img src="pic/shuijingdao/ShuiJingDao_05.jpg" width="160" height="69" alt=""></td>
+	</tr>
+	<tr>
+		<td>
+			<img src="pic/shuijingdao/ShuiJingDao_06.jpg" width="160" height="70" alt=""></td>
+		<td>
+			<img src="pic/shuijingdao/ShuiJingDao_07.jpg" width="159" height="70" alt=""></td>
+		<td>
+			<img src="pic/shuijingdao/ShuiJingDao_08.jpg" width="160" height="70" alt=""></td>
+		<td>
+			<img src="pic/shuijingdao/ShuiJingDao_09.jpg" width="159" height="70" alt=""></td>
+		<td>
+			<img src="pic/shuijingdao/ShuiJingDao_10.jpg" width="160" height="70" alt=""></td>
+	</tr>
+	<tr>
+		<td>
+			<img src="pic/shuijingdao/ShuiJingDao_11.jpg" width="160" height="68" alt=""></td>
+		<td>
+			<img src="pic/shuijingdao/ShuiJingDao_12.jpg" width="159" height="68" alt=""></td>
+		<td>
+			<img src="pic/shuijingdao/ShuiJingDao_13.jpg" width="160" height="68" alt=""></td>
+		<td>
+			<img src="pic/shuijingdao/ShuiJingDao_14.jpg" width="159" height="68" alt=""></td>
+		<td>
+			<img src="pic/shuijingdao/ShuiJingDao_15.jpg" width="160" height="68" alt=""></td>
+	</tr>
+	<tr>
+		<td>
+			<img src="pic/shuijingdao/ShuiJingDao_16.jpg" width="160" height="73" alt=""></td>
+		<td>
+			<img src="pic/shuijingdao/ShuiJingDao_17.jpg" width="159" height="73" alt=""></td>
+		<td>
+			<img src="pic/shuijingdao/ShuiJingDao_18.jpg" width="160" height="73" alt=""></td>
+		<td>
+			<img src="pic/shuijingdao/ShuiJingDao_19.jpg" width="159" height="73" alt=""></td>
+		<td>
+			<img src="pic/shuijingdao/ShuiJingDao_20.jpg" width="160" height="73" alt=""></td>
+	</tr>
+	<tr>
+		<td>
+			<img src="pic/shuijingdao/ShuiJingDao_21.jpg" width="160" height="74" alt=""></td>
+		<td>
+			<img src="pic/shuijingdao/ShuiJingDao_22.jpg" width="159" height="74" alt=""></td>
+		<td>
+			<img src="pic/shuijingdao/ShuiJingDao_23.jpg" width="160" height="74" alt=""></td>
+		<td>
+			<img src="pic/shuijingdao/ShuiJingDao_24.jpg" width="159" height="74" alt=""></td>
+		<td>
+			<img src="pic/shuijingdao/ShuiJingDao_25.jpg" width="160" height="74" alt=""></td>
+	</tr>
+	<tr>
+		<td>
+			<img src="pic/shuijingdao/ShuiJingDao_26.jpg" width="160" height="78" alt=""></td>
+		<td>
+			<img src="pic/shuijingdao/ShuiJingDao_27.jpg" width="159" height="78" alt=""></td>
+		<td>
+			<img src="pic/shuijingdao/ShuiJingDao_28.jpg" width="160" height="78" alt=""></td>
+		<td>
+			<img src="pic/shuijingdao/ShuiJingDao_29.jpg" width="159" height="78" alt=""></td>
+		<td>
+			<img src="pic/shuijingdao/ShuiJingDao_30.jpg" width="160" height="78" alt=""></td>
+	</tr>
+	<tr>
+		<td>
+			<img src="pic/shuijingdao/ShuiJingDao_31.jpg" width="160" height="72" alt=""></td>
+		<td>
+			<img src="pic/shuijingdao/ShuiJingDao_32.jpg" width="159" height="72" alt=""></td>
+		<td>
+			<img src="pic/shuijingdao/ShuiJingDao_33.jpg" width="160" height="72" alt=""></td>
+		<td>
+			<img src="pic/shuijingdao/ShuiJingDao_34.jpg" width="159" height="72" alt=""></td>
+		<td>
+			<img src="pic/shuijingdao/ShuiJingDao_35.jpg" width="160" height="72" alt=""></td>
+	</tr>
+	<tr>
+		<td>
+			<img src="pic/shuijingdao/ShuiJingDao_36.jpg" width="160" height="66" alt=""></td>
+		<td>
+			<img src="pic/shuijingdao/ShuiJingDao_37.jpg" width="159" height="66" alt=""></td>
+		<td>
+			<img src="pic/shuijingdao/ShuiJingDao_38.jpg" width="160" height="66" alt=""></td>
+		<td>
+			<img src="pic/shuijingdao/ShuiJingDao_39.jpg" width="159" height="66" alt=""></td>
+		<td>
+			<img src="pic/shuijingdao/ShuiJingDao_40.jpg" width="160" height="66" alt=""></td>
+	</tr>
+	<tr>
+		<td>
+			<img src="pic/shuijingdao/ShuiJingDao_41.jpg" width="160" height="63" alt=""></td>
+		<td>
+			<img src="pic/shuijingdao/ShuiJingDao_42.jpg" width="159" height="63" alt=""></td>
+		<td>
+			<img src="pic/shuijingdao/ShuiJingDao_43.jpg" width="160" height="63" alt=""></td>
+		<td>
+			<img src="pic/shuijingdao/ShuiJingDao_44.jpg" width="159" height="63" alt=""></td>
+		<td>
+			<img src="pic/shuijingdao/ShuiJingDao_45.jpg" width="160" height="63" alt=""></td>
+	</tr>
+	<tr>
+		<td>
+			<img src="pic/shuijingdao/ShuiJingDao_46.jpg" width="160" height="46" alt=""></td>
+		<td>
+			<img src="pic/shuijingdao/ShuiJingDao_47.jpg" width="159" height="46" alt=""></td>
+		<td>
+			<img src="pic/shuijingdao/ShuiJingDao_48.jpg" width="160" height="46" alt=""></td>
+		<td>
+			<img src="pic/shuijingdao/ShuiJingDao_49.jpg" width="159" height="46" alt=""></td>
+		<td>
+			<img src="pic/shuijingdao/ShuiJingDao_50.jpg" width="160" height="46" alt=""></td>
+	</tr>
+</table>
+<!-- End ImageReady Slices -->
