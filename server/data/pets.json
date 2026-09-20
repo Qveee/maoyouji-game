@@ -1,0 +1,21 @@
+{
+  "pets": [
+    { "code": "mao", "name": "猫", "baseStats": { "vit": 5, "str": 5, "agi": 5, "intel": 5, "spr": 5 }, "growth": { "vit": 0.6, "str": 0.6, "agi": 0.6, "intel": 0.6, "spr": 0.6 }, "sprite": "宠物/朝右/猫.gif", "description": "功夫猫：五维均衡，无短板，新手友好" },
+    { "code": "xiaomuhou", "name": "小木猴", "baseStats": { "vit": 3, "str": 3, "agi": 9, "intel": 7, "spr": 3 }, "growth": { "vit": 0.4, "str": 0.4, "agi": 1.0, "intel": 0.6, "spr": 0.4 }, "sprite": "宠物/朝右/小木猴(灵猴).gif", "description": "灵猴：天生灵巧，初始敏捷最高" },
+    { "code": "emoboli", "name": "恶魔波利", "baseStats": { "vit": 7, "str": 9, "agi": 3, "intel": 3, "spr": 3 }, "growth": { "vit": 0.7, "str": 1.0, "agi": 0.4, "intel": 0.4, "spr": 0.4 }, "sprite": "宠物/朝右/恶魔波利.gif", "description": "初始力量高，爆发物理输出" },
+    { "code": "tianshiboli", "name": "天使波利", "baseStats": { "vit": 3, "str": 3, "agi": 3, "intel": 7, "spr": 9 }, "growth": { "vit": 0.4, "str": 0.4, "agi": 0.4, "intel": 0.6, "spr": 1.0 }, "sprite": "宠物/朝右/天使波利.gif", "description": "全被动型宠物，续航恢复能力强" },
+    { "code": "baozi", "name": "包子", "baseStats": { "vit": 9, "str": 3, "agi": 3, "intel": 3, "spr": 7 }, "growth": { "vit": 1.0, "str": 0.4, "agi": 0.4, "intel": 0.4, "spr": 0.7 }, "sprite": "宠物/朝右/包子.gif", "description": "血厚耐打，生存向" },
+    { "code": "tubaozi", "name": "土包子", "baseStats": { "vit": 8, "str": 8, "agi": 3, "intel": 3, "spr": 3 }, "growth": { "vit": 0.8, "str": 0.8, "agi": 0.4, "intel": 0.4, "spr": 0.4 }, "sprite": "宠物/朝右/土包子.gif", "description": "力量体力双高，偏坦克" },
+    { "code": "mogubaobao", "name": "蘑菇宝宝", "baseStats": { "vit": 3, "str": 3, "agi": 3, "intel": 9, "spr": 7 }, "growth": { "vit": 0.4, "str": 0.4, "agi": 0.4, "intel": 1.0, "spr": 0.7 }, "sprite": "宠物/朝右/蘑菇宝宝.gif", "description": "初始智力高，法系苗子" },
+    { "code": "huoxingren", "name": "火星人", "baseStats": { "vit": 3, "str": 3, "agi": 8, "intel": 7, "spr": 4 }, "growth": { "vit": 0.4, "str": 0.4, "agi": 0.9, "intel": 0.6, "spr": 0.4 }, "sprite": "宠物/朝右/火星人.gif", "description": "敏捷智力双修，法系中的灵敏派" },
+    { "code": "nianshou", "name": "年兽", "baseStats": { "vit": 2, "str": 10, "agi": 8, "intel": 2, "spr": 3 }, "growth": { "vit": 0.4, "str": 1.1, "agi": 0.7, "intel": 0.3, "spr": 0.4 }, "sprite": "宠物/朝右/年兽.gif", "description": "初始力量顶级，升级力量成长最高" },
+    { "code": "shadixianrenzhang", "name": "沙地仙人掌", "baseStats": { "vit": 9, "str": 3, "agi": 7, "intel": 2, "spr": 4 }, "growth": { "vit": 1.0, "str": 0.4, "agi": 0.7, "intel": 0.3, "spr": 0.4 }, "sprite": "宠物/朝右/沙地仙人掌.gif", "description": "皮糙肉厚，防御向" },
+    { "code": "shuimu", "name": "水母", "baseStats": { "vit": 7, "str": 3, "agi": 3, "intel": 8, "spr": 4 }, "growth": { "vit": 0.7, "str": 0.4, "agi": 0.4, "intel": 0.9, "spr": 0.4 }, "sprite": "宠物/朝右/水母.gif", "description": "法术天赋高，血量也不弱" },
+    { "code": "shuita", "name": "水獭", "baseStats": { "vit": 3, "str": 7, "agi": 8, "intel": 3, "spr": 4 }, "growth": { "vit": 0.4, "str": 0.7, "agi": 0.9, "intel": 0.4, "spr": 0.4 }, "sprite": "宠物/朝右/水獭.gif", "description": "敏捷力量双修，物理灵敏派" },
+    { "code": "xiaoemo", "name": "小恶魔", "baseStats": { "vit": 3, "str": 3, "agi": 8, "intel": 7, "spr": 4 }, "growth": { "vit": 0.4, "str": 0.4, "agi": 0.9, "intel": 0.6, "spr": 0.4 }, "sprite": "宠物/朝右/小恶魔.gif", "description": "灵动狡黠，闪避与法术兼备" },
+    { "code": "xiongbaobao", "name": "熊宝宝", "baseStats": { "vit": 10, "str": 7, "agi": 3, "intel": 2, "spr": 3 }, "growth": { "vit": 1.1, "str": 0.7, "agi": 0.4, "intel": 0.3, "spr": 0.4 }, "sprite": "宠物/朝右/熊宝宝.gif", "description": "初始体力最高，血牛型" },
+    { "code": "yazuiou", "name": "鸭嘴兽", "baseStats": { "vit": 7, "str": 4, "agi": 6, "intel": 4, "spr": 4 }, "growth": { "vit": 0.8, "str": 0.5, "agi": 0.7, "intel": 0.5, "spr": 0.5 }, "sprite": "宠物/朝右/鸭嘴兽.gif", "description": "均衡偏生存，水陆两栖" },
+    { "code": "yetu", "name": "野兔", "baseStats": { "vit": 3, "str": 3, "agi": 10, "intel": 3, "spr": 6 }, "growth": { "vit": 0.4, "str": 0.4, "agi": 1.1, "intel": 0.4, "spr": 0.5 }, "sprite": "宠物/朝右/野兔.gif", "description": "疯兔：敏捷极致，出手如风" },
+    { "code": "zhuzhu", "name": "猪猪", "baseStats": { "vit": 9, "str": 4, "agi": 3, "intel": 3, "spr": 6 }, "growth": { "vit": 1.0, "str": 0.5, "agi": 0.4, "intel": 0.4, "spr": 0.5 }, "sprite": "宠物/朝右/猪猪.gif", "description": "憨态可掬，体格扎实" }
+  ]
+}

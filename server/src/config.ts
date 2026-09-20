@@ -8,5 +8,7 @@ try {
 export const config = {
   port: Number(process.env.PORT ?? 3000),
   databaseUrl: process.env.DATABASE_URL ?? "",
-  jwtSecret: process.env.JWT_SECRET ?? "",
+  // 未显式配置时使用开发默认值（自用单机可接受；生产部署必须设置）
+  jwtSecret: process.env.JWT_SECRET ?? "insecure-dev-secret",
+  jwtTtlSec: 7 * 24 * 60 * 60,
 };
