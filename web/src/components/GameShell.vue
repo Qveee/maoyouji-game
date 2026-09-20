@@ -356,7 +356,8 @@ onUnmounted(() => window.removeEventListener("resize", fitStage));
 .right { flex: 1; min-width: 300px; display: flex; flex-direction: column; gap: 4px; min-height: 0; }
 .drop-panel { flex: 2; }
 .private-panel { flex: 2; }
-.input-panel { flex: none; height: 38px; display: flex; align-items: center; gap: 5px; padding: 0 6px; }
+/* 覆盖 .panel 的 flex-direction: column，让 频道选择/输入框/按钮 保持同一行 */
+.input-panel { flex: none; height: 38px; display: flex; flex-direction: row; align-items: center; gap: 5px; padding: 0 6px; }
 .input-panel select {
   width: 62px; height: 24px; font: 12px "SimSun", "宋体", serif; color: #1a1a1a; background: #fff; cursor: pointer;
   border: 1px solid #7f7f7f; box-shadow: inset 1px 1px 0 #d4d0c8;
