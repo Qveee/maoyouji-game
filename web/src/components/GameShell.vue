@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, onUnmounted, ref } from "vue";
 import { api, type MapNode } from "../api";
 
 const props = defineProps<{
@@ -17,6 +17,7 @@ const camX = ref(0);
 const camY = ref(0);
 
 const map = ref<Awaited<ReturnType<typeof api.mapCurrent>> | null>(null);
+const fitScale = ref(1);
 const messages = ref<{ time: string; text: string; kind: "sys" | "chat" }[]>([]);
 const chatText = ref("");
 const channel = ref("区域");
@@ -79,17 +80,27 @@ function todo(what: string) {
   say(`【系统】${what}将在后续切片开放。`);
 }
 
+/** 舞台等比缩放：窗口小于 1400×832 时整体缩小，避免截断与横向滚动 */
+function fitStage() {
+  fitScale.value = Math.max(0.4, Math.min(window.innerWidth / 1424, (window.innerHeight - 28) / 848, 1));
+}
+
 const topMenus = ["功能", "帮助", "图鉴", "战斗力", "竞技场", "成就", "活动"];
 const funcBtns = ["任务", "技能", "道具", "宝库", "宠物", "好友", "队伍", "公会"];
 const SLOT_KEYS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 10, 11, 12];
 
 onMounted(async () => {
+  fitStage();
+  window.addEventListener("resize", fitStage);
   await load();
   say(`欢迎来到猫隐村，${props.characterName}！点击地图上的地点即可移动。`);
 });
+
+onUnmounted(() => window.removeEventListener("resize", fitStage));
 </script>
 
 <template>
+  <div class="stage-fit" :style="{ '--fit-scale': String(fitScale) }">
   <main class="shell">
     <!-- 顶栏 28px -->
     <header class="topnav">
@@ -219,9 +230,16 @@ onMounted(async () => {
       </div>
     </footer>
   </main>
+  </div>
 </template>
 
 <style scoped>
+.stage-fit {
+  display: flex;
+  justify-content: center;
+  height: calc((832px + 24px) * var(--fit-scale, 1));
+  overflow: hidden;
+}
 .shell {
   width: 1400px;
   height: 832px;
@@ -232,6 +250,8 @@ onMounted(async () => {
   border: 2px solid #14506e;
   font: 12px/1.6 "SimSun", "宋体", serif;
   color: #14506e;
+  transform: scale(var(--fit-scale, 1));
+  transform-origin: top center;
 }
 
 /* 顶栏 */
