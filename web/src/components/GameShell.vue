@@ -193,7 +193,7 @@ onUnmounted(() => window.removeEventListener("resize", fitStage));
           <div class="body scr"><p class="empty">暂无公告。</p></div>
         </div>
         <div class="panel private-panel">
-          <div class="body scr"><p class="empty">暂无私信。</p></div>
+          <div class="body scr"><p class="empty private-hint">私人信息显示窗口,你的聊天和别人对你的聊天显示在本窗口</p></div>
         </div>
       </section>
         </div>
@@ -331,6 +331,7 @@ onUnmounted(() => window.removeEventListener("resize", fitStage));
 .body.scr::-webkit-scrollbar { width: 8px; }
 .body.scr::-webkit-scrollbar-thumb { background: #8db8cd; border-radius: 4px; }
 .empty { color: #8b7b55; }
+.private-hint { color: #74A5CF; }
 
 .chatlog { flex: 1; min-height: 0; }
 .chatlog time { color: #8b7b55; margin-right: 4px; }

@@ -9,6 +9,7 @@ export async function resetDb() {
   await pool.query("SET FOREIGN_KEY_CHECKS = 0");
   await pool.query("TRUNCATE TABLE accounts");
   await pool.query("TRUNCATE TABLE characters");
+  await pool.query("TRUNCATE TABLE chat_messages");
   await pool.query("SET FOREIGN_KEY_CHECKS = 1");
 }
 

@@ -11,7 +11,7 @@ describe.skipIf(!hasDb)("数据库迁移", () => {
     await getPool().query("SELECT 1");
   });
 
-  it("001_init.sql 建齐 9 张运行时表", async () => {
+  it("迁移建齐 10 张运行时表", async () => {
     const [rows] = await getPool().query<import("mysql2").RowDataPacket[]>(
       "SHOW TABLES",
     );
@@ -26,6 +26,7 @@ describe.skipIf(!hasDb)("数据库迁移", () => {
       "character_shop_buys",
       "character_skills",
       "characters",
+      "chat_messages",
     ]);
   });
 });
