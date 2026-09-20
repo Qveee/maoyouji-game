@@ -1,0 +1,678 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>喵游记 - 登录</title>
+<style>
+/* ============================================================
+   主题变量（沿用主原型命名风格）
+   ============================================================ */
+:root{
+  --bg-main:#2FBFD8; --bg-dark:#1FA6C0;
+  --wood-dark:#6B3E1B; --wood-light:#C98A3E;
+  --gold-1:#FFF3A0; --gold-2:#FFDF6E; --gold-3:#F8C33C;
+  --btn-gold-a:#FFE98F; --btn-gold-b:#F5B93B;
+  --brown-a:#B97A32; --brown-b:#8A5218; --brown-line:#5C3310; --brown-text:#FFE9B0;
+  --red-strong:#D63A2A; --red-word:#D42A1E;
+  --heart:#FF8FAE;
+  --news-a:#FBE49B; --news-b:#EDBE55; --news-line:#A87718; --news-text:#5C3A10; --news-frame:#5E2B14;
+  --cream:#FFF6D8;
+  --cap-bg:#DFF5C8; --cap-ink:#3E6B2A;
+  --panel-top:#FFF3A0; --panel-bot:#F8C33C;
+  --ink-navy:#14506E; --link-blue:#1E7FB8;
+  --ink-brown:#5C3A10; --ink-gray:#8B7B55;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font:12px/1.7 "SimSun","宋体",serif;
+  color:var(--ink-brown);
+  /* ============================================================
+     ① 背景：满屏青蓝渐变（主色 #2FBFD8，四角略深 #1FA6C0）
+     ============================================================ */
+  background:
+    radial-gradient(640px 640px at 0% 0%, var(--bg-dark) 0%, transparent 72%),
+    radial-gradient(640px 640px at 100% 0%, var(--bg-dark) 0%, transparent 72%),
+    radial-gradient(720px 720px at 0% 100%, var(--bg-dark) 0%, transparent 72%),
+    radial-gradient(720px 720px at 100% 100%, var(--bg-dark) 0%, transparent 72%),
+    var(--bg-main);
+  overflow-x:auto;
+}
+#stage{position:relative;width:1452px;height:916px;margin:0 auto}
+
+/* 大漩涡（更浅的青白旋臂） */
+.swirl{position:absolute;border-radius:50%;filter:blur(5px);opacity:.7;pointer-events:none}
+.swirl.s1{left:-140px;top:-120px;width:520px;height:520px;
+  background:conic-gradient(from 40deg,rgba(255,255,255,.22),transparent 22%,rgba(255,255,255,.22) 48%,transparent 70%,rgba(255,255,255,.22) 90%,transparent)}
+.swirl.s2{right:-160px;bottom:-180px;width:640px;height:640px;
+  background:conic-gradient(from 210deg,rgba(255,255,255,.18),transparent 25%,rgba(255,255,255,.18) 52%,transparent 76%,rgba(255,255,255,.18))}
+
+/* 圆点泡泡 */
+.bub{position:absolute;border-radius:50%;pointer-events:none;
+  background:radial-gradient(circle at 32% 28%,rgba(255,255,255,.85),rgba(255,255,255,.18) 55%,transparent 75%)}
+.bub.b1{left:180px;top:130px;width:36px;height:36px}
+.bub.b2{left:320px;bottom:210px;width:22px;height:22px}
+.bub.b3{right:260px;top:200px;width:30px;height:30px}
+.bub.b4{right:150px;bottom:150px;width:48px;height:48px}
+.bub.b5{left:640px;top:70px;width:18px;height:18px}
+.bub.b6{left:120px;top:520px;width:26px;height:26px}
+.bub.b7{right:520px;bottom:90px;width:20px;height:20px}
+.bub.b8{right:80px;top:430px;width:26px;height:26px}
+
+/* ============================================================
+   ② LOGO 区（右上角）
+   ============================================================ */
+#logo{position:absolute;top:30px;right:64px;text-align:right;transform:rotate(-3deg);z-index:5}
+.logo-word{
+  position:relative;margin:0;font-size:96px;line-height:1.05;letter-spacing:8px;
+  font-family:"STHupo","华文琥珀","FZCuHei","方正粗圆_GBK","SimSun",sans-serif;
+  color:transparent;
+  text-shadow:
+    4px 0 0 var(--brown-b),-4px 0 0 var(--brown-b),0 4px 0 var(--brown-b),0 -4px 0 var(--brown-b),
+    5px 5px 0 var(--brown-b),-5px 5px 0 var(--brown-b),5px -5px 0 var(--brown-b),-5px -5px 0 var(--brown-b),
+    0 10px 14px rgba(60,35,0,.5);
+}
+.logo-word::before{
+  content:attr(data-text);position:absolute;inset:0;
+  background:linear-gradient(180deg,#FFF3C0 8%,#FFC63E 52%,#E8821A 92%);
+  -webkit-background-clip:text;background-clip:text;
+}
+.logo-word::after{ /* 白色顶部高光 */
+  content:attr(data-text);position:absolute;inset:0;
+  background:linear-gradient(180deg,rgba(255,255,255,.92) 4%,rgba(255,255,255,0) 34%);
+  -webkit-background-clip:text;background-clip:text;
+}
+.logo-slogan{
+  margin:2px 6px 0 0;font-family:"STHupo","华文琥珀","SimSun",sans-serif;
+  font-size:22px;letter-spacing:4px;color:#FFE27A;
+  text-shadow:2px 2px 0 #8A5218,-1px -1px 0 #8A5218,1px -1px 0 #8A5218,-1px 1px 0 #8A5218,0 4px 6px rgba(60,35,0,.45);
+}
+.logo-domain{margin:6px 8px 0 0;font-size:13px;letter-spacing:2px;color:#EAF7FC;text-shadow:0 1px 2px rgba(10,60,80,.5)}
+
+/* ============================================================
+   ③ 中央登录面板（木框 + 金底 + 铆钉）
+   ============================================================ */
+#panel{
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-52%);
+  width:930px;height:670px;padding:46px 40px 30px;
+  border:12px solid var(--wood-dark);border-radius:26px;
+  background:linear-gradient(180deg,var(--gold-1) 0%,var(--gold-2) 55%,var(--gold-3) 100%);
+  box-shadow:
+    inset 0 0 0 3px var(--wood-light),
+    inset 0 0 70px rgba(160,100,20,.28),
+    0 26px 60px rgba(8,58,78,.5);
+}
+#panel::before{ /* 木纹 */
+  content:"";position:absolute;inset:0;border-radius:14px;pointer-events:none;
+  background:repeating-linear-gradient(94deg,
+    rgba(150,92,26,.07) 0 22px,rgba(110,64,18,.05) 22px 24px,transparent 24px 66px);
+}
+/* 金色球形铆钉：四角 + 四边中点 */
+.rv{position:absolute;width:22px;height:22px;border-radius:50%;z-index:3;
+  background:radial-gradient(circle at 32% 28%,#FFFDF0,#FFE27A 36%,#E8A93C 62%,#8A5218 100%);
+  box-shadow:0 2px 3px rgba(50,25,0,.5),inset 0 -2px 3px rgba(90,40,0,.45)}
+.rv.k1{left:-16px;top:-16px}.rv.k2{right:-16px;top:-16px}
+.rv.k3{left:-16px;bottom:-16px}.rv.k4{right:-16px;bottom:-16px}
+.rv.m1{left:50%;margin-left:-11px;top:-16px}.rv.m2{left:50%;margin-left:-11px;bottom:-16px}
+.rv.m3{top:50%;margin-top:-11px;left:-16px}.rv.m4{top:50%;margin-top:-11px;right:-16px}
+
+/* 「用户登录」标题带 + 圣诞帽猫头 */
+#ptitle{
+  position:absolute;left:36px;top:-26px;width:300px;height:54px;z-index:4;
+  border:3px solid var(--brown-line);border-radius:27px;
+  background:linear-gradient(180deg,#FFE98F,#F0B23C);
+  box-shadow:0 5px 10px rgba(80,40,0,.4),inset 0 2px 0 #FFF6D0;
+  display:flex;align-items:center;justify-content:center;
+  font-family:"STHupo","华文琥珀","SimSun",sans-serif;font-size:26px;letter-spacing:10px;text-indent:10px;
+  color:#9A5A10;
+  text-shadow:0 1px 0 #FFF3C0,0 -1px 0 #7A4A10,0 3px 4px rgba(90,50,0,.4);
+}
+.santa{position:absolute;left:-30px;top:-4px;width:52px;height:46px}
+.santa .head{position:absolute;left:6px;top:8px;width:40px;height:36px;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,#fff,#F2ECDF 75%);border:2px solid #D9CBA8}
+.santa .ear{position:absolute;width:7px;height:7px;background:#FFC9D4;border-radius:50%;top:26px}
+.santa .ear.l{left:12px}.santa .ear.r{right:12px}
+.santa .eye{position:absolute;width:4px;height:6px;background:#4A3A28;border-radius:50%;top:19px}
+.santa .eye.l{left:17px}.santa .eye.r{right:17px}
+.santa .hat{position:absolute;left:1px;top:-12px;width:44px;height:30px;
+  background:linear-gradient(180deg,#E84435,#B01F14);
+  clip-path:polygon(0 100%,46% 0,100% 100%);filter:drop-shadow(0 1px 1px rgba(60,10,0,.4))}
+.santa .brim{position:absolute;left:0;top:14px;width:48px;height:9px;border-radius:5px;
+  background:linear-gradient(180deg,#fff,#E9E2D2);border:1px solid #D9CBA8}
+.santa .pom{position:absolute;left:16px;top:-16px;width:13px;height:13px;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,#fff,#EFE8D8)}
+
+/* 三视图切换 */
+.view{display:none;position:relative;z-index:2;height:100%}
+.view.on{display:block}
+
+/* ---- 登录视图：左表单 + 右公告 ---- */
+.login-grid{display:grid;grid-template-columns:420px 1fr;gap:26px;height:100%}
+.frow{margin:0 0 13px 8px;font-size:14px;white-space:nowrap}
+.frow .heart{color:var(--heart);font-family:Arial,sans-serif;margin-right:5px}
+.frow label{margin-right:6px}
+.txt{width:182px;padding:3px 7px;font:12px "SimSun",serif;background:#fff;
+  border:1px solid #B9B9B9;box-shadow:inset 1px 1px 3px rgba(0,0,0,.14);border-radius:2px}
+.txt:focus{outline:none;border-color:var(--link-blue)}
+.srv-name{color:var(--red-strong);font-weight:700;margin:0 4px 0 2px;font-size:14px}
+.btn-brown{
+  display:inline-block;cursor:pointer;font:12px "SimSun",serif;color:var(--brown-text);
+  padding:3px 10px;border:1px solid var(--brown-line);border-radius:4px;
+  background:linear-gradient(180deg,var(--brown-a),var(--brown-b));
+  box-shadow:0 2px 0 rgba(60,30,0,.45),inset 0 1px 0 rgba(255,240,200,.4);
+}
+.btn-brown:active{transform:translateY(1px);box-shadow:0 1px 0 rgba(60,30,0,.45)}
+.btn-brown.mid{padding:6px 16px;font-size:13px;margin-right:10px}
+#cap{display:inline-block;vertical-align:middle;width:96px;height:24px;line-height:22px;margin:0 8px;
+  text-align:center;font-weight:700;color:var(--cap-ink);font-size:13px;
+  background:
+    repeating-linear-gradient(28deg,rgba(120,160,80,.14) 0 3px,transparent 3px 7px),
+    repeating-linear-gradient(-35deg,rgba(120,160,80,.1) 0 2px,transparent 2px 9px),
+    var(--cap-bg);
+  border:1px solid #A8C98A;border-radius:3px}
+.link-u{color:var(--link-blue);text-decoration:underline}
+.btn-login{
+  display:block;width:154px;margin:16px 0 12px 30px;cursor:pointer;
+  font-family:"STHupo","华文琥珀","SimSun",sans-serif;font-size:23px;
+  letter-spacing:16px;text-indent:16px;color:var(--red-word);
+  padding:7px 0 8px;border:2px solid var(--brown-line);border-radius:9px;
+  background:linear-gradient(180deg,var(--btn-gold-a),var(--btn-gold-b));
+  box-shadow:inset 0 2px 0 #FFF6C8,0 4px 0 #7A4A10,0 7px 10px rgba(80,40,0,.35);
+}
+.btn-login:active{transform:translateY(2px);box-shadow:inset 0 2px 0 #FFF6C8,0 2px 0 #7A4A10}
+.help{margin:14px 0 0 8px;font-size:12px;color:#7A5A20}
+.help p{margin:3px 0}
+.hot{color:var(--red-strong);font-weight:700;cursor:pointer}
+.hot:hover{color:var(--link-blue)}
+
+/* ============================================================
+   ④ 新闻公告（登录面板左下）
+   ============================================================ */
+#news{margin-top:20px}
+#news h3{
+  margin:0 0 8px;font-family:"STHupo","华文琥珀","SimSun",sans-serif;
+  font-size:21px;letter-spacing:5px;color:var(--red-strong);
+  text-shadow:1px 0 0 #FFE98F,-1px 0 0 #FFE98F,0 1px 0 #FFE98F,0 -1px 0 #FFE98F,2px 2px 0 #FFE98F,0 4px 5px rgba(120,60,0,.3);
+}
+#news .box{border:4px solid var(--news-frame);border-radius:12px;padding:7px 9px;
+  background:rgba(255,243,160,.4);box-shadow:inset 0 2px 6px rgba(120,70,20,.25)}
+.news-i{
+  display:flex;justify-content:space-between;align-items:center;
+  height:30px;margin:5px 0;padding:0 14px;cursor:pointer;
+  border:1px solid var(--news-line);border-radius:15px;
+  background:linear-gradient(180deg,var(--news-a),var(--news-b));color:var(--news-text);font-size:13px;
+  transition:filter .15s ease;
+}
+.news-i:hover{filter:brightness(1.07) saturate(1.15)}
+.news-i time{color:var(--ink-gray);font-size:12px}
+
+/* ============================================================
+   ⑤ 右侧公告栏（糖果条纹标题 + 活动卡）
+   ============================================================ */
+.rbar h3{
+  position:relative;margin:0 0 10px;font-family:"STHupo","华文琥珀","SimSun",sans-serif;
+  font-size:20px;letter-spacing:4px;color:#FFF6D8;text-align:center;
+  padding:6px 0;border-radius:9px;
+  background:linear-gradient(180deg,#E84435,#B01F14);
+  text-shadow:0 2px 0 rgba(80,10,0,.5);
+}
+.rbar h3::after{ /* 糖果条纹下缘 */
+  content:"";position:absolute;left:0;right:0;bottom:-7px;height:7px;border-radius:0 0 8px 8px;
+  background:repeating-linear-gradient(45deg,#E85A50 0 9px,var(--cream) 9px 18px);
+}
+.rbar .card{
+  border:4px solid var(--news-frame);border-radius:12px;margin:14px 0 18px;
+  background:linear-gradient(180deg,#FFF7C8,#FFE9A0);box-shadow:inset 0 2px 6px rgba(120,70,20,.22);
+  padding:10px 14px;
+}
+.rbar .card h4{margin:0 0 6px;font-size:14px;color:var(--red-strong)}
+.rbar .card p{margin:3px 0;font-size:12px;color:#6B4E1E}
+.rbar .card .heart{color:var(--heart);margin-right:5px;font-family:Arial,sans-serif}
+
+/* ============================================================
+   角色选择视图（登录后）
+   ============================================================ */
+.vtitle{
+  margin:4px 0 18px;text-align:center;font-family:"STHupo","华文琥珀","SimSun",sans-serif;
+  font-size:30px;letter-spacing:8px;color:var(--red-strong);
+  text-shadow:2px 0 0 #FFE98F,-2px 0 0 #FFE98F,0 2px 0 #FFE98F,0 -2px 0 #FFE98F,3px 3px 0 #FFE98F,0 5px 6px rgba(120,60,0,.32);
+}
+#charList{display:flex;flex-wrap:wrap;gap:22px;justify-content:center;min-height:230px;padding:6px 0 2px}
+.char-card{
+  width:158px;padding:10px 6px 9px;text-align:center;cursor:pointer;position:relative;
+  border:3px solid #A87718;border-radius:12px;
+  background:linear-gradient(180deg,var(--news-a),var(--news-b));
+  box-shadow:0 3px 0 rgba(90,50,0,.35),inset 0 1px 0 #FFF6C8;
+  transition:filter .15s ease,transform .15s ease;
+}
+.char-card:hover{filter:brightness(1.05)}
+.char-card.sel{border-color:#D63A2A;transform:translateY(-3px);
+  box-shadow:0 0 0 3px rgba(214,58,42,.35),0 6px 10px rgba(90,50,0,.3)}
+.char-card img{width:96px;height:96px;object-fit:contain;image-rendering:pixelated;
+  filter:drop-shadow(0 4px 3px rgba(90,50,0,.35))}
+.char-card b{display:block;font-size:15px;color:var(--ink-brown);margin-top:2px}
+.char-card i{display:block;font-style:normal;font-size:12px;color:#7A5A20}
+.char-empty{align-self:center;font-size:14px;color:#7A5A20}
+.ops{display:flex;justify-content:center;gap:18px;margin-top:18px}
+.btn-big{
+  cursor:pointer;font-family:"STHupo","华文琥珀","SimSun",sans-serif;font-size:19px;
+  letter-spacing:6px;text-indent:6px;padding:8px 26px;border-radius:9px;
+  border:2px solid var(--brown-line);
+}
+.btn-big.gold{color:var(--red-word);background:linear-gradient(180deg,var(--btn-gold-a),var(--btn-gold-b));
+  box-shadow:inset 0 2px 0 #FFF6C8,0 4px 0 #7A4A10,0 7px 10px rgba(80,40,0,.35)}
+.btn-big.brown{color:var(--brown-text);background:linear-gradient(180deg,var(--brown-a),var(--brown-b));
+  box-shadow:inset 0 1px 0 rgba(255,240,200,.4),0 4px 0 #3E2208,0 7px 10px rgba(50,25,0,.35)}
+.btn-big.red{color:#FFE9B0;background:linear-gradient(180deg,#C94A3A,#8F2114);
+  border-color:#5E130A;box-shadow:inset 0 1px 0 rgba(255,220,200,.35),0 4px 0 #4A0F06,0 7px 10px rgba(50,10,0,.35)}
+.btn-big:active{transform:translateY(2px)}
+.btn-big:disabled{opacity:.55;cursor:not-allowed}
+
+/* ============================================================
+   创建角色视图
+   ============================================================ */
+.create-grid{display:grid;grid-template-columns:280px 1fr;gap:24px;height:100%}
+.stage-box{
+  border:4px solid var(--news-frame);border-radius:14px;padding:12px;text-align:center;
+  background:radial-gradient(160px 60px at 50% 78%,rgba(255,255,255,.75),transparent 70%),linear-gradient(180deg,#EAF7FF,#CFE9F5);
+  box-shadow:inset 0 2px 8px rgba(20,80,110,.15);
+}
+.stage-box img{width:170px;height:170px;object-fit:contain;image-rendering:pixelated;
+  filter:drop-shadow(0 8px 5px rgba(20,80,110,.3))}
+.stage-box b{display:block;font-size:20px;color:var(--ink-navy);margin-top:4px;letter-spacing:3px}
+.stage-box p{margin:4px 12px 0;font-size:12px;color:#48788F}
+.stat{display:grid;grid-template-columns:34px 1fr 24px;gap:7px;align-items:center;
+  margin:7px 14px 0;font-size:12px;color:var(--ink-navy)}
+.stat .tr{height:10px;background:#C7E2EF;border:1px solid #A9C8DA;border-radius:5px;overflow:hidden}
+.stat .tr i{display:block;height:100%;background:linear-gradient(90deg,#7FC4E8,#2F7FA8)}
+#petGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(86px,1fr));gap:8px;
+  max-height:286px;overflow-y:auto;padding:4px}
+.pet-card{
+  cursor:pointer;padding:8px 4px 6px;text-align:center;
+  border:2px solid #B9D8C8;border-radius:9px;background:rgba(255,255,255,.55);
+  transition:border-color .15s ease,background-color .15s ease;
+}
+.pet-card:hover{border-color:var(--link-blue);background:#EAF6FF}
+.pet-card.sel{border-color:#D8921C;background:#FFF4D6;box-shadow:0 0 0 2px rgba(216,146,28,.35)}
+.pet-card img{width:56px;height:56px;object-fit:contain;image-rendering:pixelated}
+.pet-card span{display:block;font-size:12px;color:var(--ink-brown);margin-top:2px}
+.cform{display:flex;gap:18px;flex-wrap:wrap;margin-top:16px;align-items:flex-end}
+.cform .field label{display:block;font-size:13px;margin-bottom:4px;color:#6B4E1E}
+.prof-pick{display:flex;gap:10px}
+.prof{
+  cursor:pointer;padding:7px 16px;text-align:center;font-size:13px;color:var(--ink-brown);
+  border:2px solid #B9D8C8;border-radius:9px;background:rgba(255,255,255,.55);
+}
+.prof small{display:block;color:#8B7B55;font-size:11px}
+.prof.sel{border-color:#B01F14;background:#FFE3DC;box-shadow:0 0 0 2px rgba(176,31,20,.25)}
+
+/* ============================================================
+   ⑥ 装饰：奶白藤蔓卷草花（四角 + 底边）与团子猫（底部/左右）
+   ============================================================ */
+.vine{position:absolute;width:130px;height:130px;pointer-events:none;opacity:.9}
+.vine i{position:absolute;border:7px solid var(--cream);border-radius:50%;opacity:.55}
+.vine i:nth-child(1){width:54px;height:54px;left:8px;top:36px}
+.vine i:nth-child(2){width:38px;height:38px;left:58px;top:10px;opacity:.4}
+.vine i:nth-child(3){width:30px;height:30px;left:64px;top:66px;opacity:.45}
+.vine i:nth-child(4){width:16px;height:16px;left:44px;top:22px;opacity:.35}
+.vine::before{content:"";position:absolute;left:6px;top:58px;width:96px;height:9px;border-radius:6px;
+  background:var(--cream);opacity:.4;transform:rotate(-16deg)}
+.vine::after{content:"";position:absolute;left:30px;top:50px;width:30px;height:30px;border-radius:50%;
+  background:radial-gradient(circle,transparent 40%,var(--cream) 42%,var(--cream) 60%,transparent 62%);opacity:.5}
+.vine.v1{left:36px;top:26px}
+.vine.v2{right:30px;top:96px;transform:scaleX(-1) rotate(14deg)}
+.vine.v3{left:56px;bottom:36px;transform:rotate(22deg) scale(.9)}
+.vine.v4{right:60px;bottom:26px;transform:scaleX(-1)}
+.vine.v5{left:48%;bottom:16px;transform:scale(.8)}
+
+/* 团子猫：白色椭圆身体 + 三角耳 + 粉腮红 + 简笔表情 */
+.dcat{position:absolute;width:100px;height:82px;pointer-events:none}
+.dcat .face{position:absolute;inset:0;border-radius:50%;
+  background:radial-gradient(circle at 35% 28%,#fff,#F6F0E3 72%,#EADFC9);
+  border:2px solid #D9CBA8;box-shadow:0 6px 10px rgba(10,70,95,.25)}
+.dcat .ear{position:absolute;top:-15px;width:0;height:0;
+  border:13px solid transparent;border-bottom:21px solid #FBF7EC}
+.dcat .ear::after{content:"";position:absolute;left:-6px;top:8px;width:0;height:0;
+  border:6px solid transparent;border-bottom:10px solid #F3C9CF}
+.dcat .ear.l{left:13px;transform:rotate(-16deg)}
+.dcat .ear.r{right:13px;transform:rotate(16deg)}
+.dcat .eye{position:absolute;top:30px;width:6px;height:9px;background:#4A3A28;border-radius:50%}
+.dcat .eye.l{left:24px}.dcat .eye.r{right:24px}
+.dcat .blush{position:absolute;top:42px;width:12px;height:7px;background:#FFC9D4;border-radius:50%;opacity:.85}
+.dcat .blush.l{left:12px}.dcat .blush.r{right:12px}
+.dcat.d1{left:150px;bottom:88px;transform:rotate(-8deg)}
+.dcat.d2{left:250px;bottom:40px;transform:scale(.7) rotate(6deg)}
+.dcat.d3{right:190px;bottom:64px;transform:scale(.85) scaleX(-1) rotate(-4deg)}
+.dcat.d4{right:96px;bottom:150px;transform:scale(.6)}
+.dcat.d5{left:60px;top:300px;transform:scale(.62) rotate(12deg)}
+
+#toast{
+  position:fixed;left:50%;top:16px;transform:translateX(-50%);z-index:99;
+  display:none;padding:8px 22px;font-size:14px;color:#FFF3C0;
+  background:linear-gradient(180deg,#B01F14,#7A130A);border:2px solid #FFE9B0;border-radius:8px;
+  box-shadow:0 4px 12px rgba(0,0,0,.35);
+}
+</style>
+</head>
+<body>
+<div id="stage">
+  <!-- ① 背景层 -->
+  <div class="swirl s1"></div>
+  <div class="swirl s2"></div>
+  <div class="bub b1"></div><div class="bub b2"></div><div class="bub b3"></div><div class="bub b4"></div>
+  <div class="bub b5"></div><div class="bub b6"></div><div class="bub b7"></div><div class="bub b8"></div>
+
+  <!-- ⑥ 装饰：卷草 + 团子猫 -->
+  <div class="vine v1"><i></i><i></i><i></i><i></i></div>
+  <div class="vine v2"><i></i><i></i><i></i><i></i></div>
+  <div class="vine v3"><i></i><i></i><i></i><i></i></div>
+  <div class="vine v4"><i></i><i></i><i></i><i></i></div>
+  <div class="vine v5"><i></i><i></i><i></i><i></i></div>
+  <div class="dcat d1"><b class="ear l"></b><b class="ear r"></b><i class="face"></i><span class="eye l"></span><span class="eye r"></span><span class="blush l"></span><span class="blush r"></span></div>
+  <div class="dcat d2"><b class="ear l"></b><b class="ear r"></b><i class="face"></i><span class="eye l"></span><span class="eye r"></span><span class="blush l"></span><span class="blush r"></span></div>
+  <div class="dcat d3"><b class="ear l"></b><b class="ear r"></b><i class="face"></i><span class="eye l"></span><span class="eye r"></span><span class="blush l"></span><span class="blush r"></span></div>
+  <div class="dcat d4"><b class="ear l"></b><b class="ear r"></b><i class="face"></i><span class="eye l"></span><span class="eye r"></span><span class="blush l"></span><span class="blush r"></span></div>
+  <div class="dcat d5"><b class="ear l"></b><b class="ear r"></b><i class="face"></i><span class="eye l"></span><span class="eye r"></span><span class="blush l"></span><span class="blush r"></span></div>
+
+  <!-- ② LOGO 区 -->
+  <div id="logo">
+    <h1 class="logo-word" data-text="喵游记">喵游记</h1>
+    <div class="logo-slogan">随时随地…的快乐</div>
+    <div class="logo-domain">PET.MAOMIAO.COM（站点域名占位）</div>
+  </div>
+
+  <!-- ③ 中央登录面板 -->
+  <div id="panel">
+    <span class="rv k1"></span><span class="rv k2"></span><span class="rv k3"></span><span class="rv k4"></span>
+    <span class="rv m1"></span><span class="rv m2"></span><span class="rv m3"></span><span class="rv m4"></span>
+    <div id="ptitle">
+      <span class="santa"><i class="head"></i><i class="hat"></i><i class="brim"></i><i class="pom"></i><span class="ear l"></span><span class="ear r"></span><span class="eye l"></span><span class="eye r"></span></span>
+      <span id="ptitleText">用户登录</span>
+    </div>
+
+    <!-- 登录视图 -->
+    <div class="view on" id="loginView">
+      <div class="login-grid">
+        <div>
+          <div class="frow"><span class="heart">♥</span><label>服务器：</label><b class="srv-name" id="srvName">猫隐一区</b><button type="button" class="btn-brown" id="btnSrv">更换服务器</button></div>
+          <div class="frow"><span class="heart">♥</span><label>用户名：</label><input class="txt" id="fUser" maxlength="32" placeholder="冒险者账号"></div>
+          <div class="frow"><span class="heart">♥</span><label>密码：</label><input class="txt" id="fPass" type="password" maxlength="32" placeholder="密码"></div>
+          <div class="frow"><span class="heart">♥</span><label>验证码：</label><input class="txt" id="fCap" style="width:74px" maxlength="2"><span id="cap">5 + 0 = ?</span><a class="link-u" href="#" id="capRefresh">刷新</a></div>
+          <button class="btn-login" id="btnLogin" type="button">登 录</button>
+          <div>
+            <button class="btn-brown mid" id="btnReg" type="button">新用户注册</button>
+            <button class="btn-brown mid" id="btnFind" type="button">找回密码</button>
+          </div>
+          <div class="help">
+            <p>- 如您是喵扑通行证用户，<span class="hot">点击此处</span>激活游戏帐号。</p>
+            <p>- 无法正常登录的玩家请 <span class="hot">点击此处</span>。</p>
+          </div>
+
+          <!-- ④ 新闻公告 -->
+          <div id="news">
+            <h3>新闻公告</h3>
+            <div class="box">
+              <div class="news-i"><span>【重要公告！】打击第三方代充公告</span><time>05/18</time></div>
+              <div class="news-i"><span>《喵游记》5月15日维护公告</span><time>05/14</time></div>
+              <div class="news-i"><span>《喵游记》4月17日维护公告</span><time>04/16</time></div>
+              <div class="news-i"><span>《喵游记》4月10日维护公告</span><time>04/09</time></div>
+              <div class="news-i"><span>《喵游记》3月21日维护公告</span><time>03/20</time></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ⑤ 右侧公告栏 -->
+        <div class="rbar">
+          <h3>最新活动</h3>
+          <div class="card">
+            <h4>周年庆典 · 登录有礼</h4>
+            <p><span class="heart">♥</span>活动期间每日登录即领豪华大礼包。</p>
+            <p><span class="heart">♥</span>新服「猫隐一区」已开放，邀请好友同游猫隐村，赢取限定宠物！</p>
+          </div>
+          <h3>游戏特色</h3>
+          <div class="card">
+            <h4>养一只宠物去冒险</h4>
+            <p><span class="heart">♥</span>17 种宠物 × 战士 / 法师双职业。</p>
+            <p><span class="heart">♥</span>经典格子地图，回合对战，重温 2008 页游社区。</p>
+            <p><span class="heart">♥</span>装备、技能、任务、公会一应俱全。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 角色选择视图 -->
+    <div class="view" id="charView">
+      <h2 class="vtitle">请选择角色</h2>
+      <div id="charList"></div>
+      <div class="ops">
+        <button class="btn-big gold" id="btnStart" type="button">开始游戏</button>
+        <button class="btn-big brown" id="btnNew" type="button">创建角色</button>
+        <button class="btn-big red" id="btnDel" type="button">删除角色</button>
+      </div>
+    </div>
+
+    <!-- 创建角色视图 -->
+    <div class="view" id="createView">
+      <h2 class="vtitle">创建角色</h2>
+      <div class="create-grid">
+        <div class="stage-box">
+          <img id="stageImg" src="../web/public/pets/猫.gif" alt="宠物预览">
+          <b id="stageName">猫</b>
+          <p id="stageDesc">五维均衡，无短板，新手友好</p>
+          <div class="stat"><span>体力</span><span class="tr"><i style="width:50%"></i></span><b>5</b></div>
+          <div class="stat"><span>力量</span><span class="tr"><i style="width:50%"></i></span><b>5</b></div>
+          <div class="stat"><span>敏捷</span><span class="tr"><i style="width:50%"></i></span><b>5</b></div>
+          <div class="stat"><span>智力</span><span class="tr"><i style="width:50%"></i></span><b>5</b></div>
+          <div class="stat"><span>精神</span><span class="tr"><i style="width:50%"></i></span><b>5</b></div>
+        </div>
+        <div>
+          <div id="petGrid"></div>
+          <div class="cform">
+            <div class="field">
+              <label>角色名</label>
+              <input class="txt" id="cName" style="width:170px" maxlength="16" placeholder="2~16 个字符">
+            </div>
+            <div class="field">
+              <label>职业</label>
+              <div class="prof-pick">
+                <div class="prof sel" data-p="战士">战士<small>近战物理</small></div>
+                <div class="prof" data-p="法师">法师<small>远程法术</small></div>
+              </div>
+            </div>
+            <div class="field" style="flex:1;text-align:right">
+              <button class="btn-big gold" id="btnCreate" type="button">确认创建</button>
+              <button class="btn-big brown" id="btnBack" type="button">返回上一页</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="toast"></div>
+<script>
+/* ============================================================
+   ⑦ 脚本
+   ============================================================ */
+(function(){
+  "use strict";
+  var $ = function(id){ return document.getElementById(id); };
+
+  /* 宠物数据（与 server/data/pets.json 对齐；f 为 ../web/public/pets/ 下的文件名） */
+  var PETS = [
+    {n:"猫",f:"猫.gif",d:"功夫猫：五维均衡，无短板，新手友好",s:{vit:5,str:5,agi:5,intel:5,spr:5}},
+    {n:"小木猴",f:"小木猴(灵猴).gif",d:"灵猴：天生灵巧，初始敏捷最高",s:{vit:3,str:3,agi:9,intel:7,spr:3}},
+    {n:"恶魔波利",f:"恶魔波利.gif",d:"初始力量高，爆发物理输出",s:{vit:7,str:9,agi:3,intel:3,spr:3}},
+    {n:"天使波利",f:"天使波利.gif",d:"全被动型宠物，续航恢复能力强",s:{vit:3,str:3,agi:3,intel:7,spr:9}},
+    {n:"包子",f:"包子.gif",d:"血厚耐打，生存向",s:{vit:9,str:3,agi:3,intel:3,spr:7}},
+    {n:"土包子",f:"土包子.gif",d:"力量体力双高，偏坦克",s:{vit:8,str:8,agi:3,intel:3,spr:3}},
+    {n:"蘑菇宝宝",f:"蘑菇宝宝.gif",d:"初始智力高，法系苗子",s:{vit:3,str:3,agi:3,intel:9,spr:7}},
+    {n:"火星人",f:"火星人.gif",d:"敏捷智力双修，法系中的灵敏派",s:{vit:3,str:3,agi:8,intel:7,spr:4}},
+    {n:"年兽",f:"年兽.gif",d:"初始力量顶级，升级力量成长最高",s:{vit:2,str:10,agi:8,intel:2,spr:3}},
+    {n:"沙地仙人掌",f:"沙地仙人掌.gif",d:"皮糙肉厚，防御向",s:{vit:9,str:3,agi:7,intel:2,spr:4}},
+    {n:"水母",f:"水母.gif",d:"法术天赋高，血量也不弱",s:{vit:7,str:3,agi:3,intel:8,spr:4}},
+    {n:"水獭",f:"水獭.gif",d:"敏捷力量双修，物理灵敏派",s:{vit:3,str:7,agi:8,intel:3,spr:4}},
+    {n:"小恶魔",f:"小恶魔.gif",d:"灵动狡黠，闪避与法术兼备",s:{vit:3,str:3,agi:8,intel:7,spr:4}},
+    {n:"熊宝宝",f:"熊宝宝.gif",d:"初始体力最高，血牛型",s:{vit:10,str:7,agi:3,intel:2,spr:3}},
+    {n:"鸭嘴兽",f:"鸭嘴兽.gif",d:"均衡偏生存，水陆两栖",s:{vit:7,str:4,agi:6,intel:4,spr:4}},
+    {n:"野兔",f:"野兔.gif",d:"疯兔：敏捷极致，出手如风",s:{vit:3,str:3,agi:10,intel:3,spr:6}},
+    {n:"猪猪",f:"猪猪.gif",d:"憨态可掬，体格扎实",s:{vit:9,str:4,agi:3,intel:3,spr:6}}
+  ];
+  var PET_PATH = "../web/public/pets/";
+
+  /* 演示角色（原型数据，正式版由服务端返回） */
+  var CHARS = [
+    {n:"大橘为重",pet:"猫",lv:1,cls:"战士"},
+    {n:"年兽小霸王",pet:"年兽",lv:3,cls:"法师"}
+  ];
+  var SERVERS = ["猫隐一区","猫隐二区","牧野新区"];
+  var si = 0, capA = 5, capB = 0, selChar = 0, selPet = 0, selProf = "战士";
+
+  function toast(msg){
+    var t = $("toast");
+    t.textContent = msg;
+    t.style.display = "block";
+    clearTimeout(toast._t);
+    toast._t = setTimeout(function(){ t.style.display = "none"; }, 2200);
+  }
+
+  function petOf(name){
+    for (var i = 0; i < PETS.length; i++) if (PETS[i].n === name) return PETS[i];
+    return PETS[0];
+  }
+
+  /* 视图切换 */
+  function showView(id){
+    var views = ["loginView","charView","createView"];
+    for (var i = 0; i < views.length; i++) {
+      $(views[i]).classList.toggle("on", views[i] === id);
+    }
+    $("ptitleText").textContent =
+      id === "loginView" ? "用户登录" : id === "charView" ? "选择角色" : "创建角色";
+  }
+
+  /* 验证码：JS 生成的个位加法算式 */
+  function genCap(){
+    capA = Math.floor(Math.random() * 10);
+    capB = Math.floor(Math.random() * 10);
+    $("cap").textContent = capA + " + " + capB + " = ?";
+    $("fCap").value = "";
+  }
+
+  /* 角色列表渲染 */
+  function renderChars(){
+    var box = $("charList");
+    box.innerHTML = "";
+    if (!CHARS.length) {
+      var empty = document.createElement("p");
+      empty.className = "char-empty";
+      empty.textContent = "还没有角色，点击「创建角色」开始冒险吧！";
+      box.appendChild(empty);
+      selChar = -1;
+      return;
+    }
+    if (selChar >= CHARS.length) selChar = CHARS.length - 1;
+    CHARS.forEach(function(c, i){
+      var card = document.createElement("div");
+      card.className = "char-card" + (i === selChar ? " sel" : "");
+      card.innerHTML = "<img alt=\"" + c.pet + "\"><b></b><i>Lv." + c.lv + " · " + c.cls + "</i>";
+      card.querySelector("img").src = PET_PATH + encodeURIComponent(petOf(c.pet).f);
+      card.querySelector("b").textContent = c.n;
+      card.onclick = function(){ selChar = i; renderChars(); };
+      box.appendChild(card);
+    });
+  }
+
+  /* 创建页：宠物网格 + 舞台联动 */
+  function renderPets(){
+    var grid = $("petGrid");
+    grid.innerHTML = "";
+    PETS.forEach(function(p, i){
+      var card = document.createElement("div");
+      card.className = "pet-card" + (i === selPet ? " sel" : "");
+      card.innerHTML = "<img alt=\"" + p.n + "\"><span></span>";
+      card.querySelector("img").src = PET_PATH + encodeURIComponent(p.f);
+      card.querySelector("span").textContent = p.n;
+      card.onclick = function(){ selPet = i; renderPets(); };
+      grid.appendChild(card);
+    });
+    var p = PETS[selPet];
+    $("stageImg").src = PET_PATH + encodeURIComponent(p.f);
+    $("stageImg").alt = p.n;
+    $("stageName").textContent = p.n;
+    $("stageDesc").textContent = p.d;
+    var rows = document.querySelectorAll(".stage-box .stat");
+    ["vit","str","agi","intel","spr"].forEach(function(k, j){
+      var row = rows[j];
+      row.querySelector(".tr i").style.width = Math.min(p.s[k], 10) * 10 + "%";
+      row.querySelector("b").textContent = p.s[k];
+    });
+  }
+
+  /* ---------- 登录 ---------- */
+  $("btnSrv").onclick = function(){
+    si = (si + 1) % SERVERS.length;
+    $("srvName").textContent = SERVERS[si];
+  };
+  $("capRefresh").onclick = function(e){ e.preventDefault(); genCap(); };
+  $("btnLogin").onclick = function(){
+    if (!$("fUser").value.trim()) { toast("请输入用户名"); return; }
+    if (!$("fPass").value) { toast("请输入密码"); return; }
+    if (parseInt($("fCap").value, 10) !== capA + capB) { toast("验证码错误，已刷新"); genCap(); return; }
+    toast("登录成功，欢迎回来，" + $("fUser").value.trim() + "！");
+    showView("charView");
+    renderChars();
+  };
+  $("btnReg").onclick = function(){ toast("注册功能为原型占位"); };
+  $("btnFind").onclick = function(){ toast("找回密码为原型占位"); };
+  document.querySelectorAll(".hot").forEach(function(el){
+    el.onclick = function(){ toast("帮助链接为原型占位"); };
+  });
+
+  /* ---------- 角色选择 ---------- */
+  $("btnNew").onclick = function(){
+    $("cName").value = "";
+    showView("createView");
+    renderPets();
+  };
+  $("btnDel").onclick = function(){
+    if (selChar < 0 || !CHARS.length) { toast("请先点击选中要删除的角色"); return; }
+    var c = CHARS[selChar];
+    if (!window.confirm("确定要删除角色「" + c.n + "」吗？")) return;
+    CHARS.splice(selChar, 1);
+    selChar = Math.max(0, selChar - 1);
+    renderChars();
+    toast("角色已删除");
+  };
+  $("btnStart").onclick = function(){
+    if (selChar < 0 || !CHARS.length) { toast("请先选中角色"); return; }
+    toast("「" + CHARS[selChar].n + "」即将进入猫隐村…（占位）");
+  };
+
+  /* ---------- 创建角色 ---------- */
+  document.querySelectorAll(".prof").forEach(function(el){
+    el.onclick = function(){
+      document.querySelectorAll(".prof").forEach(function(x){ x.classList.remove("sel"); });
+      el.classList.add("sel");
+      selProf = el.getAttribute("data-p");
+    };
+  });
+  $("btnCreate").onclick = function(){
+    var name = $("cName").value.trim();
+    if (name.length < 2 || name.length > 16) { toast("角色名需要 2~16 个字符"); return; }
+    var p = PETS[selPet];
+    CHARS.push({n:name, pet:p.n, lv:1, cls:selProf});
+    selChar = CHARS.length - 1;
+    showView("charView");
+    renderChars();
+    toast("创建成功！欢迎新伙伴「" + p.n + "」" + name);
+  };
+  $("btnBack").onclick = function(){ showView("charView"); renderChars(); };
+
+  genCap();
+})();
+</script>
+</body>
+</html>
