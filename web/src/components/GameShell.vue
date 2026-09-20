@@ -149,7 +149,6 @@ onUnmounted(() => window.removeEventListener("resize", fitStage));
           </div>
         </div>
         <div class="chatlog panel">
-          <div class="panel-head">聊天记录</div>
           <div class="body scr">
             <p v-for="(m, i) in messages" :key="i" :class="m.kind">
               <time>{{ m.time }}</time> {{ m.text }}
@@ -191,11 +190,9 @@ onUnmounted(() => window.removeEventListener("resize", fitStage));
       <!-- 右：消息窗 -->
       <section class="right">
         <div class="panel drop-panel">
-          <div class="panel-head">世界·掉落公告</div>
           <div class="body scr"><p class="empty">暂无公告。</p></div>
         </div>
         <div class="panel private-panel">
-          <div class="panel-head">私人信息</div>
           <div class="body scr"><p class="empty">暂无私信。</p></div>
         </div>
       </section>
