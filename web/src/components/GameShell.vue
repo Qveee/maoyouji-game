@@ -101,12 +101,11 @@ function say(text: string, kind: "sys" | "chat" = "sys") {
   void nextTick(stickChat);
 }
 
-/** 聊天区自动贴底：新行追加后视口跟随到底部；上滚超 40px 阅读历史时不拽回 */
+/** 聊天区自动贴底：新行追加后视口恒定跟随（照原型 addChat 无条件贴底；战斗时间线快进时一批可推入多行，阈值守卫会在批次掉队后永久失效，故不做阈值） */
 function stickChat() {
   const el = chatBodyEl.value;
   if (!el) return;
-  const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 40;
-  if (nearBottom) el.scrollTop = el.scrollHeight;
+  el.scrollTop = el.scrollHeight;
 }
 
 /** 血量/蓝量百分比（封顶 0~100，防异常数据撑破条） */
