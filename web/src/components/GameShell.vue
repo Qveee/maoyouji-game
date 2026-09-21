@@ -198,7 +198,6 @@ const battleActive = ref(false);
 const battle = ref<BattleResponseState | null>(null);
 const foeLevel = ref(0); // 怪物等级：开战时取自点击项；/state 不回传等级，恢复态隐藏 Lv. 展示
 const battleFloats = ref<{ id: number; target: "me" | "foe"; cls: string; text: string; jx: number }[]>([]);
-const banner = ref<null | { cls: string; title: string; sub: string }>(null);
 const toastText = ref("");
 const battleTick = ref(0); // 每秒自增，驱动 CD 遮罩等时间相关视图重算
 let floatSeq = 0;
@@ -324,25 +323,18 @@ function applyBattle(res: BattleResponse, animate = true) {
   if (res.state.over && !battleEnding) startSettlement(res.state.over);
 }
 
-/** 终局：中央横幅 3 秒 → 关覆盖层 → 重拉地图（尸体/复活可见）+ 通知 App 刷新角色（升级/回城即时反映） */
+/** 终局：不做胜利/战败横幅（战斗记录区已有击杀播报，按用户要求），短暂定格 180ms → 关覆盖层 → 重拉地图（尸体/复活可见）+ 通知 App 刷新角色（升级/回城即时反映） */
 function startSettlement(over: NonNullable<BattleResponseState["over"]>) {
   battleEnding = true;
-  markDead(over.result); // 终局倒地表现与横幅同帧出现
-  banner.value =
-    over.result === "victory"
-      ? { cls: "win", title: "胜利", sub: `获得 ${over.expGained ?? 0} 点经验` }
-      : over.result === "draw"
-        ? { cls: "draw", title: "不分胜负", sub: "战斗超时，双方脱离" }
-        : { cls: "lose", title: "战败", sub: "回到猫隐村教堂" };
+  markDead(over.result); // 终局倒地表现同帧出现（收摊极快，仅作瞬时反馈）
   settleTimer = window.setTimeout(() => {
     settleTimer = undefined;
     void finishSettlement();
-  }, 3000);
+  }, 180); // 用户要求 0.2 秒内退出战斗背景，留 20ms 余量
 }
 
 async function finishSettlement() {
   battleEnding = false;
-  banner.value = null;
   resetBattleUi();
   await load();
   emit("characterChanged");
@@ -680,12 +672,6 @@ onUnmounted(() => {
                   :style="{ marginLeft: f.jx + 'px' }"
                 >{{ f.text }}</span>
               </div>
-            </div>
-
-            <!-- 结算横幅 -->
-            <div v-if="banner" class="bt-result" :class="banner.cls">
-              <b>{{ banner.title }}</b>
-              <span>{{ banner.sub }}</span>
             </div>
           </div>
 
@@ -1029,28 +1015,6 @@ onUnmounted(() => {
 @keyframes lungeL { 35% { transform: translateX(-64px); } }
 .bt-unit.dead .bt-sprite { filter: grayscale(1) brightness(.65); transform: translateY(12px) rotate(9deg); transition: all .6s ease; }
 @media (prefers-reduced-motion: reduce) { .bt-me.atk .bt-sprite, .bt-foe.atk .bt-sprite { animation: none; } }
-/* 结算横幅 */
-.bt-result {
-  position: absolute;
-  z-index: 20;
-  left: 50%;
-  top: 38%;
-  transform: translate(-50%, -50%);
-  min-width: 240px;
-  padding: 14px 36px;
-  text-align: center;
-  border-radius: 8px;
-  background: rgba(16, 32, 46, 0.72);
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.45);
-  color: #fff;
-  pointer-events: none;
-}
-.bt-result b { display: block; font: bold 26px/34px SimHei, "黑体", "SimSun", serif; letter-spacing: 6px; }
-.bt-result.win b { color: #a4e88a; }
-.bt-result.draw b { color: #e8d48a; }
-.bt-result.lose b { color: #ff8a7a; }
-.bt-result span { display: block; margin-top: 4px; font: 13px/1.6 "SimSun", "宋体", serif; color: #cfe3ef; }
 /* 场景内轻提示 */
 .toast {
   position: absolute;
