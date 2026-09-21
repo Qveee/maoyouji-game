@@ -182,13 +182,7 @@ const presetSkill = computed(() => PRESET_SKILL[props.character.profession] ?? n
 
 const battleActive = ref(false);
 const battle = ref<BattleResponseState | null>(null);
-/** 对手展示信息：/state 不回传名字/精灵图，开战时取点击项，恢复时按格子怪物列表推断 */
-const foeMeta = ref<{ name: string; sprite: string; level: number; known: boolean }>({
-  name: "",
-  sprite: "",
-  level: 0,
-  known: false,
-});
+const foeLevel = ref(0); // 怪物等级：开战时取自点击项；/state 不回传等级，恢复态隐藏 Lv. 展示
 const battleFloats = ref<{ id: number; target: "me" | "foe"; cls: string; text: string; jx: number }[]>([]);
 const banner = ref<null | { cls: string; title: string; sub: string }>(null);
 const toastText = ref("");
@@ -228,9 +222,9 @@ function pushBattleLine(text: string, t?: number) {
   if (messages.value.length > 60) messages.value.shift();
 }
 
-/** 日志行分词上色：仅按「已知怪名」「你」两个 token 切分，不做逐词解析 */
+/** 日志行分词上色：仅按「怪名」「你」两个 token 切分，不做逐词解析 */
 function battleParts(text: string): { t: string; cls: string }[] {
-  const name = foeMeta.value.known ? foeMeta.value.name : "";
+  const name = battle.value?.foeName ?? "";
   const esc = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   const re = new RegExp(`(${(name ? `${esc(name)}|` : "") + esc("你")})`, "g");
   return text
@@ -264,25 +258,12 @@ function consumeEvent(e: BattleEvent, animate: boolean) {
   }
 }
 
-/** 从当前格怪物列表推断对手展示信息（恢复战斗时按血量特征匹配；列表同格同为该怪展示无碍） */
-function inferFoeMeta(state: BattleResponseState) {
-  const list = currentNode.value?.monsters ?? [];
-  const hit =
-    list.find((m) => m.hp === state.foeHp && m.maxHp === state.foeMaxHp) ??
-    list.find((m) => m.maxHp === state.foeMaxHp) ??
-    list[0];
-  foeMeta.value = hit
-    ? { name: hit.name, sprite: hit.sprite, level: hit.level, known: true }
-    : { name: "未知怪物", sprite: "", level: 0, known: false };
-}
-
 /** 战斗响应统一入口：刷新时钟锚 → 建/续战斗态 → 消费增量事件 → 终局分流 */
-function applyBattle(res: BattleResponse, meta?: typeof foeMeta.value, animate = true) {
+function applyBattle(res: BattleResponse, animate = true) {
   clock.serverNow = res.state.now;
   clock.localAt = Date.now();
   if (!battleActive.value) {
-    if (meta) foeMeta.value = meta;
-    else inferFoeMeta(res.state);
+    foeLevel.value = 0; // 恢复态 /state 无等级，隐藏 Lv.；开战路径在调用后补点击项等级
     battleSinceSeq = -1;
     battleActive.value = true;
     startBattleTimer();
@@ -338,7 +319,7 @@ async function resumeBattle() {
   if (battleActive.value) return;
   try {
     const res = await api.battleState(-1);
-    applyBattle(res, undefined, false); // 恢复的历史事件只进日志，不重放飘字
+    applyBattle(res, false); // 恢复的历史事件只进日志，不重放飘字
   } catch {
     /* 404=当前没有进行中的战斗；其余错误下一轮重试 */
   }
@@ -349,7 +330,7 @@ async function pollBattle() {
   battlePolling = true;
   try {
     const res = await api.battleState(battleSinceSeq);
-    applyBattle(res, undefined, true);
+    applyBattle(res);
   } catch (err) {
     // over 结算后的下一次 /state 404 属正常态，勿报错；异常失同步时静默收摊防软锁
     if (err instanceof ApiError && err.status === 404) await abandonBattle();
@@ -379,7 +360,8 @@ async function startBattle(m: NodeMonster) {
   if (battleActive.value) return;
   try {
     const res = await api.battleStart(m.id);
-    applyBattle(res, { name: m.name, sprite: m.sprite, level: m.level, known: true }, false);
+    applyBattle(res, false);
+    foeLevel.value = m.level; // 名字/形象以快照回传为准，等级取自点击项
     pushBattleLine(`你向${m.name}发起攻击！`); // 开战行照原型补一条本地日志
     emit("characterChanged"); // 服务端 lazyRegen 可能已回血蓝，刷新角色面板
   } catch (err) {
@@ -429,7 +411,7 @@ async function castPreset() {
   casting = true;
   try {
     const res = await api.battleSkill(sk.code, battleSinceSeq);
-    applyBattle(res, undefined, true);
+    applyBattle(res);
   } catch (err) {
     if (err instanceof ApiError) {
       if (err.status === 404) await abandonBattle();
@@ -555,7 +537,7 @@ onUnmounted(() => {
             </div>
             <div class="bt-stat pos-foe">
               <div class="bt-stat-name">
-                {{ foeMeta.name }}<template v-if="foeMeta.level"> Lv.{{ foeMeta.level }}</template>
+                {{ battle.foeName }}<template v-if="foeLevel"> Lv.{{ foeLevel }}</template>
               </div>
               <div class="bar hp">
                 <i :style="{ width: pct(battle.foeHp, battle.foeMaxHp) + '%' }"></i>
@@ -569,7 +551,7 @@ onUnmounted(() => {
                 <div class="bt-shadow"></div>
               </div>
               <div class="bt-unit">
-                <div class="bt-sprite"><img v-if="foeMeta.sprite" :src="foeMeta.sprite" :alt="foeMeta.name" /></div>
+                <div class="bt-sprite"><img v-if="battle.foeSprite" :src="battle.foeSprite" :alt="battle.foeName" /></div>
                 <div class="bt-shadow"></div>
               </div>
               <!-- 伤害飘字：落受击方（事件 side 是出手方）；红伤害/橙暴击放大/灰闪避/绿回血 -->

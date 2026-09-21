@@ -79,6 +79,8 @@ function toResponseState(s: BattleState) {
     foeHp: s.foe.hp,
     foeMaxHp: s.foe.maxHp,
     ...(s.foe.maxSp !== undefined ? { foeMaxSp: s.foe.maxSp } : {}),
+    foeName: s.foe.name, // 快照内现成有：战斗恢复/轮询时前端无需再推断怪名与形象
+    foeSprite: s.foe.sprite,
     pendingSkill: s.pendingSkill,
     skillCdUntil: s.skillCdUntil,
     now: s.now,

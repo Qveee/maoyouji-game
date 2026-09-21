@@ -101,6 +101,8 @@ export interface BattleResponseState {
   foeHp: number;
   foeMaxHp: number;
   foeMaxSp?: number;
+  foeName: string; // 怪物名（快照内 foe.name，恢复/轮询直接展示）
+  foeSprite: string; // 怪物精灵图，如 /monsters/LuMaoChong.gif，直接可作 img src
   pendingSkill: BattlePendingSkill | null;
   skillCdUntil: number; // 服务器时钟毫秒；倒计时须以 state.now 锚定，勿直接比本地时钟
   now: number; // 服务器当前毫秒（本地时钟锚定基准）
