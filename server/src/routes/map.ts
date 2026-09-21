@@ -31,13 +31,13 @@ async function currentOf(
 
 /**
  * 组装地图视图（GET /map/current 与跨图移动响应共用同一结构）。
- * field 图节点附带 monsters（仅 alive，静态 name/level/sprite 取自 monsters.json）；
+ * field 图节点附带 monsters（仅 alive，静态 name/level/sprite 与图鉴 type/desc 取自 monsters.json）；
  * 城镇不刷怪，节点不带 monsters 字段。
  */
 async function buildMapView(mapCode: string, currentNodeCode: string) {
   const map = mapIndex().get(mapCode)!;
   // 按格聚合该图活怪实例
-  const aliveByNode = new Map<string, Array<{ id: number; code: string; name: string; hp: number; maxHp: number; level: number; sprite: string }>>();
+  const aliveByNode = new Map<string, Array<{ id: number; code: string; name: string; hp: number; maxHp: number; level: number; sprite: string; type?: string; desc?: string }>>();
   if (map.type === "field") {
     const [rows] = await getPool().query<RowDataPacket[]>(
       `SELECT id, node_code, monster_code, hp, max_hp FROM map_node_monsters
@@ -58,6 +58,9 @@ async function buildMapView(mapCode: string, currentNodeCode: string) {
         maxHp: r.max_hp as number,
         level: monster.level,
         sprite: monster.sprite,
+        // 图鉴字段（前端详情浮窗用）；静态数据缺省时为 undefined，JSON 序列化自然省略
+        type: monster.type,
+        desc: monster.desc,
       });
       aliveByNode.set(nodeCode, list);
     }

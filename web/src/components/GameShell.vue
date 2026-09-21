@@ -407,8 +407,61 @@ function stopBattleTimer() {
   }
 }
 
+/* ---------- 怪物详情浮窗（照原型 #mon-pop：点名字开、点 ✕/点外部/开战关） ---------- */
+const monPop = ref<NodeMonster | null>(null);
+const monPopEl = ref<HTMLElement | null>(null);
+
+/** 怪物行点击分流（照原型）：红笔图标=开战，其余（名字/空隙）=开详情浮窗 */
+function onMonRowClick(m: NodeMonster, e: MouseEvent) {
+  if ((e.target as HTMLElement).classList.contains("atk-ico")) void startBattle(m);
+  else monShow(m, e);
+}
+
+/** 打开浮窗：nextTick 渲染后量宽高定位（照原型 monShow：紧贴鼠标下侧，右/底溢出翻到另一侧，贴边最小 8px） */
+function monShow(m: NodeMonster, ev: MouseEvent) {
+  monPop.value = m;
+  void nextTick(() => {
+    const el = monPopEl.value;
+    if (!el) return;
+    const w = el.offsetWidth;
+    const h = el.offsetHeight;
+    let x = ev.clientX + 2;
+    let y = ev.clientY + 14;
+    if (x + w > window.innerWidth - 8) x = ev.clientX - w - 2; // 右溢出翻到左侧
+    if (y + h > window.innerHeight - 8) y = ev.clientY - h - 6; // 底溢出翻到上侧
+    if (x < 8) x = 8;
+    if (y < 8) y = 8;
+    el.style.left = x + "px";
+    el.style.top = y + "px";
+  });
+}
+
+/** 浮窗内点击（照原型 monPanel click：整体 stopPropagation 防触发外部关闭）✕=关闭，红笔=开战并关浮窗 */
+function onMonPopClick(e: MouseEvent) {
+  e.stopPropagation();
+  const t = e.target as HTMLElement;
+  if (t.classList.contains("mx")) {
+    monPop.value = null;
+  } else if (t.tagName === "IMG" && t.classList.contains("atk-ico") && monPop.value) {
+    const m = monPop.value;
+    monPop.value = null; // 开战即关（照原型 attackMonster）
+    void startBattle(m);
+  }
+}
+
+/** 点浮窗外任意处关闭（照原型 document click 收起两个信息浮窗）；行内/浮窗点击已 stopPropagation，不会秒开秒关 */
+function onDocClickHideMonPop() {
+  monPop.value = null;
+}
+
+// 战斗覆盖层打开即关浮窗（开战/刷新后恢复战斗都会置 true，覆盖 resumeBattle 路径）
+watch(battleActive, (v) => {
+  if (v) monPop.value = null;
+});
+
 /** 点击怪物开战；「已有进行中的战斗」409 带 battleId → 导回战斗视图 */
 async function startBattle(m: NodeMonster) {
+  monPop.value = null; // 开战时关闭详情浮窗（照原型 attackMonster 先收浮窗；已开战时也收，仅不重复开战）
   if (battleActive.value) return;
   try {
     const res = await api.battleStart(m.id);
@@ -510,6 +563,7 @@ onMounted(async () => {
   fitStage();
   window.addEventListener("resize", fitStage);
   window.addEventListener("keydown", onGlobalKeydown);
+  document.addEventListener("click", onDocClickHideMonPop);
   await load();
   await resumeBattle(); // 挂载恢复：刷新/换角色再进不会把角色留在无人推进的战斗里
   await pollChat();
@@ -520,6 +574,7 @@ onMounted(async () => {
 onUnmounted(() => {
   window.removeEventListener("resize", fitStage);
   window.removeEventListener("keydown", onGlobalKeydown);
+  document.removeEventListener("click", onDocClickHideMonPop);
   if (chatTimer) window.clearInterval(chatTimer);
   stopBattleTimer();
   if (settleTimer) window.clearTimeout(settleTimer);
@@ -662,20 +717,16 @@ onUnmounted(() => {
           <div class="panel-head">{{ currentNode ? currentNode.name : "—" }}</div>
           <div class="body scr">
             <p v-if="!currentNode?.npcs.length && !currentNode?.monsters?.length" class="empty">这里空荡荡的，没有 NPC。</p>
-            <!-- 野外格怪物列表：绿名 + HP 条，点击开战 -->
+            <!-- 野外格怪物列表（照原型）：绿名 + 红笔攻击图标，无血条/等级；点名字开详情浮窗，点红笔开战 -->
             <div
               v-for="m in currentNode?.monsters ?? []"
               :key="'m' + m.id"
               class="mon"
-              :title="`挑战 ${m.name}（Lv.${m.level}）`"
-              @click="startBattle(m)"
+              @click.stop="onMonRowClick(m, $event)"
             >
-              <b class="mname">{{ m.name }}</b>
-              <!-- 红笔攻击图标（照原型 .npc img.atk-ico）：行已可点开战，图标仅作视觉指示 -->
+              <b class="mname" title="查看怪物详情">{{ m.name }}</b>
+              <!-- 红笔攻击图标（照原型 .npc img.atk-ico）：点它发起攻击 -->
               <img class="atk-ico" src="/icons/attack.gif" alt="攻击" title="攻击" />
-              <span class="mlv">Lv.{{ m.level }}</span>
-              <span class="mbar"><i :style="{ width: pct(m.hp, m.maxHp) + '%' }"></i></span>
-              <span class="mhp">{{ m.hp }}/{{ m.maxHp }}</span>
             </div>
             <div
               v-for="npc in currentNode?.npcs"
@@ -788,6 +839,28 @@ onUnmounted(() => {
     </footer>
   </main>
   </div>
+
+  <!-- 怪物详情浮窗（照原型 #mon-pop）：fixed 紧贴鼠标、左图右文 + 底部描述。
+       Teleport 到 body：stage-fit 的 transform 缩放会把 fixed 定位劫持为相对自身，故挂到根节点照原型用视口坐标 -->
+  <Teleport to="body">
+    <div v-if="monPop" id="mon-pop" ref="monPopEl" @click="onMonPopClick">
+      <span class="mx" title="关闭">✕</span>
+      <table>
+        <tbody>
+          <tr>
+            <td class="mi"><img :src="monPop.sprite" :alt="monPop.name" /></td>
+            <td>
+              <div class="mn">
+                {{ monPop.name }}<img class="atk-ico" src="/icons/attack.gif" alt="攻击" title="攻击" />
+              </div>
+              <div class="ml">Lv.{{ monPop.level }} ({{ monPop.type ?? "未知" }})</div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="md">{{ monPop.desc ?? "（图鉴暂未收录此怪物。）" }}</div>
+    </div>
+  </Teleport>
 </template>
 
 <style scoped>
@@ -1044,26 +1117,33 @@ onUnmounted(() => {
 .npc .tt.t-green { color: #178714; }
 .npc .tt.t-orange { color: #d97a00; }
 
-/* 怪物列表行（野外格）：绿名 + 等级 + HP 条 + 数值，点击开战 */
+/* 怪物列表行（野外格，照原型）：绿名 + 红笔攻击图标（无血条/等级）；点名字开详情浮窗，点红笔开战 */
 .mon { display: flex; align-items: center; gap: 5px; line-height: 20px; white-space: nowrap; overflow: hidden; cursor: pointer; }
 .mon:hover { background: #d9eef8; }
 .mon .mname { color: #178714; font-weight: bold; white-space: nowrap; }
 .mon:hover .mname { color: #0d6ba8; }
-/* 红笔攻击图标（照原型 .npc img.atk-ico） */
 .mon .atk-ico { width: 12px; height: 12px; flex: none; cursor: pointer; }
-.mon .mlv { flex: none; font-size: 11px; color: #8b7b55; }
-.mon .mbar {
-  position: relative;
-  flex: none;
-  width: 64px;
-  height: 8px;
-  background: #fff;
-  border: 1px solid #7f9db0;
-  border-radius: 4px;
-  overflow: hidden;
+
+/* 怪物详情浮窗（照原型 #mon-pop）：#eee 底、深色细边框 + 内圈浅灰线；左侧怪物图，右侧名称/红笔/等级类型，底部描述。
+   显隐由 v-if 接管（原型的 display:none 切换在此不需要） */
+#mon-pop {
+  position: fixed;
+  z-index: 120;
+  width: 370px;
+  background: #eee;
+  border: 1px solid #2e2e2e;
+  box-shadow: inset 0 0 0 1px #c6c6c6, 1px 1px 3px rgba(0, 0, 0, 0.4);
+  padding: 20px 10px 12px 14px;
 }
-.mon .mbar i { position: absolute; left: 0; top: 0; bottom: 0; background: linear-gradient(#8fd88a, #3f9e4d); }
-.mon .mhp { flex: none; font-size: 11px; color: #456; }
+#mon-pop .mx { position: absolute; top: 5px; right: 6px; font: bold 14px/1 Tahoma, SimSun; color: #111; cursor: pointer; padding: 3px; }
+#mon-pop .mx:hover { color: #c33812; }
+#mon-pop table { border-collapse: collapse; }
+#mon-pop td.mi { width: 200px; text-align: center; vertical-align: middle; }
+#mon-pop td.mi img { width: 129px; display: block; margin: 0 auto; }
+#mon-pop .mn { font: bold 19px/22px SimSun; color: #222; white-space: nowrap; }
+#mon-pop .mn img { width: 14px; height: 14px; margin-left: 14px; cursor: pointer; vertical-align: 1px; }
+#mon-pop .ml { margin-top: 11px; width: 146px; font: 17px/25px SimSun; color: #333; }
+#mon-pop .md { margin-top: 12px; font: 13px/1.7 SimSun; color: #555; }
 
 .right { flex: 1; min-width: 300px; display: flex; flex-direction: column; gap: 4px; min-height: 0; }
 .side { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }

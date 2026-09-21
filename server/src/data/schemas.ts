@@ -54,6 +54,9 @@ export const MonsterSchema = z
     intervalMs: z.number().int().min(500).max(10000),
     spr: z.number().int().min(0),
     exp: z.number().int().min(0),
+    /** 图鉴展示字段（照原型 MONSTERS 字典考据）：定位类型与描述，可选；缺省时前端走兜底文案 */
+    type: z.string().max(32).optional(),
+    desc: z.string().max(200).optional(),
   })
   .refine((m) => m.hpMin <= m.hpMax, { message: "hpMin 不能大于 hpMax" })
   .refine((m) => m.atkMin <= m.atkMax, { message: "atkMin 不能大于 atkMax" });

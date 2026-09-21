@@ -37,6 +37,8 @@ export interface NodeMonster {
   maxHp: number;
   level: number;
   sprite: string; // 如 /monsters/LuMaoChong.gif，直接可作 img src
+  type?: string; // 图鉴定位类型（如「战士 昆虫辅助」），缺省时详情浮窗显示「未知」
+  desc?: string; // 图鉴描述文案，缺省时详情浮窗显示兜底提示
 }
 
 export interface MapNode {

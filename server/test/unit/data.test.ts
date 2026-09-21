@@ -65,6 +65,19 @@ describe("静态怪物数据", () => {
     expect(() => MonstersFileSchema.parse({ monsters: [{ ...file.monsters[0]!, dodgeRate: 1 }] })).toThrow();
     expect(() => MonstersFileSchema.parse({ monsters: [{ ...file.monsters[0]!, critRate: -0.1 }] })).toThrow();
   });
+
+  it("图鉴字段 type/desc 可选且随静态数据透传", () => {
+    const file = loadMonsters();
+    // 绿毛虫照原型填了考据文本，红蘑菇原版无收录不加字段（走前端兜底文案）
+    const worm = file.monsters.find((m) => m.code === "lvmaochong")!;
+    expect(worm.type).toBe("战士 昆虫辅助");
+    expect(worm.desc).toBe("牧野草原最常见的小虫，圆滚滚的身子行动迟缓，靠啃食嫩草为生，最适合新手练手。");
+    const mogu = file.monsters.find((m) => m.code === "hongmogu")!;
+    expect(mogu.type).toBeUndefined();
+    expect(mogu.desc).toBeUndefined();
+    // 缺省字段合法（不破坏既有校验），zod infer 透传到 Monster 类型
+    expect(() => MonstersFileSchema.parse({ monsters: [mogu] })).not.toThrow();
+  });
 });
 
 describe("静态技能数据", () => {
