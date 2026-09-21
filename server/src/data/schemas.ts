@@ -37,11 +37,87 @@ export const PetsFileSchema = z
 export type Pet = z.infer<typeof PetSchema>;
 export type PetsFile = z.infer<typeof PetsFileSchema>;
 
+/** 怪物（HP 区间来自原版血量大全；攻防/攻速/经验为 MVP 手写值） */
+export const MonsterSchema = z
+  .object({
+    code: z.string().min(1).max(64),
+    name: z.string().min(1).max(32),
+    level: z.number().int().min(1).max(200),
+    sprite: z.string().min(1),
+    hpMin: z.number().int().min(1),
+    hpMax: z.number().int().min(1),
+    atkMin: z.number().int().min(0),
+    atkMax: z.number().int().min(0),
+    def: z.number().int().min(0),
+    dodgeRate: z.number().min(0).lt(1),
+    critRate: z.number().min(0).lt(1),
+    intervalMs: z.number().int().min(500).max(10000),
+    spr: z.number().int().min(0),
+    exp: z.number().int().min(0),
+  })
+  .refine((m) => m.hpMin <= m.hpMax, { message: "hpMin 不能大于 hpMax" })
+  .refine((m) => m.atkMin <= m.atkMax, { message: "atkMin 不能大于 atkMax" });
+
+export const MonstersFileSchema = z
+  .object({ monsters: z.array(MonsterSchema).min(1) })
+  .refine((f) => new Set(f.monsters.map((m) => m.code)).size === f.monsters.length, { message: "怪物 code 重复" });
+
+export type Monster = z.infer<typeof MonsterSchema>;
+export type MonstersFile = z.infer<typeof MonstersFileSchema>;
+
+/** 技能公共字段 */
+const skillBase = {
+  code: z.string().min(1).max(64),
+  name: z.string().min(1).max(32),
+  profession: z.enum(["warrior", "mage"]),
+  preset: z.boolean(),
+  spCost: z.number().int().min(0),
+  cdMs: z.number().int().min(0),
+  castMs: z.number().int().min(0),
+  description: z.string(),
+};
+
+/**
+ * 技能按 kind 判别：近战加伤只带 bonusDamage，直接伤害只带 dmgMin/dmgMax。
+ * strictObject 让互斥成为硬约束（带错 kind 的字段直接拒绝）。
+ */
+export const SkillSchema = z.discriminatedUnion("kind", [
+  z.strictObject({ ...skillBase, kind: z.literal("next_hit_bonus"), bonusDamage: z.number().int().min(0) }),
+  z.strictObject({
+    ...skillBase,
+    kind: z.literal("direct_damage"),
+    dmgMin: z.number().int().min(0),
+    dmgMax: z.number().int().min(0),
+  }),
+]);
+
+export const SkillsFileSchema = z
+  .object({ skills: z.array(SkillSchema).min(1) })
+  .superRefine((f, ctx) => {
+    if (new Set(f.skills.map((s) => s.code)).size !== f.skills.length) {
+      ctx.addIssue({ code: "custom", message: "技能 code 重复" });
+    }
+    for (const s of f.skills) {
+      if (s.kind === "direct_damage" && s.dmgMin > s.dmgMax) {
+        ctx.addIssue({ code: "custom", message: "dmgMin 不能大于 dmgMax" });
+      }
+    }
+  });
+
+export type Skill = z.infer<typeof SkillSchema>;
+export type SkillsFile = z.infer<typeof SkillsFileSchema>;
+
 /** 地图节点 NPC（切片 3 只展示；chats 留给任务切片） */
 const MapNpcSchema = z.object({
   name: z.string().min(1).max(32),
   title: z.string().max(64),
   titleColor: z.string().max(16),
+});
+
+/** 跨图出口：目标地图 code + 目标节点 code */
+const MapExitSchema = z.object({
+  map: z.string().min(1).max(64),
+  node: z.string().min(1).max(64),
 });
 
 export const MapNodeSchema = z.object({
@@ -53,6 +129,12 @@ export const MapNodeSchema = z.object({
   locked: z.boolean().optional(),
   lockedReason: z.string().optional(),
   npcs: z.array(MapNpcSchema),
+  /** 相邻节点（field 地图走格子用），引用全局节点 code */
+  adjacent: z.array(z.string().min(1).max(64)).optional(),
+  /** 跨地图出口 */
+  exit: MapExitSchema.optional(),
+  /** 刷怪分区：可出现的怪物 code 列表（对怪物数据的交叉引用在 loader 层校验，避免循环依赖） */
+  spawns: z.array(z.string().min(1).max(64)).optional(),
 });
 
 export const MapSchema = z.object({
@@ -67,16 +149,45 @@ export const MapSchema = z.object({
 export const MapsFileSchema = z
   .object({ maps: z.array(MapSchema).min(1) })
   .superRefine((file, ctx) => {
+    // 节点 code 跨地图全局唯一（自然覆盖单地图内去重）
+    const owner = new Map<string, string>(); // 节点 code → 所属地图 code
     for (const map of file.maps) {
-      const codes = new Set<string>();
       for (const node of map.nodes) {
-        if (codes.has(node.code)) {
-          ctx.addIssue({ code: "custom", message: `地图 ${map.code} 节点 code 重复：${node.code}` });
+        const prev = owner.get(node.code);
+        if (prev) {
+          ctx.addIssue({ code: "custom", message: `节点 code 跨地图重复：${node.code}（${prev} 与 ${map.code}）` });
+        } else {
+          owner.set(node.code, map.code);
         }
-        codes.add(node.code);
       }
-      if (!codes.has(map.spawnNodeCode)) {
+    }
+    const mapByCode = new Map(file.maps.map((m) => [m.code, m]));
+    for (const map of file.maps) {
+      const nodeCodes = new Set(map.nodes.map((n) => n.code));
+      if (!nodeCodes.has(map.spawnNodeCode)) {
         ctx.addIssue({ code: "custom", message: `地图 ${map.code} 出生点 ${map.spawnNodeCode} 不在节点表中` });
+      }
+      for (const node of map.nodes) {
+        for (const adj of node.adjacent ?? []) {
+          if (!owner.has(adj)) {
+            ctx.addIssue({
+              code: "custom",
+              message: `地图 ${map.code} 节点 ${node.code} 的 adjacent 引用不存在的节点：${adj}`,
+            });
+          }
+        }
+        const exit = node.exit;
+        if (exit) {
+          const target = mapByCode.get(exit.map);
+          if (!target) {
+            ctx.addIssue({ code: "custom", message: `节点 ${node.code} 的 exit 引用不存在的地图：${exit.map}` });
+          } else if (!target.nodes.some((n) => n.code === exit.node)) {
+            ctx.addIssue({
+              code: "custom",
+              message: `节点 ${node.code} 的 exit 引用地图 ${exit.map} 中不存在的节点：${exit.node}`,
+            });
+          }
+        }
       }
     }
   });

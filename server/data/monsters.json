@@ -1,0 +1,68 @@
+{
+  "monsters": [
+    {
+      "code": "lvmaochong",
+      "name": "绿毛虫",
+      "level": 1,
+      "sprite": "/monsters/LuMaoChong.gif",
+      "hpMin": 20,
+      "hpMax": 40,
+      "atkMin": 2,
+      "atkMax": 4,
+      "def": 0,
+      "dodgeRate": 0.02,
+      "critRate": 0.02,
+      "intervalMs": 2200,
+      "spr": 0,
+      "exp": 40
+    },
+    {
+      "code": "xiaoji",
+      "name": "小鸡",
+      "level": 2,
+      "sprite": "/monsters/XiaoJi.gif",
+      "hpMin": 20,
+      "hpMax": 40,
+      "atkMin": 3,
+      "atkMax": 5,
+      "def": 1,
+      "dodgeRate": 0.03,
+      "critRate": 0.02,
+      "intervalMs": 2000,
+      "spr": 0,
+      "exp": 50
+    },
+    {
+      "code": "hongmogu",
+      "name": "红蘑菇",
+      "level": 4,
+      "sprite": "/monsters/mogu2.gif",
+      "hpMin": 40,
+      "hpMax": 60,
+      "atkMin": 4,
+      "atkMax": 7,
+      "def": 2,
+      "dodgeRate": 0.04,
+      "critRate": 0.03,
+      "intervalMs": 2400,
+      "spr": 0,
+      "exp": 80
+    },
+    {
+      "code": "caoyuanxie",
+      "name": "草原蝎",
+      "level": 5,
+      "sprite": "/monsters/XieZi.gif",
+      "hpMin": 40,
+      "hpMax": 60,
+      "atkMin": 5,
+      "atkMax": 8,
+      "def": 2,
+      "dodgeRate": 0.03,
+      "critRate": 0.03,
+      "intervalMs": 2000,
+      "spr": 0,
+      "exp": 120
+    }
+  ]
+}

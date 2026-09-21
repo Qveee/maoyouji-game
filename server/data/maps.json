@@ -439,8 +439,10 @@
           "short": "牧野草原",
           "x": 374,
           "y": 570,
-          "locked": true,
-          "lockedReason": "牧野草原将在下一切片开放",
+          "exit": {
+            "map": "muye_caoyuan",
+            "node": "my_rukou"
+          },
           "npcs": [
             {
               "name": "小牧童",
@@ -617,6 +619,635 @@
               "titleColor": ""
             }
           ]
+        }
+      ]
+    },
+    {
+      "code": "muye_caoyuan",
+      "name": "牧野草原",
+      "type": "field",
+      "background": "/maps/muyecaoyuan.jpg",
+      "spawnNodeCode": "my_rukou",
+      "nodes": [
+        {
+          "code": "my00",
+          "name": "牧野草原00",
+          "short": "00",
+          "x": 292,
+          "y": 44,
+          "adjacent": [
+            "my01",
+            "my07"
+          ],
+          "spawns": [
+            "lvmaochong",
+            "xiaoji"
+          ],
+          "npcs": []
+        },
+        {
+          "code": "my01",
+          "name": "牧野草原01",
+          "short": "01",
+          "x": 378,
+          "y": 54,
+          "adjacent": [
+            "my00",
+            "my02"
+          ],
+          "spawns": [
+            "lvmaochong",
+            "xiaoji"
+          ],
+          "npcs": []
+        },
+        {
+          "code": "my02",
+          "name": "牧野草原02",
+          "short": "02",
+          "x": 455,
+          "y": 78,
+          "adjacent": [
+            "my01",
+            "my13"
+          ],
+          "spawns": [
+            "lvmaochong",
+            "xiaoji"
+          ],
+          "npcs": []
+        },
+        {
+          "code": "my03",
+          "name": "牧野草原03",
+          "short": "03",
+          "x": 667,
+          "y": 193,
+          "adjacent": [
+            "my_rukou",
+            "my13",
+            "my14"
+          ],
+          "spawns": [
+            "lvmaochong",
+            "xiaoji"
+          ],
+          "npcs": []
+        },
+        {
+          "code": "my04",
+          "name": "牧野草原04",
+          "short": "04",
+          "x": 145,
+          "y": 161,
+          "adjacent": [
+            "my05",
+            "my08"
+          ],
+          "spawns": [
+            "xiaoji",
+            "hongmogu"
+          ],
+          "npcs": []
+        },
+        {
+          "code": "my05",
+          "name": "牧野草原05",
+          "short": "05",
+          "x": 213,
+          "y": 98,
+          "adjacent": [
+            "my06",
+            "my07",
+            "my04"
+          ],
+          "spawns": [
+            "xiaoji",
+            "hongmogu"
+          ],
+          "npcs": []
+        },
+        {
+          "code": "my06",
+          "name": "牧野草原06",
+          "short": "06",
+          "x": 111,
+          "y": 79,
+          "adjacent": [
+            "my05",
+            "my_wanma"
+          ],
+          "spawns": [
+            "xiaoji",
+            "hongmogu"
+          ],
+          "npcs": []
+        },
+        {
+          "code": "my07",
+          "name": "牧野草原07",
+          "short": "07",
+          "x": 284,
+          "y": 115,
+          "adjacent": [
+            "my00",
+            "my05",
+            "my10"
+          ],
+          "spawns": [
+            "lvmaochong",
+            "xiaoji"
+          ],
+          "npcs": []
+        },
+        {
+          "code": "my08",
+          "name": "牧野草原08",
+          "short": "08",
+          "x": 115,
+          "y": 234,
+          "adjacent": [
+            "my04",
+            "my15"
+          ],
+          "spawns": [
+            "xiaoji",
+            "hongmogu"
+          ],
+          "npcs": []
+        },
+        {
+          "code": "my09",
+          "name": "牧野草原09",
+          "short": "09",
+          "x": 328,
+          "y": 358,
+          "adjacent": [
+            "my22",
+            "my23"
+          ],
+          "spawns": [
+            "hongmogu",
+            "caoyuanxie"
+          ],
+          "npcs": []
+        },
+        {
+          "code": "my10",
+          "name": "牧野草原10",
+          "short": "10",
+          "x": 271,
+          "y": 181,
+          "adjacent": [
+            "my11",
+            "my07"
+          ],
+          "spawns": [
+            "lvmaochong",
+            "xiaoji"
+          ],
+          "npcs": []
+        },
+        {
+          "code": "my11",
+          "name": "牧野草原11",
+          "short": "11",
+          "x": 354,
+          "y": 172,
+          "adjacent": [
+            "my12",
+            "my10"
+          ],
+          "spawns": [
+            "lvmaochong",
+            "xiaoji"
+          ],
+          "npcs": []
+        },
+        {
+          "code": "my12",
+          "name": "牧野草原12",
+          "short": "12",
+          "x": 445,
+          "y": 179,
+          "adjacent": [
+            "my17",
+            "my11",
+            "my13"
+          ],
+          "spawns": [
+            "lvmaochong",
+            "xiaoji"
+          ],
+          "npcs": []
+        },
+        {
+          "code": "my13",
+          "name": "牧野草原13",
+          "short": "13",
+          "x": 542,
+          "y": 162,
+          "adjacent": [
+            "my03",
+            "my02",
+            "my12",
+            "my14"
+          ],
+          "spawns": [
+            "lvmaochong",
+            "xiaoji"
+          ],
+          "npcs": []
+        },
+        {
+          "code": "my14",
+          "name": "牧野草原14",
+          "short": "14",
+          "x": 603,
+          "y": 264,
+          "adjacent": [
+            "my13",
+            "my03",
+            "my18"
+          ],
+          "spawns": [
+            "lvmaochong",
+            "xiaoji"
+          ],
+          "npcs": []
+        },
+        {
+          "code": "my15",
+          "name": "牧野草原15",
+          "short": "15",
+          "x": 29,
+          "y": 285,
+          "adjacent": [
+            "my08",
+            "my16",
+            "my20"
+          ],
+          "spawns": [
+            "xiaoji",
+            "hongmogu"
+          ],
+          "npcs": []
+        },
+        {
+          "code": "my16",
+          "name": "牧野草原16",
+          "short": "16",
+          "x": 152,
+          "y": 287,
+          "adjacent": [
+            "my15",
+            "my20"
+          ],
+          "spawns": [
+            "xiaoji",
+            "hongmogu"
+          ],
+          "npcs": []
+        },
+        {
+          "code": "my17",
+          "name": "牧野草原17",
+          "short": "17",
+          "x": 379,
+          "y": 260,
+          "adjacent": [
+            "my24",
+            "my12"
+          ],
+          "spawns": [
+            "xiaoji",
+            "hongmogu"
+          ],
+          "npcs": []
+        },
+        {
+          "code": "my18",
+          "name": "牧野草原18",
+          "short": "18",
+          "x": 534,
+          "y": 297,
+          "adjacent": [
+            "my14",
+            "my24",
+            "my25"
+          ],
+          "spawns": [
+            "xiaoji",
+            "hongmogu"
+          ],
+          "npcs": []
+        },
+        {
+          "code": "my20",
+          "name": "牧野草原20",
+          "short": "20",
+          "x": 78,
+          "y": 356,
+          "adjacent": [
+            "my15",
+            "my16",
+            "my26"
+          ],
+          "spawns": [
+            "xiaoji",
+            "hongmogu"
+          ],
+          "npcs": []
+        },
+        {
+          "code": "my21",
+          "name": "牧野草原21",
+          "short": "21",
+          "x": 184,
+          "y": 424,
+          "adjacent": [
+            "my26",
+            "my22",
+            "my30",
+            "my32"
+          ],
+          "spawns": [
+            "xiaoji",
+            "hongmogu"
+          ],
+          "npcs": []
+        },
+        {
+          "code": "my22",
+          "name": "牧野草原22",
+          "short": "22",
+          "x": 281,
+          "y": 402,
+          "adjacent": [
+            "my21",
+            "my32",
+            "my09"
+          ],
+          "spawns": [
+            "hongmogu",
+            "caoyuanxie"
+          ],
+          "npcs": []
+        },
+        {
+          "code": "my23",
+          "name": "牧野草原23",
+          "short": "23",
+          "x": 390,
+          "y": 384,
+          "adjacent": [
+            "my09",
+            "my24"
+          ],
+          "spawns": [
+            "hongmogu",
+            "caoyuanxie"
+          ],
+          "npcs": []
+        },
+        {
+          "code": "my24",
+          "name": "牧野草原24",
+          "short": "24",
+          "x": 449,
+          "y": 307,
+          "adjacent": [
+            "my23",
+            "my17",
+            "my18"
+          ],
+          "spawns": [
+            "xiaoji",
+            "hongmogu"
+          ],
+          "npcs": []
+        },
+        {
+          "code": "my25",
+          "name": "牧野草原25",
+          "short": "25",
+          "x": 568,
+          "y": 339,
+          "adjacent": [
+            "my18",
+            "my27",
+            "my28"
+          ],
+          "spawns": [
+            "xiaoji",
+            "hongmogu"
+          ],
+          "npcs": []
+        },
+        {
+          "code": "my26",
+          "name": "牧野草原26",
+          "short": "26",
+          "x": 83,
+          "y": 441,
+          "adjacent": [
+            "my20",
+            "my21",
+            "my30"
+          ],
+          "spawns": [
+            "xiaoji",
+            "hongmogu"
+          ],
+          "npcs": []
+        },
+        {
+          "code": "my27",
+          "name": "牧野草原27",
+          "short": "27",
+          "x": 547,
+          "y": 407,
+          "adjacent": [
+            "my25",
+            "my36"
+          ],
+          "spawns": [
+            "hongmogu",
+            "caoyuanxie"
+          ],
+          "npcs": []
+        },
+        {
+          "code": "my28",
+          "name": "牧野草原28",
+          "short": "28",
+          "x": 663,
+          "y": 413,
+          "adjacent": [
+            "my25",
+            "my35"
+          ],
+          "spawns": [
+            "hongmogu",
+            "caoyuanxie"
+          ],
+          "npcs": []
+        },
+        {
+          "code": "my30",
+          "name": "牧野草原30",
+          "short": "30",
+          "x": 125,
+          "y": 499,
+          "adjacent": [
+            "my26",
+            "my21",
+            "my31"
+          ],
+          "spawns": [
+            "hongmogu",
+            "caoyuanxie"
+          ],
+          "npcs": []
+        },
+        {
+          "code": "my31",
+          "name": "牧野草原31",
+          "short": "31",
+          "x": 203,
+          "y": 512,
+          "adjacent": [
+            "my30",
+            "my32"
+          ],
+          "spawns": [
+            "hongmogu",
+            "caoyuanxie"
+          ],
+          "npcs": []
+        },
+        {
+          "code": "my32",
+          "name": "牧野草原32",
+          "short": "32",
+          "x": 285,
+          "y": 504,
+          "adjacent": [
+            "my31",
+            "my21",
+            "my22",
+            "my33"
+          ],
+          "spawns": [
+            "hongmogu",
+            "caoyuanxie"
+          ],
+          "npcs": []
+        },
+        {
+          "code": "my33",
+          "name": "牧野草原33",
+          "short": "33",
+          "x": 419,
+          "y": 487,
+          "adjacent": [
+            "my36",
+            "my32"
+          ],
+          "spawns": [
+            "hongmogu",
+            "caoyuanxie"
+          ],
+          "npcs": []
+        },
+        {
+          "code": "my34",
+          "name": "牧野草原34",
+          "short": "34",
+          "x": 569,
+          "y": 473,
+          "adjacent": [
+            "my36",
+            "my35"
+          ],
+          "spawns": [
+            "hongmogu",
+            "caoyuanxie"
+          ],
+          "npcs": []
+        },
+        {
+          "code": "my35",
+          "name": "牧野草原35",
+          "short": "35",
+          "x": 673,
+          "y": 483,
+          "adjacent": [
+            "my34",
+            "my28",
+            "my_aolin"
+          ],
+          "spawns": [
+            "hongmogu",
+            "caoyuanxie"
+          ],
+          "npcs": []
+        },
+        {
+          "code": "my36",
+          "name": "牧野草原36",
+          "short": "36",
+          "x": 488,
+          "y": 457,
+          "adjacent": [
+            "my27",
+            "my33",
+            "my34"
+          ],
+          "spawns": [
+            "hongmogu",
+            "caoyuanxie"
+          ],
+          "npcs": []
+        },
+        {
+          "code": "my_rukou",
+          "name": "村口",
+          "short": "猫隐村",
+          "x": 700,
+          "y": 108,
+          "exit": {
+            "map": "maoyin_village",
+            "node": "muye03"
+          },
+          "adjacent": [
+            "my03"
+          ],
+          "npcs": []
+        },
+        {
+          "code": "my_wanma",
+          "name": "万马草原口",
+          "short": "万马草原",
+          "x": 17,
+          "y": 19,
+          "locked": true,
+          "adjacent": [
+            "my06"
+          ],
+          "npcs": []
+        },
+        {
+          "code": "my_aolin",
+          "name": "矮林边界",
+          "short": "低矮林地",
+          "x": 704,
+          "y": 527,
+          "locked": true,
+          "adjacent": [
+            "my35"
+          ],
+          "npcs": []
         }
       ]
     }

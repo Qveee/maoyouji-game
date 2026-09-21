@@ -1,0 +1,29 @@
+{
+  "skills": [
+    {
+      "code": "qiangli_daji",
+      "name": "强力打击",
+      "profession": "warrior",
+      "preset": true,
+      "kind": "next_hit_bonus",
+      "bonusDamage": 10,
+      "spCost": 25,
+      "cdMs": 5000,
+      "castMs": 0,
+      "description": "下一次近战攻击伤害提高 10 点（消耗 25SP，冷却 5 秒）"
+    },
+    {
+      "code": "huoqiu_shu",
+      "name": "火球术",
+      "profession": "mage",
+      "preset": true,
+      "kind": "direct_damage",
+      "dmgMin": 17,
+      "dmgMax": 23,
+      "spCost": 20,
+      "cdMs": 0,
+      "castMs": 5000,
+      "description": "发射火球造成 17~23 点火焰伤害（消耗 20SP，咏唱 5 秒）"
+    }
+  ]
+}

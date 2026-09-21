@@ -67,14 +67,14 @@ describe("地图与移动", () => {
     expect(res.statusCode).toBe(404);
   });
 
-  it("移动到锁定出口（牧野草原03）返回 400", async () => {
+  it("移动到已解锁的牧野草原入口（牧野草原03）成功", async () => {
     const res = await app.inject({
       method: "POST",
       url: "/api/map/move",
       headers: { cookie: charCookie },
       payload: { toCode: "muye03" },
     });
-    expect(res.statusCode).toBe(400);
-    expect(res.json().message).toContain("下一切片");
+    expect(res.statusCode).toBe(200);
+    expect(res.json().node).toMatchObject({ code: "muye03", name: "牧野草原03" });
   });
 });
