@@ -984,11 +984,14 @@ onUnmounted(() => {
 .bt-unit { display: flex; flex-direction: column; align-items: center; gap: 6px; width: 170px; }
 .bt-sprite { display: flex; align-items: flex-end; justify-content: center; filter: drop-shadow(0 3px 2px rgba(20, 40, 20, 0.35)); }
 .bt-sprite img { height: 160px; width: auto; image-rendering: pixelated; }
+/* 我方宠物按用户要求放大到原型 2 倍；怪物保持原型 80px 不放大 */
+.bt-foe .bt-sprite img { height: 80px; }
 .bt-shadow { width: 184px; height: 13px; border-radius: 50%; background: rgba(30, 60, 30, 0.25); }
-/* 飘字锚点：与两侧单位对齐（stage 左右 padding 46px + 单位宽 170px）；bottom 随精灵 2 倍放大上移，保证飘字在头顶之上 */
-.floats-me, .floats-foe { position: absolute; bottom: 220px; width: 170px; height: 2px; pointer-events: none; }
-.floats-me { left: 46px; }
-.floats-foe { right: 46px; }
+.bt-foe .bt-shadow { width: 92px; }
+/* 飘字锚点：与两侧单位对齐（stage 左右 padding 46px + 单位宽 170px）；bottom 各自跟随本侧精灵头顶 */
+.floats-me, .floats-foe { position: absolute; width: 170px; height: 2px; pointer-events: none; }
+.floats-me { left: 46px; bottom: 220px; }
+.floats-foe { right: 46px; bottom: 140px; }
 .bt-float {
   position: absolute;
   left: 50%;
