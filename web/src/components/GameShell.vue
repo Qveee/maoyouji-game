@@ -1117,10 +1117,10 @@ onUnmounted(() => {
 .npc .tt.t-green { color: #178714; }
 .npc .tt.t-orange { color: #d97a00; }
 
-/* 怪物列表行（野外格，照原型）：绿名 + 红笔攻击图标（无血条/等级）；点名字开详情浮窗，点红笔开战 */
-.mon { display: flex; align-items: center; gap: 5px; line-height: 20px; white-space: nowrap; overflow: hidden; cursor: pointer; }
+/* 怪物列表行（野外格，照原型 .npc）：深蓝名 + 红笔攻击图标（无血条/等级）；点名字开详情浮窗，点红笔开战 */
+.mon { display: flex; align-items: center; gap: 4px; line-height: 20px; white-space: nowrap; overflow: hidden; cursor: pointer; }
 .mon:hover { background: #d9eef8; }
-.mon .mname { color: #178714; font-weight: bold; white-space: nowrap; }
+.mon .mname { color: #14506e; font-weight: bold; white-space: nowrap; }
 .mon:hover .mname { color: #0d6ba8; }
 .mon .atk-ico { width: 12px; height: 12px; flex: none; cursor: pointer; }
 
