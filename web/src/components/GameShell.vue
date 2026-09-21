@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref, watch } from "vue";
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue";
 import {
   api,
   ApiError,
@@ -34,6 +34,7 @@ type LogLine =
   | { time: string; text: string; kind: "sys" | "chat" }
   | { time: string; text: string; kind: "battle"; parts: { t: string; cls: string }[] };
 const messages = ref<LogLine[]>([]);
+const chatBodyEl = ref<HTMLElement | null>(null); // 聊天记录滚动容器（自动贴底用）
 const chatText = ref("");
 const channel = ref("区域");
 const CHANNEL_OF: Record<string, string> = { 区域: "area", 世界: "world", 私聊: "private" };
@@ -97,6 +98,15 @@ function now() {
 function say(text: string, kind: "sys" | "chat" = "sys") {
   messages.value.push({ time: now(), text, kind });
   if (messages.value.length > 60) messages.value.shift();
+  void nextTick(stickChat);
+}
+
+/** 聊天区自动贴底：新行追加后视口跟随到底部；上滚超 40px 阅读历史时不拽回 */
+function stickChat() {
+  const el = chatBodyEl.value;
+  if (!el) return;
+  const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 40;
+  if (nearBottom) el.scrollTop = el.scrollHeight;
 }
 
 /** 血量/蓝量百分比（封顶 0~100，防异常数据撑破条） */
@@ -226,6 +236,7 @@ function pushBattleLine(text: string, t?: number) {
     parts: battleParts(text, battle.value?.foeName ?? ""),
   });
   if (messages.value.length > 60) messages.value.shift();
+  void nextTick(stickChat);
 }
 
 /** 日志行分词上色：仅按「怪名」「你」两个 token 切分，不做逐词解析；foeName 由调用方在 push 时传入 */
@@ -248,12 +259,41 @@ function spawnFloat(target: "me" | "foe", cls: string, text: string) {
   }, 1000);
 }
 
+// ---------- 战斗单位动作（照原型 unitAnim） ----------
+
+const meUnitEl = ref<HTMLElement | null>(null);
+const foeUnitEl = ref<HTMLElement | null>(null);
+
+/** 出手前冲：原型 unitAnim 同款手法（移除类 → 强制 reflow → 加回），同类连发可重新起播；.5s 播完自然静止 */
+function lunge(side: "me" | "foe") {
+  const el = side === "me" ? meUnitEl.value : foeUnitEl.value;
+  if (!el) return;
+  el.classList.remove("atk");
+  void el.offsetWidth; // 强制 reflow，保证动画从头重播
+  el.classList.add("atk");
+}
+
+/** 终局倒地：victory 怪倒、defeat 我倒、draw 都不倒 */
+function markDead(result: "victory" | "defeat" | "draw") {
+  if (result === "victory") foeUnitEl.value?.classList.add("dead");
+  else if (result === "defeat") meUnitEl.value?.classList.add("dead");
+}
+
+/** 清掉两个单位的 atk/dead 类：开战/恢复/收摊时调用，防跨场残留 */
+function resetUnitAnim() {
+  for (const el of [meUnitEl.value, foeUnitEl.value]) el?.classList.remove("atk", "dead");
+}
+
 /** 事件消费：side 是出手方 → 飘字落受击方；日志行恒追加（恢复回放时 animate=false 不飘字） */
 function consumeEvent(e: BattleEvent, animate: boolean) {
   if (e.seq <= battleSinceSeq) return; // 去重：轮询与技能请求并发在途时可能带回同一批增量
   battleSinceSeq = Math.max(battleSinceSeq, e.seq);
   pushBattleLine(e.text, e.t);
   if (!animate) return;
+  // 出手前冲：side 是出手方，hit/crit/skill/miss 都算一次出手动作（regen/stun/end 不冲）
+  if (e.kind === "hit" || e.kind === "crit" || e.kind === "skill" || e.kind === "miss") {
+    lunge(e.side);
+  }
   const stricken: "me" | "foe" = e.side === "me" ? "foe" : "me"; // 受击方
   if (e.kind === "miss") {
     spawnFloat(stricken, "f-miss", "闪避");
@@ -273,6 +313,7 @@ function applyBattle(res: BattleResponse, animate = true) {
     if (res.state.over) return;
     foeLevel.value = 0; // 恢复态 /state 无等级，隐藏 Lv.；开战路径在调用后补点击项等级
     battleSinceSeq = -1;
+    resetUnitAnim(); // 开战/恢复先清动作类，防上一场的前冲/倒地残留
     battleActive.value = true;
     startBattleTimer();
   }
@@ -287,6 +328,7 @@ function applyBattle(res: BattleResponse, animate = true) {
 /** 终局：中央横幅 3 秒 → 关覆盖层 → 重拉地图（尸体/复活可见）+ 通知 App 刷新角色（升级/回城即时反映） */
 function startSettlement(over: NonNullable<BattleResponseState["over"]>) {
   battleEnding = true;
+  markDead(over.result); // 终局倒地表现与横幅同帧出现
   banner.value =
     over.result === "victory"
       ? { cls: "win", title: "胜利", sub: `获得 ${over.expGained ?? 0} 点经验` }
@@ -313,6 +355,7 @@ function resetBattleUi() {
   battleActive.value = false;
   battle.value = null;
   battleFloats.value = [];
+  resetUnitAnim(); // 收摊清动作类
 }
 
 /** 服务端已无进行中的战斗（轮询 404）且前端仍处战斗态：静默收摊刷新，防软锁 */
@@ -556,11 +599,11 @@ onUnmounted(() => {
             </div>
 
             <div class="bt-stage">
-              <div class="bt-unit">
+              <div ref="meUnitEl" class="bt-unit bt-me">
                 <div class="bt-sprite"><img :src="petGif" :alt="character.name" /></div>
                 <div class="bt-shadow"></div>
               </div>
-              <div class="bt-unit">
+              <div ref="foeUnitEl" class="bt-unit bt-foe">
                 <div class="bt-sprite"><img v-if="battle.foeSprite" :src="battle.foeSprite" :alt="battle.foeName" /></div>
                 <div class="bt-shadow"></div>
               </div>
@@ -596,7 +639,7 @@ onUnmounted(() => {
           <div v-if="toastText" class="toast">{{ toastText }}</div>
         </div>
         <div class="chatlog panel">
-          <div class="body scr">
+          <div ref="chatBodyEl" class="body scr">
             <p v-for="(m, i) in messages" :key="i" :class="m.kind">
               <time>{{ m.time }}</time>
               <!-- 战斗日志行：你=红 #F52627、怪名=绿下划线（格式照原型）；parts 已在 push 时烘焙，历史行不再重建 -->
@@ -629,6 +672,8 @@ onUnmounted(() => {
               @click="startBattle(m)"
             >
               <b class="mname">{{ m.name }}</b>
+              <!-- 红笔攻击图标（照原型 .npc img.atk-ico）：行已可点开战，图标仅作视觉指示 -->
+              <img class="atk-ico" src="/icons/attack.gif" alt="攻击" title="攻击" />
               <span class="mlv">Lv.{{ m.level }}</span>
               <span class="mbar"><i :style="{ width: pct(m.hp, m.maxHp) + '%' }"></i></span>
               <span class="mhp">{{ m.hp }}/{{ m.maxHp }}</span>
@@ -903,6 +948,13 @@ onUnmounted(() => {
   to { opacity: 0; transform: translate(-50%, -54px); }
 }
 @media (prefers-reduced-motion: reduce) { .bt-float { animation: none; opacity: 0; } }
+/* 出手前冲与终局倒地（CSS 照原型逐字）：我方在左往右冲、怪在右往左冲 */
+.bt-me.atk .bt-sprite { animation: lungeR .5s ease; }
+.bt-foe.atk .bt-sprite { animation: lungeL .5s ease; }
+@keyframes lungeR { 35% { transform: translateX(64px); } }
+@keyframes lungeL { 35% { transform: translateX(-64px); } }
+.bt-unit.dead .bt-sprite { filter: grayscale(1) brightness(.65); transform: translateY(12px) rotate(9deg); transition: all .6s ease; }
+@media (prefers-reduced-motion: reduce) { .bt-me.atk .bt-sprite, .bt-foe.atk .bt-sprite { animation: none; } }
 /* 结算横幅 */
 .bt-result {
   position: absolute;
@@ -998,6 +1050,8 @@ onUnmounted(() => {
 .mon:hover { background: #d9eef8; }
 .mon .mname { color: #178714; font-weight: bold; white-space: nowrap; }
 .mon:hover .mname { color: #0d6ba8; }
+/* 红笔攻击图标（照原型 .npc img.atk-ico） */
+.mon .atk-ico { width: 12px; height: 12px; flex: none; cursor: pointer; }
 .mon .mlv { flex: none; font-size: 11px; color: #8b7b55; }
 .mon .mbar {
   position: relative;
