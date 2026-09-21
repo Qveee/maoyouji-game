@@ -155,12 +155,8 @@ function doRegister() {
 </template>
 
 <style scoped>
-/* 视图容器：占满金板内区，压住木纹伪元素 */
-.view {
-  position: relative;
-  z-index: 2;
-  height: 100%;
-}
+/* 说明：.view / .vtitle / .btn-big / .txt 为三视图共享原语，统一收在 ImmersiveStage.vue
+   的非 scoped 块（.scene 前缀），此处只留本组件差异覆盖。 */
 
 /* ---- 登录视图：左表单 + 右公告 ---- */
 .login-grid {
@@ -183,20 +179,7 @@ function doRegister() {
   display: inline-block;
   width: 5em;
 }
-.txt {
-  width: 182px;
-  padding: 3px 7px;
-  font: 12px "SimSun", serif;
-  background: #fff;
-  border: 1px solid #b9b9b9;
-  box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.14);
-  border-radius: 2px;
-}
-.txt:focus {
-  outline: none;
-  border-color: var(--link-blue);
-}
-.cap-input {
+.txt.cap-input {
   width: 74px;
 }
 .srv-name {
@@ -378,17 +361,6 @@ function doRegister() {
   font-family: Arial, sans-serif;
 }
 
-/* ---- 视图大标题（注册视图复用原型 .vtitle） ---- */
-.vtitle {
-  margin: 4px 0 18px;
-  text-align: center;
-  font-family: "STHupo", "华文琥珀", "SimSun", sans-serif;
-  font-size: 30px;
-  letter-spacing: 8px;
-  color: var(--red-strong);
-  text-shadow: 2px 0 0 #ffe98f, -2px 0 0 #ffe98f, 0 2px 0 #ffe98f, 0 -2px 0 #ffe98f, 3px 3px 0 #ffe98f, 0 5px 6px rgba(120, 60, 0, 0.32);
-}
-
 /* ---- 注册视图（新增） ---- */
 .reg-form {
   max-width: 420px;
@@ -399,28 +371,5 @@ function doRegister() {
   justify-content: center;
   gap: 18px;
   margin-top: 26px;
-}
-.btn-big {
-  cursor: pointer;
-  font-family: "STHupo", "华文琥珀", "SimSun", sans-serif;
-  font-size: 19px;
-  letter-spacing: 6px;
-  text-indent: 6px;
-  padding: 8px 26px;
-  border-radius: 9px;
-  border: 2px solid var(--brown-line);
-}
-.btn-big.gold {
-  color: var(--red-word);
-  background: linear-gradient(180deg, var(--btn-gold-a), var(--btn-gold-b));
-  box-shadow: inset 0 2px 0 #fff6c8, 0 4px 0 #7a4a10, 0 7px 10px rgba(80, 40, 0, 0.35);
-}
-.btn-big.brown {
-  color: var(--brown-text);
-  background: linear-gradient(180deg, var(--brown-a), var(--brown-b));
-  box-shadow: inset 0 1px 0 rgba(255, 240, 200, 0.4), 0 4px 0 #3e2208, 0 7px 10px rgba(50, 25, 0, 0.35);
-}
-.btn-big:active {
-  transform: translateY(2px);
 }
 </style>

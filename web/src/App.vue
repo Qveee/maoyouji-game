@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { api, type Character, type Pet } from "./api";
+import { petGifOf } from "./pets";
 import LoginPanel from "./components/LoginPanel.vue";
 import CharacterSelect from "./components/CharacterSelect.vue";
 import GameShell from "./components/GameShell.vue";
@@ -14,11 +15,7 @@ const pets = ref<Pet[]>([]);
 const current = ref<Character | null>(null);
 const message = ref("");
 
-const petNameOf = (code: string) => pets.value.find((p) => p.code === code)?.name ?? code;
-const petGifOf = (code: string) => {
-  const sprite = pets.value.find((p) => p.code === code)?.sprite ?? "宠物/朝右/猫.gif";
-  return `/pets/${encodeURIComponent(sprite.split("/").pop() ?? "")}`;
-};
+const currentPetGif = computed(() => petGifOf(pets.value.find((p) => p.code === current.value?.breedCode)));
 
 async function refresh(keepView = false) {
   try {
@@ -88,7 +85,9 @@ async function remove(id: number) {
   message.value = "";
   try {
     await api.deleteCharacter(id);
-    await refresh();
+    // keepView：删除后留在选角页——被删角色未必是当前选中的，刷新若发现
+    // 旧 characterId 仍有效会把用户弹进游戏视图
+    await refresh(true);
   } catch (err) {
     message.value = err instanceof Error ? err.message : "删除失败";
   }
@@ -119,7 +118,7 @@ onMounted(refresh);
       v-else-if="view === 'game' && current"
       :username="username"
       :character="current"
-      :pet-gif="petGifOf(current.breedCode)"
+      :pet-gif="currentPetGif"
       @switch-view="view = 'select'"
       @character-changed="refresh"
     />

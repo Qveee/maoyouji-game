@@ -122,8 +122,6 @@ defineExpose({ toast });
   --cream: #fff6d8;
   --cap-bg: #dff5c8;
   --cap-ink: #3e6b2a;
-  --panel-top: #fff3a0;
-  --panel-bot: #f8c33c;
   --ink-navy: #14506e;
   --link-blue: #1e7fb8;
   --ink-brown: #5c3a10;
@@ -529,5 +527,76 @@ defineExpose({ toast });
   border: 2px solid #ffe9b0;
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+}
+</style>
+
+<style>
+/* ============================================================
+   三视图共享样式原语（非 scoped，统一以 .scene 作祖先前缀限定作用域，
+   不外溢到 GameShell 的 btn3d 体系；组件内只保留差异覆盖）
+   ============================================================ */
+/* 视图容器：占满金板内区，压住木纹伪元素 */
+.scene .view {
+  position: relative;
+  z-index: 2;
+  height: 100%;
+}
+
+/* 视图大标题（选角「请选择角色」/ 注册「注册新账号」） */
+.scene .vtitle {
+  margin: 4px 0 18px;
+  text-align: center;
+  font-family: "STHupo", "华文琥珀", "SimSun", sans-serif;
+  font-size: 30px;
+  letter-spacing: 8px;
+  color: var(--red-strong);
+  text-shadow: 2px 0 0 #ffe98f, -2px 0 0 #ffe98f, 0 2px 0 #ffe98f, 0 -2px 0 #ffe98f, 3px 3px 0 #ffe98f,
+    0 5px 6px rgba(120, 60, 0, 0.32);
+}
+
+/* 输入框基类（白底 / 边框 / inset 阴影 / 宋体 12px） */
+.scene .txt {
+  width: 182px;
+  padding: 3px 7px;
+  font: 12px "SimSun", serif;
+  background: #fff;
+  border: 1px solid #b9b9b9;
+  box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.14);
+  border-radius: 2px;
+}
+.scene .txt:focus {
+  outline: none;
+  border-color: var(--link-blue);
+}
+
+/* 大按钮（开始游戏/创建角色/删除角色/退出登录/确认注册/返回登录） */
+.scene .btn-big {
+  cursor: pointer;
+  font-family: "STHupo", "华文琥珀", "SimSun", sans-serif;
+  font-size: 19px;
+  letter-spacing: 6px;
+  text-indent: 6px;
+  padding: 8px 26px;
+  border-radius: 9px;
+  border: 2px solid var(--brown-line);
+}
+.scene .btn-big.gold {
+  color: var(--red-word);
+  background: linear-gradient(180deg, var(--btn-gold-a), var(--btn-gold-b));
+  box-shadow: inset 0 2px 0 #fff6c8, 0 4px 0 #7a4a10, 0 7px 10px rgba(80, 40, 0, 0.35);
+}
+.scene .btn-big.brown {
+  color: var(--brown-text);
+  background: linear-gradient(180deg, var(--brown-a), var(--brown-b));
+  box-shadow: inset 0 1px 0 rgba(255, 240, 200, 0.4), 0 4px 0 #3e2208, 0 7px 10px rgba(50, 25, 0, 0.35);
+}
+.scene .btn-big.red {
+  color: #ffe9b0;
+  background: linear-gradient(180deg, #c94a3a, #8f2114);
+  border-color: #5e130a;
+  box-shadow: inset 0 1px 0 rgba(255, 220, 200, 0.35), 0 4px 0 #4a0f06, 0 7px 10px rgba(50, 10, 0, 0.35);
+}
+.scene .btn-big:active {
+  transform: translateY(2px);
 }
 </style>

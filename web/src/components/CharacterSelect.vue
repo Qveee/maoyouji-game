@@ -8,6 +8,7 @@
  */
 import { computed, ref, watch } from "vue";
 import ImmersiveStage from "./ImmersiveStage.vue";
+import { petGifOf } from "../pets";
 import type { Character, Pet } from "../api";
 
 const props = defineProps<{ characters: Character[]; pets: Pet[]; message: string }>();
@@ -25,13 +26,12 @@ function toast(msg: string) {
 
 const professionName = { warrior: "战士", mage: "法师" } as const;
 
+/** 角色数上限（与服务端 characters 路由的上限对齐） */
+const MAX_CHARACTERS = 5;
+
 /* ---- 宠物静态数据工具 ---- */
 const petOf = (code: string) => props.pets.find((p) => p.code === code);
 const petNameOf = (code: string) => petOf(code)?.name ?? code;
-const petGifOf = (code: string) => {
-  const sprite = petOf(code)?.sprite ?? "宠物/朝右/猫.gif";
-  return `/pets/${encodeURIComponent(sprite.split("/").pop() ?? "")}`;
-};
 
 /* ---- 子视图切换：char 选角 / create 创建，标题带随之切换 ---- */
 const sub = ref<"char" | "create">("char");
@@ -41,7 +41,8 @@ const title = computed(() => (sub.value === "char" ? "选择角色" : "创建角
 const selIndex = ref(0);
 const selChar = computed(() => props.characters[selIndex.value] ?? null);
 
-/* 创建成功：列表变长 → 选中末尾新角色并落回选角子视图；删除失败等：收紧选中下标 */
+/* 创建成功：列表变长 → 选中末尾新角色并落回选角子视图；删除失败等：收紧选中下标。
+ * 注意：任何列表增长都会跳回选角页；若未来引入轮询/多标签同步，需改为比对新建角色 id（App 传回） */
 watch(
   () => props.characters.length,
   (n, old) => {
@@ -71,8 +72,8 @@ function removeChar() {
   }
 }
 function gotoCreate() {
-  if (props.characters.length >= 5) {
-    toast("每个账号最多 5 个角色");
+  if (props.characters.length >= MAX_CHARACTERS) {
+    toast(`每个账号最多 ${MAX_CHARACTERS} 个角色`);
     return;
   }
   characterName.value = "";
@@ -128,7 +129,7 @@ function backToChar() {
             :class="{ sel: i === selIndex }"
             @click="selIndex = i"
           >
-            <img :src="petGifOf(c.breedCode)" :alt="petNameOf(c.breedCode)" />
+            <img :src="petGifOf(petOf(c.breedCode))" :alt="petNameOf(c.breedCode)" />
             <b>{{ c.name }}</b>
             <i>Lv.{{ c.level }} · {{ professionName[c.profession] }}</i>
           </div>
@@ -149,7 +150,7 @@ function backToChar() {
       <div class="create-grid">
         <!-- 左：舞台预览（图/名/描述/五维条） -->
         <div class="stage-box">
-          <img v-if="selPet" :src="petGifOf(selPet.code)" :alt="selPet.name" />
+          <img v-if="selPet" :src="petGifOf(selPet)" :alt="selPet.name" />
           <b>{{ selPet?.name }}</b>
           <p>{{ selPet?.description }}</p>
           <div v-for="row in statRows" :key="row.label" class="stat">
@@ -168,7 +169,7 @@ function backToChar() {
               :class="{ sel: p.code === selectedPetCode }"
               @click="selectedPetCode = p.code"
             >
-              <img :src="petGifOf(p.code)" :alt="p.name" />
+              <img :src="petGifOf(p)" :alt="p.name" />
               <span>{{ p.name }}</span>
             </div>
           </div>
@@ -206,23 +207,8 @@ function backToChar() {
 </template>
 
 <style scoped>
-/* 视图容器：占满金板内区，压住木纹伪元素 */
-.view {
-  position: relative;
-  z-index: 2;
-  height: 100%;
-}
-
-/* ---- 大标题（请选择角色） ---- */
-.vtitle {
-  margin: 4px 0 18px;
-  text-align: center;
-  font-family: "STHupo", "华文琥珀", "SimSun", sans-serif;
-  font-size: 30px;
-  letter-spacing: 8px;
-  color: var(--red-strong);
-  text-shadow: 2px 0 0 #ffe98f, -2px 0 0 #ffe98f, 0 2px 0 #ffe98f, 0 -2px 0 #ffe98f, 3px 3px 0 #ffe98f, 0 5px 6px rgba(120, 60, 0, 0.32);
-}
+/* 说明：.view / .vtitle / .btn-big / .txt 为三视图共享原语，统一收在 ImmersiveStage.vue
+   的非 scoped 块（.scene 前缀），此处只留本组件差异覆盖。 */
 
 /* ---- 角色卡片网格 ---- */
 .char-list {
@@ -284,35 +270,6 @@ function backToChar() {
   justify-content: center;
   gap: 18px;
   margin-top: 18px;
-}
-.btn-big {
-  cursor: pointer;
-  font-family: "STHupo", "华文琥珀", "SimSun", sans-serif;
-  font-size: 19px;
-  letter-spacing: 6px;
-  text-indent: 6px;
-  padding: 8px 26px;
-  border-radius: 9px;
-  border: 2px solid var(--brown-line);
-}
-.btn-big.gold {
-  color: var(--red-word);
-  background: linear-gradient(180deg, var(--btn-gold-a), var(--btn-gold-b));
-  box-shadow: inset 0 2px 0 #fff6c8, 0 4px 0 #7a4a10, 0 7px 10px rgba(80, 40, 0, 0.35);
-}
-.btn-big.brown {
-  color: var(--brown-text);
-  background: linear-gradient(180deg, var(--brown-a), var(--brown-b));
-  box-shadow: inset 0 1px 0 rgba(255, 240, 200, 0.4), 0 4px 0 #3e2208, 0 7px 10px rgba(50, 25, 0, 0.35);
-}
-.btn-big.red {
-  color: #ffe9b0;
-  background: linear-gradient(180deg, #c94a3a, #8f2114);
-  border-color: #5e130a;
-  box-shadow: inset 0 1px 0 rgba(255, 220, 200, 0.35), 0 4px 0 #4a0f06, 0 7px 10px rgba(50, 10, 0, 0.35);
-}
-.btn-big:active {
-  transform: translateY(2px);
 }
 
 /* ---- 中按钮（确认创建/返回上一页） ---- */
