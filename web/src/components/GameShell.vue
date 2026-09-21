@@ -29,7 +29,11 @@ const camY = ref(0);
 
 const map = ref<MapCurrent | null>(null);
 const fitScale = ref(1);
-const messages = ref<{ time: string; text: string; kind: "sys" | "chat" | "battle" }[]>([]);
+/** 聊天记录行：战斗行在 push 时以当帧怪名烘焙分词结果（parts），战斗结束后历史行配色不回退 */
+type LogLine =
+  | { time: string; text: string; kind: "sys" | "chat" }
+  | { time: string; text: string; kind: "battle"; parts: { t: string; cls: string }[] };
+const messages = ref<LogLine[]>([]);
 const chatText = ref("");
 const channel = ref("区域");
 const CHANNEL_OF: Record<string, string> = { 区域: "area", 世界: "world", 私聊: "private" };
@@ -171,6 +175,7 @@ function todo(what: string) {
 // ---------- 战斗 ----------
 
 /** 职业 preset 技能（MVP 口径：按职业直接可用，切片 5+ 接技能学习后替换） */
+// 数值须与 server/data/skills.json 保持同步，切片 8 xlsx 导入后复核
 const PRESET_SKILL: Record<
   Character["profession"],
   { code: string; name: string; sp: number; cdMs: number }
@@ -212,19 +217,20 @@ function isBattleConflict(err: unknown): err is ApiError {
   return err instanceof ApiError && err.status === 409 && typeof err.body.battleId === "number";
 }
 
-/** 战斗日志行：text 服务端中文直出，简单按已知 token 上色（你=红、怪名=绿下划线，照原型格式） */
+/** 战斗日志行：text 服务端中文直出，push 时按「怪名」「你」烘焙上色分词（你=红、怪名=绿下划线，照原型格式） */
 function pushBattleLine(text: string, t?: number) {
   messages.value.push({
     time: t ? new Date(t).toLocaleTimeString("zh-CN", { hour12: false }) : now(),
     text,
     kind: "battle",
+    parts: battleParts(text, battle.value?.foeName ?? ""),
   });
   if (messages.value.length > 60) messages.value.shift();
 }
 
-/** 日志行分词上色：仅按「怪名」「你」两个 token 切分，不做逐词解析 */
-function battleParts(text: string): { t: string; cls: string }[] {
-  const name = battle.value?.foeName ?? "";
+/** 日志行分词上色：仅按「怪名」「你」两个 token 切分，不做逐词解析；foeName 由调用方在 push 时传入 */
+function battleParts(text: string, foeName: string): { t: string; cls: string }[] {
+  const name = foeName;
   const esc = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   const re = new RegExp(`(${(name ? `${esc(name)}|` : "") + esc("你")})`, "g");
   return text
@@ -263,11 +269,15 @@ function applyBattle(res: BattleResponse, animate = true) {
   clock.serverNow = res.state.now;
   clock.localAt = Date.now();
   if (!battleActive.value) {
+    // 带 over 的响应必来自已收摊的旧战斗（全新开战的响应 over 恒为 null），勿借其在途 200「复活」战斗态
+    if (res.state.over) return;
     foeLevel.value = 0; // 恢复态 /state 无等级，隐藏 Lv.；开战路径在调用后补点击项等级
     battleSinceSeq = -1;
     battleActive.value = true;
     startBattleTimer();
   }
+  // 乱序守卫：技能响应与轮询快照并发在途时可能乱序到达，旧快照（now 更小）整包丢弃，防 HP/SP/CD 回跳
+  if (battle.value && res.state.now < battle.value.now) return;
   battle.value = res.state;
   for (const e of res.events) consumeEvent(e, animate);
   // /skill 可能 200 + over 非空（这一击打出胜负，技能未激活 SP 未扣）——按终局处理
@@ -321,7 +331,7 @@ async function resumeBattle() {
     const res = await api.battleState(-1);
     applyBattle(res, false); // 恢复的历史事件只进日志，不重放飘字
   } catch {
-    /* 404=当前没有进行中的战斗；其余错误下一轮重试 */
+    /* 404=当前没有进行中的战斗；其余错误不重试，后续 move/开战 409 会重新尝试恢复 */
   }
 }
 
@@ -589,9 +599,9 @@ onUnmounted(() => {
           <div class="body scr">
             <p v-for="(m, i) in messages" :key="i" :class="m.kind">
               <time>{{ m.time }}</time>
-              <!-- 战斗日志行：你=红 #F52627、怪名=绿下划线（格式照原型） -->
+              <!-- 战斗日志行：你=红 #F52627、怪名=绿下划线（格式照原型）；parts 已在 push 时烘焙，历史行不再重建 -->
               <template v-if="m.kind === 'battle'">
-                <template v-for="(p, j) in battleParts(m.text)" :key="j">
+                <template v-for="(p, j) in m.parts" :key="j">
                   <span v-if="p.cls" :class="p.cls">{{ p.t }}</span>
                   <template v-else>{{ p.t }}</template>
                 </template>
