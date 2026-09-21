@@ -52,10 +52,10 @@ beforeAll(async () => {
     payload: { characterId: mageId },
   });
   mageCookie = cookieOf(selB);
-  // 战士进草原 my03：muye03（跨图落 my_rukou）→ my03（相邻）
+  // 战士进草原 my03：muye03 跨图直落 my03（门牌点对面的实际格子）
   await move(warriorCookie, "muye03");
   await move(warriorCookie, "my03");
-  // 法师进 my13：my_rukou → my03 → my13
+  // 法师进 my13：muye03 跨图直落 my03 → my13（相邻）
   await move(mageCookie, "muye03");
   await move(mageCookie, "my03");
   await move(mageCookie, "my13");

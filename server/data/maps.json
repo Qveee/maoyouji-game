@@ -441,7 +441,7 @@
           "y": 570,
           "exit": {
             "map": "muye_caoyuan",
-            "node": "my_rukou"
+            "node": "my03"
           },
           "npcs": [
             {
@@ -1218,7 +1218,7 @@
           "y": 108,
           "exit": {
             "map": "maoyin_village",
-            "node": "muye03"
+            "node": "cunkou"
           },
           "adjacent": [
             "my03"

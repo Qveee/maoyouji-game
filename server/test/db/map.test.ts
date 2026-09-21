@@ -79,23 +79,24 @@ describe("地图与移动", () => {
     expect(res.statusCode).toBe(404);
   });
 
-  it("城镇任意位置点草原入口：跨图直接落在 my_rukou 并返回草原视图", async () => {
+  it("城镇任意位置点草原入口：跨图直接落在出口指向的实际格子 my03 并返回草原视图", async () => {
     const res = await move("muye03");
     expect(res.statusCode).toBe(200);
     const body = res.json();
-    // 跨图成功：返回新地图视图（同 /map/current 结构），从不站立在边界/出口节点上
+    // 跨图成功：返回新地图视图（同 /map/current 结构），落点是门牌对面格子而非草原侧门牌
     expect(body.map).toMatchObject({ code: "muye_caoyuan", name: "牧野草原", type: "field" });
-    expect(body.currentNodeCode).toBe("my_rukou");
+    expect(body.currentNodeCode).toBe("my03");
     expect(body.nodes).toHaveLength(38);
-    expect(body.nodes.find((n: { code: string }) => n.code === "my_rukou")).toBeTruthy();
+    expect(body.nodes.find((n: { code: string }) => n.code === "my03")).toBeTruthy();
   });
 
-  it("站在出口节点 my_rukou 上再点它是 no-op（防弹回）", async () => {
-    const res = await move("my_rukou");
+  it("站在跨图落点 my03 上再点它自身是 no-op", async () => {
+    const res = await move("my03");
     expect(res.statusCode).toBe(200);
+    expect(res.json().node).toMatchObject({ code: "my03" });
     const cur = await current();
     expect(cur.json().map.code).toBe("muye_caoyuan");
-    expect(cur.json().currentNodeCode).toBe("my_rukou");
+    expect(cur.json().currentNodeCode).toBe("my03");
   });
 
   it("野外非相邻移动返回 400", async () => {
@@ -106,29 +107,31 @@ describe("地图与移动", () => {
     expect(res.json().message.length).toBeGreaterThan(0);
   });
 
-  it("野外相邻移动通过", async () => {
-    const res = await move("my03");
+  it("野外相邻移动通过（去 my14 再折返 my03）", async () => {
+    const res = await move("my14");
     expect(res.statusCode).toBe(200);
-    expect(res.json().node).toMatchObject({ code: "my03", name: "牧野草原03" });
+    expect(res.json().node).toMatchObject({ code: "my14", name: "牧野草原14" });
     const cur = await current();
-    expect(cur.json().currentNodeCode).toBe("my03");
+    expect(cur.json().currentNodeCode).toBe("my14");
+    const back = await move("my03");
+    expect(back.statusCode).toBe(200);
   });
 
-  it("返程：草原相邻格点入口落回猫隐村 muye03（双向）", async () => {
+  it("返程：草原相邻格点村口入口落回猫隐村村口（双向）", async () => {
     const res = await move("my_rukou");
     expect(res.statusCode).toBe(200);
     const body = res.json();
     expect(body.map).toMatchObject({ code: "maoyin_village", name: "猫隐村", type: "town" });
-    expect(body.currentNodeCode).toBe("muye03");
+    expect(body.currentNodeCode).toBe("cunkou");
     expect(body.nodes).toHaveLength(20);
   });
 
-  it("城镇站在出口节点 muye03 上再点它也是 no-op", async () => {
-    const res = await move("muye03");
+  it("城镇站在跨图落点村口上再点它自身也是 no-op", async () => {
+    const res = await move("cunkou");
     expect(res.statusCode).toBe(200);
     const cur = await current();
     expect(cur.json().map.code).toBe("maoyin_village");
-    expect(cur.json().currentNodeCode).toBe("muye03");
+    expect(cur.json().currentNodeCode).toBe("cunkou");
   });
 
   it("城镇不能点草原侧出口节点（跨图只认本图出口）", async () => {
@@ -171,9 +174,8 @@ describe("地图与移动", () => {
 
 describe("格子惰性刷怪与复活", () => {
   it("进入带 spawns 的格子出现 2~4 只活怪，重复进入不重复刷怪", async () => {
-    // 回草原：muye03（跨图落 my_rukou）→ my03（相邻，此前已刷过）→ my13（相邻，首次进入）
+    // 回草原：muye03 跨图直落 my03（落点即此前已刷过的格子）→ my13（相邻，首次进入）
     await move("muye03");
-    await move("my03");
     const arrive = await move("my13");
     expect(arrive.statusCode).toBe(200);
 
@@ -319,9 +321,8 @@ describe("兜底与防御", () => {
   });
 
   it("野外与出口节点不相邻的格子点出口返回 400（走格子到边缘再传送是设计意图）", async () => {
-    // 回草原：muye03（跨图落 my_rukou）→ my03（相邻）→ my13（与 my_rukou 不相邻的远格）
+    // 回草原：muye03 跨图直落 my03 → my13（与 my_rukou 不相邻的远格）
     await move("muye03");
-    await move("my03");
     await move("my13");
     const res = await move("my_rukou");
     expect(res.statusCode).toBe(400);

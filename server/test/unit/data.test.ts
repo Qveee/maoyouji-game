@@ -36,7 +36,7 @@ describe("静态宠物数据", () => {
     // muye03 已解锁，锁点清零
     expect(village.nodes.filter((n) => n.locked)).toHaveLength(0);
     const muye03 = village.nodes.find((n) => n.code === "muye03")!;
-    expect(muye03.exit).toEqual({ map: "muye_caoyuan", node: "my_rukou" });
+    expect(muye03.exit).toEqual({ map: "muye_caoyuan", node: "my03" });
     expect(village.nodes.reduce((s, n) => s + n.npcs.length, 0)).toBeGreaterThan(80);
   });
 });
@@ -174,7 +174,7 @@ describe("牧野草原地图", () => {
     expect(muye.spawnNodeCode).toBe("my_rukou");
     expect(muye.nodes).toHaveLength(38);
     const rukou = muye.nodes.find((n) => n.code === "my_rukou")!;
-    expect(rukou.exit).toEqual({ map: "maoyin_village", node: "muye03" });
+    expect(rukou.exit).toEqual({ map: "maoyin_village", node: "cunkou" });
     expect(rukou.locked).toBeUndefined();
     for (const code of ["my_wanma", "my_aolin"]) {
       expect(muye.nodes.find((n) => n.code === code)!.locked).toBe(true);
