@@ -282,9 +282,14 @@ export async function battleRoutes(app: FastifyInstance) {
         await conn.rollback();
         return reply.code(409).send({ message: "怪物尚未刷新" });
       }
-      // 校验链 ④：同一实例同时只允许一场战斗（跨账号同怪互斥）
+      // 校验链 ④：同一实例同时只允许一场战斗（跨账号同怪互斥）。
+      // 必须用锁定读（FOR UPDATE）绕过 RR 读视图：本事务的快照建立于链①，若另一账号的
+      // /start 在「链①之后、本事务拿到实例行锁之前」提交，一致读将看不见其新 battles 行，
+      // 会漏放两场同实例战斗；锁定读恒读最新已提交数据，而能拿到实例行锁即意味着对方已提交
+      // （与链②对同行实例的重复加锁无碍，同事务内锁幂等）。
       const [foeBusy] = await conn.query<RowDataPacket[]>(
-        "SELECT id FROM battles WHERE monster_instance_id = ? AND status = 'active' LIMIT 1",
+        `SELECT id FROM battles WHERE monster_instance_id = ? AND status = 'active' LIMIT 1
+         FOR UPDATE`,
         [inst.id],
       );
       if (foeBusy[0]) {

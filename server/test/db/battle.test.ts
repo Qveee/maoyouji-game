@@ -295,6 +295,23 @@ describe("战斗结算", () => {
     expect(r2.statusCode).toBe(404);
   });
 
+  it("静态数据漂移兜底：未知 monster_code 的实例发起返回 400", async () => {
+    // 战士此时无 active 战斗（上一用例已平局收尾）：手插幽灵实例行到其当前格
+    // （map_node_monsters 无外键，模拟 monsters.json 改名/删 code 后的残留）
+    const [inst] = await getPool().query<ResultSetHeader>(
+      `INSERT INTO map_node_monsters (map_code, node_code, monster_code, hp, max_hp, status)
+       VALUES ('muye_caoyuan', 'my03', 'ghost_monster', 10, 10, 'alive')`,
+    );
+    try {
+      const res = await battleStart(warriorCookie, Number(inst.insertId));
+      expect(res.statusCode).toBe(400);
+      expect(res.json().message).toBe("怪物不存在");
+    } finally {
+      // 用后清理，避免幽灵行影响后续用例的刷怪/复活断言
+      await getPool().query("DELETE FROM map_node_monsters WHERE id = ?", [inst.insertId]);
+    }
+  });
+
   it("胜利结算：经验入账升级、斩杀统计、实例尸体排程、hp 取战斗结束快照", async () => {
     // 平局用例已把 warriorMonsterId 复活，可直接再战；预置 60 经验保证击杀后必升 1 级
     await getPool().query("UPDATE characters SET exp = 60 WHERE id = ?", [warriorId]);
