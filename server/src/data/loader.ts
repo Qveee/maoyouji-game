@@ -49,6 +49,31 @@ export function mapIndex(): Map<string, GameMap> {
   return mapCache;
 }
 
+/** 节点归属：节点 code → 所属地图 code + 节点本体 */
+export interface NodeOwner {
+  mapCode: string;
+  node: MapNode;
+}
+
+let nodeCache: Map<string, NodeOwner> | null = null;
+
+/**
+ * 节点 code → 归属 索引（模块级缓存）。
+ * 节点 code 跨图全局唯一由 MapsFileSchema 交叉引用校验保证，这里直接平铺建索引；
+ * adjacent/exit 的引用完整性同样在 schema 层校验，无需在此重复。
+ */
+export function nodeIndex(): Map<string, NodeOwner> {
+  if (!nodeCache) {
+    nodeCache = new Map();
+    for (const map of mapIndex().values()) {
+      for (const node of map.nodes) {
+        nodeCache.set(node.code, { mapCode: map.code, node });
+      }
+    }
+  }
+  return nodeCache;
+}
+
 const DEFAULT_MONSTERS_PATH = new URL("../../data/monsters.json", import.meta.url);
 
 /** 读取并校验静态怪物数据；校验失败抛错（共识 #4：拒绝启动） */
