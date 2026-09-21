@@ -4,6 +4,7 @@ import type { ResultSetHeader, RowDataPacket } from "mysql2";
 import { getPool } from "../db.ts";
 import { petIndex } from "../data/loader.ts";
 import { mapIndex } from "../data/loader.ts";
+import { hpMaxOf, spMaxOf } from "../game/rules.ts";
 import { requireAccount } from "../plugins/auth.ts";
 
 const createSchema = z.object({
@@ -59,8 +60,9 @@ export async function characterRoutes(app: FastifyInstance) {
 
     const { vit, str, agi, intel, spr } = pet.baseStats;
     const level = 1;
-    const hp = 50 + vit * 8 + level * 10;
-    const sp = 30 + intel * 5 + level * 5;
+    // 派生公式单点收口到 rules（与战斗派生同源，防公式漂移）
+    const hp = hpMaxOf(level, vit);
+    const sp = spMaxOf(level, intel);
     try {
       const [result] = await pool.query<ResultSetHeader>(
         `INSERT INTO characters (account_id, name, profession, breed_code, vit, str, agi, intel, spr, hp, sp, current_node_code)

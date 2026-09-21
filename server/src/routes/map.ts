@@ -107,12 +107,12 @@ export async function mapRoutes(app: FastifyInstance) {
     const body = z.object({ toCode: z.string().min(1).max(64) }).safeParse(req.body);
     if (!body.success) return reply.code(400).send({ message: "参数不合法" });
 
-    // 战斗中禁止移动（直接 EXISTS 查 battles，不依赖战斗模块）
+    // 战斗中禁止移动（直接查 battles，不依赖战斗模块）；响应带 battleId 供前端导回战斗视图
     const [busy] = await getPool().query<RowDataPacket[]>(
-      "SELECT EXISTS(SELECT 1 FROM battles WHERE character_id = ? AND status = 'active') AS busy",
+      "SELECT id FROM battles WHERE character_id = ? AND status = 'active' LIMIT 1",
       [req.account!.characterId],
     );
-    if (busy[0]?.busy) return reply.code(409).send({ message: "战斗中无法移动" });
+    if (busy[0]) return reply.code(409).send({ message: "战斗中无法移动", battleId: busy[0].id });
 
     const target = nodeIndex().get(body.data.toCode);
     if (!target) return reply.code(404).send({ message: "地点不存在" });

@@ -9,6 +9,7 @@ import {
   expNeedOf,
   hpMaxOf,
   lazyRegen,
+  MAX_LEVEL,
   PLAYER_ATTACK_MS,
   spMaxOf,
   statGainOf,
@@ -116,6 +117,14 @@ describe("经验与升级", () => {
     const snapshot = structuredClone(input);
     applyLevelUps(input, 400);
     expect(input).toEqual(snapshot);
+  });
+
+  it("满级 90 喂巨额经验不再升级，leveledTo 为 null", () => {
+    expect(MAX_LEVEL).toBe(90);
+    const base = { ...warriorBase(), level: MAX_LEVEL, exp: 0 };
+    const r = applyLevelUps(base, 1_000_000_000);
+    expect(r.level).toBe(MAX_LEVEL);
+    expect(r.leveledTo).toBeNull();
   });
 
   it("未升级时 leveledTo 为 null，属性原样", () => {

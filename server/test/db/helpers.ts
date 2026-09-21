@@ -12,6 +12,8 @@ export async function resetDb() {
   await pool.query("TRUNCATE TABLE chat_messages");
   await pool.query("TRUNCATE TABLE battles");
   await pool.query("TRUNCATE TABLE map_node_monsters");
+  // 战斗胜利会写斩杀统计，角色 id 每轮重建后固定为小值，必须清掉跨 run 残留
+  await pool.query("TRUNCATE TABLE character_monster_stats");
   await pool.query("SET FOREIGN_KEY_CHECKS = 1");
 }
 

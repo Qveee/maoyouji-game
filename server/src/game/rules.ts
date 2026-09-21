@@ -45,6 +45,9 @@ export const UNARMED_MAX = 3;
 
 // ---------- 经验与升级 ----------
 
+/** 等级上限（docs/游戏规则设计.md §3.4：满级 90），满级后不再升级 */
+export const MAX_LEVEL = 90;
+
 /** 升到 level+1 所需经验 = floor(100 * L^1.5)。必须 floor 而非 round（L=2 时 round 会得 283） */
 export function expNeedOf(level: number): number {
   return Math.floor(100 * level ** 1.5);
@@ -91,7 +94,8 @@ export function applyLevelUps(
   const r = { ...p };
   r.exp += gained;
   let leveledTo: number | null = null;
-  while (r.exp >= expNeedOf(r.level)) {
+  // 循环条件带等级上限：满级后经验不再触发升级（leveledTo 保持 null）
+  while (r.level < MAX_LEVEL && r.exp >= expNeedOf(r.level)) {
     const oldLevel = r.level;
     const oldVit = r.vit;
     const oldIntel = r.intel;
