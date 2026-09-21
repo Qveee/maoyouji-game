@@ -317,4 +317,14 @@ describe("兜底与防御", () => {
     );
     expect(rows[0]?.current_node_code).toBe("guangchang");
   });
+
+  it("野外与出口节点不相邻的格子点出口返回 400（走格子到边缘再传送是设计意图）", async () => {
+    // 回草原：muye03（跨图落 my_rukou）→ my03（相邻）→ my13（与 my_rukou 不相邻的远格）
+    await move("muye03");
+    await move("my03");
+    await move("my13");
+    const res = await move("my_rukou");
+    expect(res.statusCode).toBe(400);
+    expect(res.json().message).toBe("目的地不可直达");
+  });
 });

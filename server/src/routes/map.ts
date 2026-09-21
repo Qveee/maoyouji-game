@@ -129,13 +129,13 @@ export async function mapRoutes(app: FastifyInstance) {
       return { node: nodeBrief(target.node.code) };
     }
 
-    // 可达性收敛式：目标必须与当前同图，且满足其一——
-    // 城镇图内自由移动；出口节点任意位置可点（传送门）；野外普通格必须与当前格相邻。
+    // 可达性：目标必须与当前同图，且——城镇图内自由移动（出口任意位置可点）、
+    // 野外一律与当前格相邻（含出口节点：走格子到边缘再传送是设计意图，勿放宽）。
     // 跨图只认本图出口：草原侧出口节点 my_rukou 在猫隐村不可点，防未来多图绕过图论
     const adjacent = nodeIndex().get(cur.nodeCode)!.node.adjacent ?? [];
     const reachable =
       target.mapCode === cur.mapCode &&
-      (curMap.type === "town" || target.node.exit !== undefined || adjacent.includes(target.node.code));
+      (curMap.type === "town" || adjacent.includes(target.node.code));
     if (!reachable) return reply.code(400).send({ message: "目的地不可直达" });
 
     // 跨图出口（传送门语义）：直接落至出口指向的节点，从不站立在边界/出口节点上
