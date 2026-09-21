@@ -133,9 +133,16 @@ async function patchState(battleId: number, patch: (s: BattleState) => void): Pr
   await getPool().query("UPDATE battles SET state = ? WHERE id = ?", [JSON.stringify(s), battleId]);
 }
 
-/** 把战斗快照整体拨回 ms 毫秒前：startedAt 与双方 nextActAt 同步平移（模拟开打已有 ms 毫秒） */
+/**
+ * 把战斗快照整体拨回 ms 毫秒前（模拟开打已有 ms 毫秒）。
+ * 绝对时刻字段必须同步于此：startedAt / skillCdUntil / 双方 stunUntil 与 nextActAt。
+ * skillCdUntil、stunUntil 平移后为负与 0 等价（视为未进 CD/未眩晕），安全。
+ */
 function rewindBy(s: BattleState, ms: number): void {
   s.startedAt -= ms;
+  s.skillCdUntil -= ms;
+  s.me.stunUntil -= ms;
+  s.foe.stunUntil -= ms;
   s.me.nextActAt -= ms;
   s.foe.nextActAt -= ms;
 }
@@ -452,5 +459,76 @@ describe("战斗结算", () => {
     const again = await battleState(mageCookie, 0);
     expect(again.statusCode).toBe(404);
     expect(await killCount()).toBe(1);
+  });
+
+  it("技能路由时序判别：advance 先于 activate（普攻先发生，技能不被吞）", async () => {
+    const view = await current(mageCookie);
+    const monsters = view.json().nodes.find((n: { code: string }) => n.code === "my13").monsters;
+    expect(monsters.length).toBeGreaterThan(0);
+    const res = await battleStart(mageCookie, monsters[0].id);
+    expect(res.statusCode).toBe(200);
+    const spAtStart = res.json().state.sp as number;
+    const battleId = Number((await battleRowOf(mageId)).id);
+    // 时间轴拨回 60 秒 + 怪血量抬高：/skill 内的 advance 会先处理 ~27 次普攻，之后才轮到激活
+    await patchState(battleId, (s) => {
+      s.foe.hp = 100000;
+      s.foe.maxHp = 100000;
+      rewindBy(s, 60_000);
+    });
+    const skill = await battleSkill(mageCookie, "huoqiu_shu");
+    expect(skill.statusCode).toBe(200);
+    const b = skill.json();
+    // advance 先跑的证据：法师的首次行动是普通攻击事件（若 activate 先跑，首击会被技能吞掉变成 skill 事件）
+    const firstMeEvent = b.events.find((e: { side: string }) => e.side === "me");
+    expect(firstMeEvent).toBeTruthy();
+    expect(firstMeEvent.kind).not.toBe("skill");
+    expect(b.events.some((e: { side: string; kind: string }) => e.side === "me" && (e.kind === "hit" || e.kind === "crit"))).toBe(true);
+    // 激活同时成立：待发保留（未被 advance 消费）、SP 扣减 20（初始 SP 受前面用例结算回写影响，取相对值）
+    expect(b.state.pendingSkill).toMatchObject({ code: "huoqiu_shu" });
+    expect(b.state.sp).toBe(spAtStart - 20);
+
+    // 收尾：怪打不死必平局，把该战斗落 finished 释放法师的 active 名额
+    await patchState(battleId, (s) => {
+      rewindBy(s, 181_000);
+    });
+    const draw = await battleState(mageCookie, 0);
+    expect(draw.json().state.over).toMatchObject({ result: "draw" });
+  });
+
+  it("技能路由终局分支：这一击打出胜负直接结算不再激活（SP 未扣）", async () => {
+    const view = await current(mageCookie);
+    const monsters = view.json().nodes.find((n: { code: string }) => n.code === "my13").monsters;
+    expect(monsters.length).toBeGreaterThan(0);
+    const res = await battleStart(mageCookie, monsters[0].id);
+    expect(res.statusCode).toBe(200);
+    const spAtStart = res.json().state.sp as number;
+    const battleId = Number((await battleRowOf(mageId)).id);
+    const code = (await battleRowOf(mageId)).monster_code as string;
+    const killCountOf = async (): Promise<number> => {
+      const [rows] = await getPool().query<RowDataPacket[]>(
+        "SELECT kill_count FROM character_monster_stats WHERE character_id = ? AND monster_code = ?",
+        [mageId, code],
+      );
+      return rows.length === 0 ? 0 : Number(rows[0]!.kill_count);
+    };
+    const before = await killCountOf();
+
+    // 攻高首击必杀 + 时间轴拨回 60 秒：/skill 的 advance 直接打出胜负
+    await patchState(battleId, (s) => {
+      s.me.atk = 500;
+      rewindBy(s, 60_000);
+    });
+    const skill = await battleSkill(mageCookie, "huoqiu_shu");
+    expect(skill.statusCode).toBe(200);
+    const b = skill.json();
+    // 走结算分支而非激活：over 胜利、SP 未扣（激活会扣 20）、无待发
+    expect(b.state.over).toMatchObject({ result: "victory" });
+    expect(b.state.sp).toBe(spAtStart);
+    expect(b.state.pendingSkill).toBeNull();
+    // 副作用齐：battles finished、斩杀统计 +1
+    const row = await battleRowOf(mageId);
+    expect(row.status).toBe("finished");
+    expect(row.result).toBe("victory");
+    expect((await killCountOf())).toBe(before + 1);
   });
 });

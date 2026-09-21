@@ -5,12 +5,12 @@ import { getPool } from "../db.ts";
 import { mapIndex, monsterIndex, nodeIndex } from "../data/loader.ts";
 import { requireCharacter } from "../plugins/auth.ts";
 import { reviveDueMonsters, spawnForNode } from "../game/spawn.ts";
-
-const VILLAGE_CODE = "maoyin_village";
+import { resolveCurrentNode } from "../game/node.ts";
 
 /**
  * 查角色当前所在节点，并经 nodeIndex 反查所属地图（支持双图）。
- * 旧角色（出生点功能上线前创建）或残留的未知节点：惰性落库猫隐村出生点。
+ * 旧角色（出生点功能上线前创建）或残留的未知节点：惰性落库猫隐村出生点
+ * （共享 helper resolveCurrentNode，与战斗开战同语义）。
  * 角色不存在（无记录/已软删）返回 null，由调用方统一 404。
  */
 async function currentOf(
@@ -21,14 +21,11 @@ async function currentOf(
     [characterId],
   );
   if (rows.length === 0) return null;
-  let code = (rows[0]?.current_node_code as string | null) ?? "";
-  if (!code || !nodeIndex().has(code)) {
-    code = mapIndex().get(VILLAGE_CODE)!.spawnNodeCode;
-    await getPool().query(
-      "UPDATE characters SET current_node_code = ? WHERE id = ? AND deleted_at IS NULL",
-      [code, characterId],
-    );
-  }
+  const code = await resolveCurrentNode(
+    getPool(),
+    characterId,
+    rows[0]?.current_node_code as string | null,
+  );
   return { mapCode: nodeIndex().get(code)!.mapCode, nodeCode: code };
 }
 

@@ -2,8 +2,9 @@ import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import type { PoolConnection, RowDataPacket } from "mysql2/promise";
 import { getPool } from "../db.ts";
-import { mapIndex, monsterIndex, nodeIndex, petIndex, skillIndex } from "../data/loader.ts";
+import { monsterIndex, nodeIndex, petIndex, skillIndex } from "../data/loader.ts";
 import { requireCharacter } from "../plugins/auth.ts";
+import { resolveCurrentNode } from "../game/node.ts";
 import { spawnForNode } from "../game/spawn.ts";
 import {
   activateSkill,
@@ -23,8 +24,6 @@ import {
   PLAYER_ATTACK_MS,
   spMaxOf,
 } from "../game/rules.ts";
-
-const VILLAGE_CODE = "maoyin_village";
 
 /** 结算用角色行字段（battles 外键保证角色存在，读取即用） */
 const CHARACTER_FIELDS =
@@ -234,13 +233,8 @@ export async function battleRoutes(app: FastifyInstance) {
         return reply.code(404).send({ message: "角色不存在" });
       }
 
-      // 解析当前格所属地图（nodeIndex 反查）；残留未知节点惰性落库猫隐村出生点
-      let curCode = c.current_node_code ?? "";
-      if (!curCode || !nodeIndex().has(curCode)) {
-        curCode = mapIndex().get(VILLAGE_CODE)!.spawnNodeCode;
-        await conn.query("UPDATE characters SET current_node_code = ? WHERE id = ?", [curCode, characterId]);
-      }
-      const owner = nodeIndex().get(curCode)!;
+      // 解析当前格（共享 helper：残留未知节点惰性落库猫隐村出生点，与地图路由同语义）
+      const owner = nodeIndex().get(await resolveCurrentNode(conn, characterId, c.current_node_code))!;
       const ownerNodeCode = owner.node.code;
 
       // 先刷怪（与 /map/current 同语义；见上：先于实例行锁，避免复活 UPDATE 与行锁互等）
@@ -393,13 +387,13 @@ export async function battleRoutes(app: FastifyInstance) {
       const now = Date.now();
       // 顺序固定：先 advance 再分支；over 后 advance 是安全 no-op（终局只结算一次由行锁保证）
       const next = advance(battle.state, now);
-      const finalState =
-        next.over !== null
-          ? await settleBattle(conn, battle, next)
-          : await (async () => {
-              await conn.query("UPDATE battles SET state = ? WHERE id = ?", [JSON.stringify(next), battle.id]);
-              return next;
-            })();
+      let finalState: BattleState;
+      if (next.over !== null) {
+        finalState = await settleBattle(conn, battle, next);
+      } else {
+        await conn.query("UPDATE battles SET state = ? WHERE id = ?", [JSON.stringify(next), battle.id]);
+        finalState = next;
+      }
       await conn.commit();
       return {
         state: toResponseState(finalState),
