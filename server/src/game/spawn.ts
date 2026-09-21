@@ -33,13 +33,25 @@ async function insertFreshSpawns(mapCode: string, nodeCode: string, spawns: stri
   );
 }
 
-/** 把一批到期尸体复活：status='alive'、HP 按静态区间重新 roll（即回满新血量）、respawn_at 清空 */
+/**
+ * 把一批到期尸体复活：status='alive'、HP 按静态区间重新 roll（即回满新血量）、
+ * max_hp 同步为静态 hpMax、respawn_at 清空。
+ * 静态数据漂移兜底：怪物已改名/删 code 的尸体永久搁置（保持 dead 且 respawn_at=NULL，
+ * 不再参与扫描），避免复活路径 500。
+ */
 async function reviveRows(rows: RowDataPacket[]): Promise<void> {
   for (const row of rows) {
-    const monster = monsterIndex().get(row.monster_code as string)!;
+    const monster = monsterIndex().get(row.monster_code as string);
+    if (!monster) {
+      await getPool().query(
+        "UPDATE map_node_monsters SET status = 'dead', respawn_at = NULL WHERE id = ?",
+        [row.id],
+      );
+      continue;
+    }
     await getPool().query(
-      "UPDATE map_node_monsters SET status = 'alive', hp = ?, respawn_at = NULL WHERE id = ?",
-      [randInt(monster.hpMin, monster.hpMax), row.id],
+      "UPDATE map_node_monsters SET status = 'alive', hp = ?, max_hp = ?, respawn_at = NULL WHERE id = ?",
+      [randInt(monster.hpMin, monster.hpMax), monster.hpMax, row.id],
     );
   }
 }

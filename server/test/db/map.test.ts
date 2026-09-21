@@ -131,6 +131,13 @@ describe("地图与移动", () => {
     expect(cur.json().currentNodeCode).toBe("muye03");
   });
 
+  it("城镇不能点草原侧出口节点（跨图只认本图出口）", async () => {
+    // my_rukou 属于牧野草原：站猫隐村点它语义错误，必须先从本图出口 muye03 进草原
+    const res = await move("my_rukou");
+    expect(res.statusCode).toBe(400);
+    expect(res.json().message).toBe("目的地不可直达");
+  });
+
   it("战斗中移动返回 409，战斗结束后恢复", async () => {
     // 手插一条合法 battle 行：battles 有 FK，需先有角色与 map_node_monsters 实例行
     const [inst] = await getPool().query<ResultSetHeader>(
@@ -252,5 +259,62 @@ describe("格子惰性刷怪与复活", () => {
     );
     expect(rows.length).toBeGreaterThan(0);
     for (const r of rows) expect(r.status).toBe("dead");
+  });
+});
+
+describe("兜底与防御", () => {
+  it("相邻格点锁定节点返回 400（文案取 lockedReason，未配置时用默认文案）", async () => {
+    // 从 my13 一路走到 my06（my_wanma 唯一相邻格），确保点击发生在相邻格上
+    for (const code of ["my02", "my01", "my00", "my07", "my05", "my06"]) {
+      const step = await move(code);
+      expect(step.statusCode).toBe(200);
+    }
+    const res = await move("my_wanma");
+    expect(res.statusCode).toBe(400);
+    // my_wanma 未配置 lockedReason，走默认文案
+    expect(res.json().message).toBe("该地点暂未开放");
+  });
+
+  it("静态数据漂移兜底：未知 monster_code 的实例不进视图、到期尸体被永久搁置", async () => {
+    // 模拟 monsters.json 改名/删 code 后库里残留的实例行（map_node_monsters 无外键）
+    await getPool().query(
+      `INSERT INTO map_node_monsters (map_code, node_code, monster_code, hp, max_hp, status)
+       VALUES ('muye_caoyuan', 'my04', 'ghost_monster', 10, 10, 'alive')`,
+    );
+    // 活着的幽灵行不进视图，也不应 500
+    const res = await current();
+    expect(res.statusCode).toBe(200);
+    expect(res.json().nodes.find((n: { code: string }) => n.code === "my04").monsters).toEqual([]);
+
+    // 尸体化并到期：复活扫描应将其永久搁置（dead + respawn_at=NULL），不再参与扫描
+    await getPool().query(
+      `UPDATE map_node_monsters SET status = 'dead', respawn_at = DATE_SUB(NOW(), INTERVAL 1 SECOND)
+       WHERE monster_code = 'ghost_monster'`,
+    );
+    const res2 = await current();
+    expect(res2.statusCode).toBe(200);
+    const [row] = await getPool().query<RowDataPacket[]>(
+      "SELECT status, respawn_at FROM map_node_monsters WHERE monster_code = 'ghost_monster'",
+    );
+    expect(row[0]?.status).toBe("dead");
+    expect(row[0]?.respawn_at).toBeNull();
+    // 清理幽灵行，避免影响其他用例
+    await getPool().query("DELETE FROM map_node_monsters WHERE monster_code = 'ghost_monster'");
+  });
+
+  it("current_node_code 残留未知节点时惰性落库猫隐村出生点", async () => {
+    await getPool().query("UPDATE characters SET current_node_code = 'ghost_node' WHERE id = ?", [
+      characterId,
+    ]);
+    const res = await current();
+    expect(res.statusCode).toBe(200);
+    expect(res.json().map.code).toBe("maoyin_village");
+    expect(res.json().currentNodeCode).toBe("guangchang");
+    // 查库确认已惰性落库
+    const [rows] = await getPool().query<RowDataPacket[]>(
+      "SELECT current_node_code FROM characters WHERE id = ?",
+      [characterId],
+    );
+    expect(rows[0]?.current_node_code).toBe("guangchang");
   });
 });

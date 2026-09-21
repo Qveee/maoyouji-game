@@ -11,19 +11,23 @@ const VILLAGE_CODE = "maoyin_village";
 /**
  * 查角色当前所在节点，并经 nodeIndex 反查所属地图（支持双图）。
  * 旧角色（出生点功能上线前创建）或残留的未知节点：惰性落库猫隐村出生点。
+ * 角色不存在（无记录/已软删）返回 null，由调用方统一 404。
  */
-async function currentOf(characterId: number): Promise<{ mapCode: string; nodeCode: string }> {
+async function currentOf(
+  characterId: number,
+): Promise<{ mapCode: string; nodeCode: string } | null> {
   const [rows] = await getPool().query<RowDataPacket[]>(
     "SELECT current_node_code FROM characters WHERE id = ? AND deleted_at IS NULL",
     [characterId],
   );
+  if (rows.length === 0) return null;
   let code = (rows[0]?.current_node_code as string | null) ?? "";
   if (!code || !nodeIndex().has(code)) {
     code = mapIndex().get(VILLAGE_CODE)!.spawnNodeCode;
-    await getPool().query("UPDATE characters SET current_node_code = ? WHERE id = ?", [
-      code,
-      characterId,
-    ]);
+    await getPool().query(
+      "UPDATE characters SET current_node_code = ? WHERE id = ? AND deleted_at IS NULL",
+      [code, characterId],
+    );
   }
   return { mapCode: nodeIndex().get(code)!.mapCode, nodeCode: code };
 }
@@ -44,7 +48,9 @@ async function buildMapView(mapCode: string, currentNodeCode: string) {
       [mapCode],
     );
     for (const r of rows) {
-      const monster = monsterIndex().get(r.monster_code as string)!;
+      // 静态数据漂移兜底：怪物已改名/删 code 的实例行直接跳过，避免视图 500
+      const monster = monsterIndex().get(r.monster_code as string);
+      if (!monster) continue;
       const nodeCode = r.node_code as string;
       const list = aliveByNode.get(nodeCode) ?? [];
       list.push({
@@ -86,8 +92,9 @@ function nodeBrief(code: string) {
 
 /** 当前地图视图：节点、NPC、我的位置 */
 export async function mapRoutes(app: FastifyInstance) {
-  app.get("/current", { preHandler: requireCharacter }, async (req) => {
+  app.get("/current", { preHandler: requireCharacter }, async (req, reply) => {
     const cur = await currentOf(req.account!.characterId!);
+    if (!cur) return reply.code(404).send({ message: "角色不存在" });
     const map = mapIndex().get(cur.mapCode)!;
     if (map.type === "field") {
       await reviveDueMonsters(cur.mapCode); // 响应前对全图做一次惰性复活扫描
@@ -114,6 +121,7 @@ export async function mapRoutes(app: FastifyInstance) {
     }
 
     const cur = await currentOf(req.account!.characterId!);
+    if (!cur) return reply.code(404).send({ message: "角色不存在" });
     const curMap = mapIndex().get(cur.mapCode)!;
 
     // 站在原地再点原地（含站在出口节点上再点它，防跨图弹回）：no-op，返回现状
@@ -121,33 +129,36 @@ export async function mapRoutes(app: FastifyInstance) {
       return { node: nodeBrief(target.node.code) };
     }
 
-    // 可达性：城镇图内自由移动；野外图内必须与当前格相邻；跨图只认出口——
-    // 城镇任意位置可点出口，野外必须与当前格相邻
+    // 可达性收敛式：目标必须与当前同图，且满足其一——
+    // 城镇图内自由移动；出口节点任意位置可点（传送门）；野外普通格必须与当前格相邻。
+    // 跨图只认本图出口：草原侧出口节点 my_rukou 在猫隐村不可点，防未来多图绕过图论
     const adjacent = nodeIndex().get(cur.nodeCode)!.node.adjacent ?? [];
-    const reachable = target.node.exit
-      ? curMap.type === "town" || adjacent.includes(target.node.code)
-      : target.mapCode === cur.mapCode
-        ? curMap.type === "town" || adjacent.includes(target.node.code)
-        : false; // 其他地图的普通节点：UI 不可触达，防御性拒绝
+    const reachable =
+      target.mapCode === cur.mapCode &&
+      (curMap.type === "town" || target.node.exit !== undefined || adjacent.includes(target.node.code));
     if (!reachable) return reply.code(400).send({ message: "目的地不可直达" });
 
     // 跨图出口（传送门语义）：直接落至出口指向的节点，从不站立在边界/出口节点上
-    const landingNodeCode = target.node.exit ? target.node.exit.node : target.node.code;
+    const landing = target.node.exit ? nodeIndex().get(target.node.exit.node)!.node : target.node;
+    // 落点防御：出口指向的节点若为锁点（数据配置异常）拒绝传送
+    if (landing.locked) {
+      return reply.code(400).send({ message: landing.lockedReason ?? "该地点暂未开放" });
+    }
 
     const [result] = await getPool().query<ResultSetHeader>(
       "UPDATE characters SET current_node_code = ? WHERE id = ? AND deleted_at IS NULL",
-      [landingNodeCode, req.account!.characterId],
+      [landing.code, req.account!.characterId],
     );
     if (result.affectedRows === 0) return reply.code(404).send({ message: "角色不存在" });
 
     // 进入格子惰性刷怪（落点无 spawns 配置时内部直接返回）
     const landingMapCode = target.node.exit ? target.node.exit.map : cur.mapCode;
-    await spawnForNode(landingMapCode, landingNodeCode);
+    await spawnForNode(landingMapCode, landing.code);
 
     if (target.node.exit) {
       // 跨图成功：返回新地图视图（同 /map/current 结构，含惰性复活扫描）
       await reviveDueMonsters(landingMapCode);
-      return buildMapView(landingMapCode, landingNodeCode);
+      return buildMapView(landingMapCode, landing.code);
     }
     return { node: nodeBrief(target.node.code) };
   });
