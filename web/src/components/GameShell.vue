@@ -965,23 +965,24 @@ onUnmounted(() => {
   text-shadow: 0 1px 2px #000;
   white-space: nowrap;
 }
+/* 血/蓝格子（嵌数字）按用户要求加高至 20px（原型 14px），数字放大并随 line-height 垂直居中 */
 .bar {
   position: relative;
-  height: 14px;
-  border-radius: 7px;
+  height: 20px;
+  border-radius: 10px;
   background: rgba(255, 255, 255, 0.25);
   border: 1px solid rgba(255, 255, 255, 0.45);
   box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.4);
   overflow: hidden;
 }
-.bar + .bar { margin-top: 4px; }
-.bar i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 6px; transition: width 0.3s ease; }
+.bar + .bar { margin-top: 6px; }
+.bar i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 9px; transition: width 0.3s ease; }
 .bar.hp i { background: linear-gradient(#a4e88a, #4fc24a 45%, #2f9e3f); }
 .bar.mp i { background: linear-gradient(#8ec9f0, #4a9fd8 45%, #2f7fc0); }
 .bar span {
   position: relative;
   display: block;
-  font: bold 10px/12px Tahoma, Verdana, sans-serif;
+  font: bold 11px/20px Tahoma, Verdana, sans-serif; /* line-height 随格子加高，保证数字垂直居中 */
   color: #fff;
   text-align: center;
   text-shadow: 0 0 3px #000, 0 1px 1px #000;
