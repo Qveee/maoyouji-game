@@ -271,7 +271,7 @@ GameShell 规格（视觉基准：旧仓库原型 `D:\maoyouji\测试\游戏主�
 
 **GameShell 拆分备忘（切片 5 前低风险重构项，本切片不动）**：现 1134 行（战斗 +650）已到拆分阈值。务实路径：抽 `useBattle.ts` 组合式函数（battle refs + applyBattle/pollBattle/castPreset/settlement 约 250 行 script，模板耦合面窄，emit 以回调注入）；`BattleLayer.vue` 为可选第二步。收益：竞态守卫可上 vitest 单测；切片 5/6 还要继续往该文件加东西。纯搬移不改行为，1400×832 手动回归一次即可。
 
-### Task 8: 全量回归 + 手动验收 + 文档
+### Task 8: 全量回归 + 手动验收 + 文档 ✅（cf7b8e7 + b19e3b2；73 单测 + 58 db 全绿、web build 零错误、dev 双端冒烟在线；1400×832 三路视觉验收留人工）
 
 - [ ] `pnpm test`（server 单测 + web）与 `pnpm --filter maoyouji-server test:db` 全绿
 - [ ] `pnpm dev` 起双端，按 1400×832 手动回归三路验收（设计文档验收标准）：
