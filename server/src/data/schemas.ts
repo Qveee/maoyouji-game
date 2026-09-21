@@ -60,7 +60,15 @@ export const MonsterSchema = z
 
 export const MonstersFileSchema = z
   .object({ monsters: z.array(MonsterSchema).min(1) })
-  .refine((f) => new Set(f.monsters.map((m) => m.code)).size === f.monsters.length, { message: "怪物 code 重复" });
+  .superRefine((f, ctx) => {
+    const seen = new Set<string>();
+    for (const m of f.monsters) {
+      if (seen.has(m.code)) {
+        ctx.addIssue({ code: "custom", message: `怪物 code 重复：${m.code}` });
+      }
+      seen.add(m.code);
+    }
+  });
 
 export type Monster = z.infer<typeof MonsterSchema>;
 export type MonstersFile = z.infer<typeof MonstersFileSchema>;
@@ -94,12 +102,14 @@ export const SkillSchema = z.discriminatedUnion("kind", [
 export const SkillsFileSchema = z
   .object({ skills: z.array(SkillSchema).min(1) })
   .superRefine((f, ctx) => {
-    if (new Set(f.skills.map((s) => s.code)).size !== f.skills.length) {
-      ctx.addIssue({ code: "custom", message: "技能 code 重复" });
-    }
+    const seen = new Set<string>();
     for (const s of f.skills) {
+      if (seen.has(s.code)) {
+        ctx.addIssue({ code: "custom", message: `技能 code 重复：${s.code}` });
+      }
+      seen.add(s.code);
       if (s.kind === "direct_damage" && s.dmgMin > s.dmgMax) {
-        ctx.addIssue({ code: "custom", message: "dmgMin 不能大于 dmgMax" });
+        ctx.addIssue({ code: "custom", message: `技能 ${s.code} 的 dmgMin 不能大于 dmgMax` });
       }
     }
   });
@@ -169,10 +179,17 @@ export const MapsFileSchema = z
       }
       for (const node of map.nodes) {
         for (const adj of node.adjacent ?? []) {
-          if (!owner.has(adj)) {
+          const adjOwner = owner.get(adj);
+          if (!adjOwner) {
             ctx.addIssue({
               code: "custom",
               message: `地图 ${map.code} 节点 ${node.code} 的 adjacent 引用不存在的节点：${adj}`,
+            });
+          } else if (adjOwner !== map.code) {
+            // 走格子只在图内相邻格间进行，跨图必须走 exit
+            ctx.addIssue({
+              code: "custom",
+              message: `地图 ${map.code} 节点 ${node.code} 的相邻格引用了其他地图（${adjOwner}）的节点：${adj}`,
             });
           }
         }

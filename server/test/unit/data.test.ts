@@ -128,6 +128,18 @@ describe("地图交叉引用校验", () => {
     expect(() => MapsFileSchema.parse({ maps: [bad] })).toThrow(/adjacent 引用不存在的节点/);
   });
 
+  it("adjacent 引用其他地图的已有节点被拒绝（相邻格必须同图）", () => {
+    const file = loadMaps();
+    const village = file.maps.find((m) => m.code === "maoyin_village")!;
+    const muye = file.maps.find((m) => m.code === "muye_caoyuan")!;
+    // my03 全局存在但归属牧野草原，村节点不能拿它当相邻格（跨图走 exit）
+    const bad = {
+      ...village,
+      nodes: village.nodes.map((n) => (n.code === "muye03" ? { ...n, adjacent: ["my03"] } : n)),
+    };
+    expect(() => MapsFileSchema.parse({ maps: [bad, muye] })).toThrow(/相邻格引用了其他地图/);
+  });
+
   it("exit 引用不存在的地图被拒绝", () => {
     const file = loadMaps();
     const village = file.maps.find((m) => m.code === "maoyin_village")!;
@@ -197,7 +209,7 @@ describe("牧野草原地图", () => {
     for (const n of muye.nodes) {
       for (const adj of n.adjacent ?? []) {
         const other = byCode.get(adj);
-        // 悬空/跨图引用由 schema 交叉引用校验拦截，这里只查对称性
+        // 悬空引用与跨图 adjacent 均由 schema 交叉引用校验拦截，这里只查图内对称性
         if (!other) continue;
         expect(other.adjacent ?? [], `边 ${n.code}→${adj} 缺少反向边 ${adj}→${n.code}`).toContain(n.code);
       }
