@@ -20,7 +20,7 @@ const petGifOf = (code: string) => {
   return `/pets/${encodeURIComponent(sprite.split("/").pop() ?? "")}`;
 };
 
-async function refresh() {
+async function refresh(keepView = false) {
   try {
     if (pets.value.length === 0) {
       pets.value = (await api.pets()).pets;
@@ -30,7 +30,11 @@ async function refresh() {
     const list = await api.characters();
     characters.value = list.characters;
     current.value = list.characters.find((c) => c.id === me.characterId) ?? null;
-    view.value = me.characterId && current.value ? "game" : "select";
+    // keepView：建角后刷新时保持在选角视图（角色列表已更新，由 CharacterSelect 选中新角色），
+    // 避免旧 characterId 仍指向原角色而把界面劫持回游戏内
+    if (!keepView || view.value === "loading") {
+      view.value = me.characterId && current.value ? "game" : "select";
+    }
   } catch {
     view.value = "auth";
   }
@@ -57,13 +61,14 @@ async function logout() {
   await api.logout();
   view.value = "auth";
   current.value = null;
+  message.value = "";
 }
 
 async function createCharacter(name: string, breedCode: string, profession: "warrior" | "mage") {
   message.value = "";
   try {
     await api.createCharacter(name, breedCode, profession);
-    await refresh();
+    await refresh(true);
   } catch (err) {
     message.value = err instanceof Error ? err.message : "创建失败";
   }
@@ -93,13 +98,8 @@ onMounted(refresh);
 </script>
 
 <template>
-  <div class="app" :class="{ immersive: view === 'auth' }">
-    <header v-if="view === 'select'" class="topbar">
-      <b class="brand">喵游记</b>
-      <span class="who">冒险者：{{ username }}</span>
-      <a href="#" @click.prevent="logout">退出登录</a>
-    </header>
-
+  <!-- auth 与 select 复用原型沉浸式场景（背景/木框面板由 ImmersiveStage 提供），仅 game 视图保留天蓝页面底 -->
+  <div class="app" :class="{ immersive: view === 'auth' || view === 'select' }">
     <div v-if="view === 'loading'" class="loading">加载中…</div>
 
     <LoginPanel v-else-if="view === 'auth'" :message="message" @submit="submitAuth" />
@@ -112,6 +112,7 @@ onMounted(refresh);
       @create="createCharacter"
       @enter="enter"
       @remove="remove"
+      @logout="logout"
     />
 
     <GameShell
@@ -139,24 +140,6 @@ body {
     radial-gradient(900px 380px at 20% -8%, #ffffffaa, transparent 60%),
     linear-gradient(#a8dcf3, #d8f2fc 70%);
 }
-
-.topbar {
-  display: flex;
-  gap: 18px;
-  align-items: center;
-  padding: 8px 18px;
-  background: linear-gradient(#3d88ad, #2c617e);
-  color: #fff;
-  box-shadow: 0 2px 8px rgba(20, 80, 110, 0.35);
-}
-.topbar .brand {
-  font-family: "STKaiti", "KaiTi", "SimSun", serif;
-  font-size: 20px;
-  letter-spacing: 4px;
-  text-shadow: 0 1px 0 rgba(9, 47, 68, 0.6);
-}
-.topbar .who { flex: 1; font-size: 13px; opacity: 0.9; }
-.topbar a { color: #cde9f5; font-size: 13px; }
 
 .loading {
   min-height: 100vh;
