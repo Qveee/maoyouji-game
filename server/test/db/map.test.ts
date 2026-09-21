@@ -2,6 +2,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import type { ResultSetHeader, RowDataPacket } from "mysql2";
 import { buildApp } from "../../src/app.ts";
 import { getPool } from "../../src/db.ts";
+import { monsterIndex } from "../../src/data/loader.ts";
 import { resetDb, registerAndLogin, cookieOf } from "./helpers.ts";
 
 const app = buildApp();
@@ -61,6 +62,8 @@ describe("地图与移动", () => {
     expect(body.currentNodeCode).toBe("guangchang");
     expect(body.nodes).toHaveLength(20);
     expect(body.nodes.find((n: { code: string }) => n.code === "cunzhangxiaowu").npcs[0].name).toBe("肥猫");
+    // 城镇节点不刷怪：不带 monsters 字段（field 节点恒带，可为空数组）
+    for (const n of body.nodes) expect(n.monsters).toBeUndefined();
   });
 
   it("城市自由移动到村口成功", async () => {
@@ -152,8 +155,102 @@ describe("地图与移动", () => {
     await getPool().query("DELETE FROM battles WHERE id = ?", [battle.insertId]);
     await getPool().query("DELETE FROM map_node_monsters WHERE id = ?", [inst.insertId]);
     const [left] = await getPool().query<RowDataPacket[]>(
-      "SELECT COUNT(*) AS c FROM map_node_monsters WHERE map_code = 'muye_caoyuan'",
+      "SELECT COUNT(*) AS c FROM map_node_monsters WHERE id = ?",
+      [inst.insertId],
     );
     expect(left[0]?.c).toBe(0);
+  });
+});
+
+describe("格子惰性刷怪与复活", () => {
+  it("进入带 spawns 的格子出现 2~4 只活怪，重复进入不重复刷怪", async () => {
+    // 回草原：muye03（跨图落 my_rukou）→ my03（相邻，此前已刷过）→ my13（相邻，首次进入）
+    await move("muye03");
+    await move("my03");
+    const arrive = await move("my13");
+    expect(arrive.statusCode).toBe(200);
+
+    const body = (await current()).json();
+    const my13 = body.nodes.find((n: { code: string }) => n.code === "my13");
+    expect(my13.monsters.length).toBeGreaterThanOrEqual(2);
+    expect(my13.monsters.length).toBeLessThanOrEqual(4);
+    for (const m of my13.monsters) {
+      // my13 的刷怪池只有绿毛虫/小鸡；静态信息取自 monsters.json
+      expect(["lvmaochong", "xiaoji"]).toContain(m.code);
+      const staticMonster = monsterIndex().get(m.code)!;
+      expect(m.name).toBe(staticMonster.name);
+      expect(m.level).toBe(staticMonster.level);
+      expect(m.sprite).toBe(staticMonster.sprite);
+      expect(m.maxHp).toBe(staticMonster.hpMax);
+      expect(m.hp).toBeGreaterThanOrEqual(staticMonster.hpMin);
+      expect(m.hp).toBeLessThanOrEqual(staticMonster.hpMax);
+      expect(m.id).toBeGreaterThan(0);
+    }
+
+    // 幂等：绕开再回来，已有实例的格子不重复刷怪
+    await move("my14");
+    await move("my13");
+    const again = (await current()).json();
+    expect(again.nodes.find((n: { code: string }) => n.code === "my13").monsters).toHaveLength(
+      my13.monsters.length,
+    );
+  });
+
+  it("无 spawns 配置的格子（入口 my_rukou）绝不刷怪", async () => {
+    const body = (await current()).json();
+    expect(body.nodes.find((n: { code: string }) => n.code === "my_rukou").monsters).toEqual([]);
+    const [cnt] = await getPool().query<RowDataPacket[]>(
+      "SELECT COUNT(*) AS c FROM map_node_monsters WHERE node_code = 'my_rukou'",
+    );
+    expect(cnt[0]?.c).toBe(0);
+  });
+
+  it("全图到期尸体在查看地图时复活（HP 重 roll 回静态区间）", async () => {
+    // 杀掉 my13 与 my03 两格（my03 非当前格，验证复活扫描是全图而非仅当前格）
+    for (const node of ["my13", "my03"]) {
+      await getPool().query(
+        `UPDATE map_node_monsters SET status = 'dead', hp = 0,
+         respawn_at = DATE_SUB(NOW(), INTERVAL 1 SECOND)
+         WHERE map_code = 'muye_caoyuan' AND node_code = ?`,
+        [node],
+      );
+    }
+    const body = (await current()).json();
+    for (const code of ["my13", "my03"]) {
+      const node = body.nodes.find((n: { code: string }) => n.code === code);
+      expect(node.monsters.length).toBeGreaterThan(0);
+      for (const m of node.monsters) {
+        const staticMonster = monsterIndex().get(m.code)!;
+        expect(m.hp).toBeGreaterThanOrEqual(staticMonster.hpMin);
+        expect(m.hp).toBeLessThanOrEqual(staticMonster.hpMax);
+      }
+    }
+    // 库内：到期尸体全部复活、respawn_at 清空、HP 回到区间内
+    const [rows] = await getPool().query<RowDataPacket[]>(
+      "SELECT status, respawn_at, hp, monster_code FROM map_node_monsters WHERE node_code IN ('my13', 'my03')",
+    );
+    expect(rows.length).toBeGreaterThan(0);
+    for (const r of rows) {
+      expect(r.status).toBe("alive");
+      expect(r.respawn_at).toBeNull();
+      const staticMonster = monsterIndex().get(r.monster_code as string)!;
+      expect(Number(r.hp)).toBeGreaterThanOrEqual(staticMonster.hpMin);
+    }
+  });
+
+  it("死亡未到期（respawn_at 在未来）保持尸体，不出现在怪物列表", async () => {
+    await getPool().query(
+      `UPDATE map_node_monsters SET status = 'dead', hp = 0,
+       respawn_at = DATE_ADD(NOW(), INTERVAL 60 SECOND)
+       WHERE map_code = 'muye_caoyuan' AND node_code = 'my13'`,
+    );
+    const body = (await current()).json();
+    expect(body.nodes.find((n: { code: string }) => n.code === "my13").monsters).toEqual([]);
+    // 库内仍是尸体
+    const [rows] = await getPool().query<RowDataPacket[]>(
+      "SELECT status FROM map_node_monsters WHERE node_code = 'my13'",
+    );
+    expect(rows.length).toBeGreaterThan(0);
+    for (const r of rows) expect(r.status).toBe("dead");
   });
 });

@@ -2,8 +2,9 @@ import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import type { ResultSetHeader, RowDataPacket } from "mysql2";
 import { getPool } from "../db.ts";
-import { mapIndex, nodeIndex } from "../data/loader.ts";
+import { mapIndex, monsterIndex, nodeIndex } from "../data/loader.ts";
 import { requireCharacter } from "../plugins/auth.ts";
+import { reviveDueMonsters, spawnForNode } from "../game/spawn.ts";
 
 const VILLAGE_CODE = "maoyin_village";
 
@@ -27,22 +28,53 @@ async function currentOf(characterId: number): Promise<{ mapCode: string; nodeCo
   return { mapCode: nodeIndex().get(code)!.mapCode, nodeCode: code };
 }
 
-/** 组装地图视图（GET /map/current 与跨图移动响应共用同一结构） */
-function buildMapView(mapCode: string, currentNodeCode: string) {
+/**
+ * 组装地图视图（GET /map/current 与跨图移动响应共用同一结构）。
+ * field 图节点附带 monsters（仅 alive，静态 name/level/sprite 取自 monsters.json）；
+ * 城镇不刷怪，节点不带 monsters 字段。
+ */
+async function buildMapView(mapCode: string, currentNodeCode: string) {
   const map = mapIndex().get(mapCode)!;
+  // 按格聚合该图活怪实例
+  const aliveByNode = new Map<string, Array<{ id: number; code: string; name: string; hp: number; maxHp: number; level: number; sprite: string }>>();
+  if (map.type === "field") {
+    const [rows] = await getPool().query<RowDataPacket[]>(
+      `SELECT id, node_code, monster_code, hp, max_hp FROM map_node_monsters
+       WHERE map_code = ? AND status = 'alive'`,
+      [mapCode],
+    );
+    for (const r of rows) {
+      const monster = monsterIndex().get(r.monster_code as string)!;
+      const nodeCode = r.node_code as string;
+      const list = aliveByNode.get(nodeCode) ?? [];
+      list.push({
+        id: r.id as number,
+        code: r.monster_code as string,
+        name: monster.name,
+        hp: r.hp as number,
+        maxHp: r.max_hp as number,
+        level: monster.level,
+        sprite: monster.sprite,
+      });
+      aliveByNode.set(nodeCode, list);
+    }
+  }
   return {
     map: { code: map.code, name: map.name, type: map.type, background: map.background },
     currentNodeCode,
-    nodes: map.nodes.map((n) => ({
-      code: n.code,
-      name: n.name,
-      short: n.short,
-      x: n.x,
-      y: n.y,
-      locked: n.locked ?? false,
-      lockedReason: n.lockedReason ?? null,
-      npcs: n.npcs,
-    })),
+    nodes: map.nodes.map((n) => {
+      const base = {
+        code: n.code,
+        name: n.name,
+        short: n.short,
+        x: n.x,
+        y: n.y,
+        locked: n.locked ?? false,
+        lockedReason: n.lockedReason ?? null,
+        npcs: n.npcs,
+      };
+      return map.type === "field" ? { ...base, monsters: aliveByNode.get(n.code) ?? [] } : base;
+    }),
   };
 }
 
@@ -56,6 +88,11 @@ function nodeBrief(code: string) {
 export async function mapRoutes(app: FastifyInstance) {
   app.get("/current", { preHandler: requireCharacter }, async (req) => {
     const cur = await currentOf(req.account!.characterId!);
+    const map = mapIndex().get(cur.mapCode)!;
+    if (map.type === "field") {
+      await reviveDueMonsters(cur.mapCode); // 响应前对全图做一次惰性复活扫描
+      await spawnForNode(cur.mapCode, cur.nodeCode); // 查看当前格：无实例则刷怪
+    }
     return buildMapView(cur.mapCode, cur.nodeCode);
   });
 
@@ -103,9 +140,14 @@ export async function mapRoutes(app: FastifyInstance) {
     );
     if (result.affectedRows === 0) return reply.code(404).send({ message: "角色不存在" });
 
+    // 进入格子惰性刷怪（落点无 spawns 配置时内部直接返回）
+    const landingMapCode = target.node.exit ? target.node.exit.map : cur.mapCode;
+    await spawnForNode(landingMapCode, landingNodeCode);
+
     if (target.node.exit) {
-      // 跨图成功：返回新地图视图（同 /map/current 结构）
-      return buildMapView(target.node.exit.map, landingNodeCode);
+      // 跨图成功：返回新地图视图（同 /map/current 结构，含惰性复活扫描）
+      await reviveDueMonsters(landingMapCode);
+      return buildMapView(landingMapCode, landingNodeCode);
     }
     return { node: nodeBrief(target.node.code) };
   });
