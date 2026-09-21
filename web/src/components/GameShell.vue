@@ -933,7 +933,8 @@ onUnmounted(() => {
   filter: drop-shadow(0 2px 2px rgba(0, 20, 40, 0.5));
   animation: bob 1.2s ease-in-out infinite;
 }
-.pet-mark img { height: 60px; width: auto; display: block; }
+/* 形象尺寸按用户要求 1.5 倍于原型（原型 .bt-sprite img 为 80px、地图形象 60px） */
+.pet-mark img { height: 90px; width: auto; display: block; }
 @keyframes bob { 50% { transform: translate(-50%, calc(-50% - 3px)); } }
 @media (prefers-reduced-motion: reduce) { .pet-mark { animation: none; } }
 
@@ -995,10 +996,10 @@ onUnmounted(() => {
 }
 .bt-unit { display: flex; flex-direction: column; align-items: center; gap: 6px; width: 170px; }
 .bt-sprite { display: flex; align-items: flex-end; justify-content: center; filter: drop-shadow(0 3px 2px rgba(20, 40, 20, 0.35)); }
-.bt-sprite img { height: 80px; width: auto; image-rendering: pixelated; }
-.bt-shadow { width: 92px; height: 13px; border-radius: 50%; background: rgba(30, 60, 30, 0.25); }
-/* 飘字锚点：与两侧单位对齐（stage 左右 padding 46px + 单位宽 170px） */
-.floats-me, .floats-foe { position: absolute; bottom: 140px; width: 170px; height: 2px; pointer-events: none; }
+.bt-sprite img { height: 120px; width: auto; image-rendering: pixelated; }
+.bt-shadow { width: 138px; height: 13px; border-radius: 50%; background: rgba(30, 60, 30, 0.25); }
+/* 飘字锚点：与两侧单位对齐（stage 左右 padding 46px + 单位宽 170px）；bottom 随精灵 1.5 倍放大上移，保证飘字在头顶之上 */
+.floats-me, .floats-foe { position: absolute; bottom: 180px; width: 170px; height: 2px; pointer-events: none; }
 .floats-me { left: 46px; }
 .floats-foe { right: 46px; }
 .bt-float {
