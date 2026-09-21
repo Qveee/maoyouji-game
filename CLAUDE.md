@@ -42,7 +42,7 @@ pnpm monorepo，两个 workspace 包：`server/`（Fastify 5 + TS + mysql2 手�
 
 ## 实施切片与工作流
 
-按 `docs/开发共识.md` 的切片顺序推进：1 脚手架 ✅ → 2 认证+角色 ✅ → 3 地图移动 ✅ → 4 战斗引擎（下一步）→ 5 掉落+背包 → 6 新手任务 → 7 前端面板 → 8 xlsx→JSON 导入。
+按 `docs/开发共识.md` 的切片顺序推进：1 脚手架 ✅ → 2 认证+角色 ✅ → 3 地图移动 ✅ → 4 战斗引擎 ✅ → 5 掉落+背包（下一步）→ 6 新手任务 → 7 前端面板 → 8 xlsx→JSON 导入。
 
 每个切片先写实施计划（checkbox 任务清单，TDD 红绿节奏）存入 `docs/plans/` 或 `docs/superpowers/plans/`，设计规格存 `docs/superpowers/specs/`。实现按任务逐条推进并勾选。
 
