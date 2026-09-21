@@ -11,13 +11,14 @@ describe.skipIf(!hasDb)("数据库迁移", () => {
     await getPool().query("SELECT 1");
   });
 
-  it("迁移建齐 10 张运行时表", async () => {
+  it("迁移建齐 12 张运行时表", async () => {
     const [rows] = await getPool().query<import("mysql2").RowDataPacket[]>(
       "SHOW TABLES",
     );
     const tables = rows.map((r) => Object.values(r)[0]).sort();
     expect(tables).toEqual([
       "accounts",
+      "battles",
       "character_equipment",
       "character_inventory",
       "character_monster_stats",
@@ -27,6 +28,7 @@ describe.skipIf(!hasDb)("数据库迁移", () => {
       "character_skills",
       "characters",
       "chat_messages",
+      "map_node_monsters",
     ]);
   });
 });
