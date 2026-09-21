@@ -230,6 +230,24 @@ describe("advance 时间快进", () => {
     expect(foeHits[0]!.t).toBe(4000);
   });
 
+  it("控制昏迷：既有更长的眩晕不被短控制覆盖", () => {
+    // 防未来多控制源叠加时互相缩短：目标已眩晕到 9000，再吃 3s 控制不得提前到 4000
+    const s0 = structuredClone(battle(7));
+    s0.foe.stunUntil = 9000;
+    const s = advance(activateOk(s0, TENGCI, 0), 5200);
+    expect(s.foe.stunUntil).toBe(9000);
+    expect(s.events.filter((e) => e.kind === "stun" && e.side === "foe")).toHaveLength(1); // 1500 一次顺延
+    expect(s.foe.nextActAt).toBe(9000); // 苏醒时刻仍是最长眩晕
+  });
+
+  it("满血行动不产生 regen 事件（增量 >0 才发）", () => {
+    // 双方满血：行动后回血量为 0，不刷 regen 事件
+    const s = advance(battle(7, { hp: 100 }, { hp: 100 }), 1200);
+    expect(s.events.map((e) => e.kind)).toEqual(["hit"]); // 只有我方普攻
+    expect(s.me.hp).toBe(100);
+    expect(s.foe.hp).toBe(100 - 8);
+  });
+
   it("击杀：victory 结算 expGained=foeExp 并发 end 事件，此后不再产生事件", () => {
     // 攻 50 对 20 血绿毛虫：t=1000 一击 3+50=53 必杀
     const s = advance(battle(7, { atk: 50 }, { hp: 20, maxHp: 20 }), 60000);
@@ -392,5 +410,22 @@ describe("确定性与纯函数性", () => {
     const r = activateSkill(s0, QIANGLI, 0);
     expect(r.ok).toBe(true);
     expect(structuredClone(s0)).toEqual(before); // 拒绝/成功都不改入参
+  });
+
+  it("JSON 往返守卫：从 battles.state 快照（JSON 序列化）读回复跑，与内存对象续跑深度一致", () => {
+    // 持久化核心契约：state 经 JSON 落库再读回后，RNG 时间线必须原样续跑
+    const wild = { dodge: 0.3, crit: 0.5 };
+    const live = advance(battle(7, wild, wild), 10000);
+    const revived = JSON.parse(JSON.stringify(live)) as BattleState;
+    expect(advance(revived, 20000)).toEqual(advance(structuredClone(live), 20000));
+  });
+
+  it("targetMs <= now 时快进为 no-op：now 单调不回退、不产生事件、整体幂等", () => {
+    // 轮询重叠/旧请求晚到会真实走到：目标时刻早于当前时间线
+    const s0 = advance(battle(7), 1200);
+    const before = structuredClone(s0);
+    const s = advance(s0, 500);
+    expect(s.now).toBe(1200); // now 只前进不回退
+    expect(s).toEqual(before);
   });
 });

@@ -176,9 +176,10 @@ function resolveAttack(
   }
   pushEvent(s, { t, side, kind, amount: dealt, text });
 
-  // 控制附效：带 stunMs 的技能命中（非闪避）后击晕目标；实际跳过行动在目标下次轮到时判定
+  // 控制附效：带 stunMs 的技能命中（非闪避）后击晕目标；实际跳过行动在目标下次轮到时判定。
+  // 取 max 而非直接赋值：未来多控制源叠加时，短控制不得缩短目标既有的更长眩晕
   if (skill?.stunMs !== undefined) {
-    target.stunUntil = t + skill.stunMs;
+    target.stunUntil = Math.max(target.stunUntil, t + skill.stunMs);
   }
 }
 
@@ -263,7 +264,8 @@ export function advance(state: BattleState, targetMs: number): BattleState {
     pushEvent(s, { t: cap, side: "me", kind: "end", text: "战斗超时，不分胜负。" });
   }
 
-  s.now = cap;
+  // now 单调守卫：路由层拿旧快照重放/时钟回拨时 targetMs 可能小于当前 now，只前进不回退
+  s.now = Math.max(s.now, cap);
   s.seed = rng.state;
   return s;
 }
