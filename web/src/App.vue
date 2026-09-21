@@ -117,9 +117,10 @@ onMounted(refresh);
     <GameShell
       v-else-if="view === 'game' && current"
       :username="username"
-      :character-name="current.name"
+      :character="current"
       :pet-gif="petGifOf(current.breedCode)"
       @switch-view="view = 'select'"
+      @character-changed="refresh"
     />
   </div>
 </template>
