@@ -12,6 +12,8 @@ import {
   type MapNode,
   type NodeMonster,
 } from "../api";
+import { QUALITY_COLORS } from "../quality";
+import InventoryPanel from "./InventoryPanel.vue";
 
 const props = defineProps<{
   username: string;
@@ -34,7 +36,9 @@ type LogLine =
   | { time: string; text: string; kind: "sys" | "chat" }
   | { time: string; text: string; kind: "battle"; parts: { t: string; cls: string }[] }
   /** 战斗结算行：金橙加粗大字号，与普通战斗行明显区分 */
-  | { time: string; text: string; kind: "battle-end" };
+  | { time: string; text: string; kind: "battle-end" }
+  /** 掉落行（样式同 sys）：parts 内联品质色（QUALITY_COLORS），丢失段整行红 */
+  | { time: string; kind: "drops"; parts: { t: string; color?: string }[] };
 const messages = ref<LogLine[]>([]);
 const chatBodyEl = ref<HTMLElement | null>(null); // 聊天记录滚动容器（自动贴底用）
 const chatText = ref("");
@@ -183,6 +187,15 @@ function todo(what: string) {
   say(`【系统】${what}将在后续切片开放。`);
 }
 
+/** 道具背包面板显隐（底部「道具」按钮开关） */
+const showBag = ref(false);
+
+/** 底部功能按钮分流：「道具」开关背包面板，其余暂为占位提示 */
+function onFuncBtn(f: string) {
+  if (f === "道具") showBag.value = !showBag.value;
+  else todo(f);
+}
+
 // ---------- 战斗 ----------
 
 /** 职业 preset 技能（MVP 口径：按职业直接可用，切片 5+ 接技能学习后替换） */
@@ -253,7 +266,33 @@ function pushBattleResult(over: NonNullable<BattleResponseState["over"]>) {
   }
   messages.value.push({ time: now(), text, kind: "battle-end" });
   if (messages.value.length > 60) messages.value.shift();
+  if (over.drops) pushDropLines(over.drops); // 掉落明细紧随结算行（仅 victory 结算会回填）
   void nextTick(stickChat);
+}
+
+/** 掉落明细行（sys 样式 + 内联品质色 span）：铜币/每件获得/满包丢失；三段全空整段跳过 */
+function pushDropLines(drops: NonNullable<NonNullable<BattleResponseState["over"]>["drops"]>) {
+  if (!drops.copper && !drops.items.length && !drops.lost.length) return;
+  const lines: { time: string; kind: "drops"; parts: { t: string; color?: string }[] }[] = [];
+  if (drops.copper > 0) lines.push({ time: now(), kind: "drops", parts: [{ t: `获得 ${drops.copper} 铜币` }] });
+  for (const it of drops.items) {
+    lines.push({
+      time: now(),
+      kind: "drops",
+      parts: [{ t: "获得 " }, { t: it.name, color: QUALITY_COLORS[it.quality] }, { t: `×${it.qty}` }],
+    });
+  }
+  for (const l of drops.lost) {
+    lines.push({
+      time: now(),
+      kind: "drops",
+      parts: [{ t: `背包已满，${l.name}×${l.qty} 丢失了`, color: "#f52627" }], // 红色=丢失（与「你」同款警醒红）
+    });
+  }
+  for (const line of lines) {
+    messages.value.push(line);
+    if (messages.value.length > 60) messages.value.shift();
+  }
 }
 
 /** 日志行分词上色：仅按「怪名」「你」两个 token 切分，不做逐词解析；foeName 由调用方在 push 时传入 */
@@ -735,12 +774,19 @@ onUnmounted(() => {
         </div>
         <div class="chatlog panel">
           <div ref="chatBodyEl" class="body scr">
-            <p v-for="(m, i) in messages" :key="i" :class="m.kind">
+            <p v-for="(m, i) in messages" :key="i" :class="m.kind === 'drops' ? 'sys' : m.kind">
               <time>{{ m.time }}</time>
               <!-- 战斗日志行：你=红 #F52627、怪名=绿下划线（格式照原型）；parts 已在 push 时烘焙，历史行不再重建 -->
               <template v-if="m.kind === 'battle'">
                 <template v-for="(p, j) in m.parts" :key="j">
                   <span v-if="p.cls" :class="p.cls">{{ p.t }}</span>
+                  <template v-else>{{ p.t }}</template>
+                </template>
+              </template>
+              <!-- 掉落行：品质色内联 span（QUALITY_COLORS），丢失段整行红 -->
+              <template v-else-if="m.kind === 'drops'">
+                <template v-for="(p, j) in m.parts" :key="j">
+                  <span v-if="p.color" :style="{ color: p.color }">{{ p.t }}</span>
                   <template v-else>{{ p.t }}</template>
                 </template>
               </template>
@@ -872,12 +918,20 @@ onUnmounted(() => {
           </div>
         </div>
         <div class="fbtns">
-          <div v-for="f in funcBtns" :key="f" class="fbtn" :title="f" @click="todo(f)">
+          <div v-for="f in funcBtns" :key="f" class="fbtn" :title="f" @click="onFuncBtn(f)">
             <img :src="`/ui/${f}按钮.gif`" :alt="f" />
           </div>
         </div>
       </div>
     </footer>
+
+    <!-- 道具背包面板：绝对定位覆盖主区中央；toast 复用场景内轻提示，changed=用药后刷新角色面板 -->
+    <InventoryPanel
+      v-if="showBag"
+      @close="showBag = false"
+      @toast="toast"
+      @changed="emit('characterChanged')"
+    />
   </main>
   </div>
 
@@ -913,6 +967,7 @@ onUnmounted(() => {
 }
 .shell {
   flex: none;
+  position: relative; /* 道具背包等绝对定位覆盖窗口的定位基准 */
   width: 1400px;
   height: 832px;
   margin: 12px auto;

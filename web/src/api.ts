@@ -113,12 +113,77 @@ export interface BattleResponseState {
     expGained?: number;
     killCount?: number; // 累计斩杀数（结算时服务端补写）
     totalExpGained?: number; // 该怪累计获取经验（结算时服务端补写）
+    /** 掉落展示快照（victory 结算回填）：items 含全部掷出条目，lost 为满包丢失部分 */
+    drops?: {
+      copper: number;
+      items: { code: string; name: string; quality: string; qty: number }[];
+      lost: { name: string; qty: number }[];
+    };
   };
 }
 
 export interface BattleResponse {
   state: BattleResponseState;
   events: BattleEvent[]; // 仅含 seq > sinceSeq 的增量
+}
+
+// ---------- 背包（与 server/src/routes/inventory.ts toBagItemView、game/equipment.ts 对齐） ----------
+
+/** 运行时装备栏位（server EQUIP_SLOT_CODES：静态 ring 拆 ring1/ring2，共 14） */
+export type EquipSlotCode =
+  | "main_hand" | "off_hand" | "head" | "shoulder" | "chest" | "hands" | "waist"
+  | "legs" | "feet" | "wrist" | "ring1" | "ring2" | "neck" | "cloak";
+
+/** 装备子对象（仅 kind=equipment 的行携带；字段照 server 静态装备分支） */
+export interface BagItemEquip {
+  slot: string; // 静态部位（ring 拆 ring1/ring2 由服务端 planEquip 处理）
+  equipType: string;
+  hands: 1 | 2;
+  levelReq: number;
+  dmgMin?: number;
+  dmgMax?: number;
+  intervalMs?: number;
+  defBonus?: number;
+  bonuses: Partial<Record<"vit" | "str" | "agi" | "intel" | "spr" | "atk" | "hp" | "sp", number>>;
+}
+
+/** 背包/已穿行视图（inventory.ts toBagItemView 输出；静态漂移兜底：name=code、quality=""） */
+export interface BagItemView {
+  inventoryId: number;
+  itemCode: string;
+  slotIndex: number | null; // null=已穿戴（character_equipment 引用的行）
+  quantity: number;
+  durability: number | null;
+  name: string;
+  quality: string; // 仅装备有 gray/green/blue/purple/orange，其余为 ""
+  sprite: string;
+  kind: "consumable" | "material" | "equipment";
+  stackMax: number;
+  equip?: BagItemEquip; // JSON 序列化时 undefined 字段省略
+}
+
+/** 装备加成汇总（equipmentBonusesOf 原样输出；dmgMin/dmgMax/intervalMs null=无有效武器） */
+export interface EquipmentBonusesView {
+  vit: number;
+  str: number;
+  agi: number;
+  intel: number;
+  spr: number;
+  hp: number;
+  sp: number;
+  atk: number;
+  def: number;
+  dmgMin: number | null;
+  dmgMax: number | null;
+  intervalMs: number | null;
+}
+
+/** GET /api/inventory 响应 */
+export interface InventoryView {
+  copper: number;
+  bag: BagItemView[]; // 仅未穿戴行，slotIndex 升序
+  equipment: Record<EquipSlotCode, BagItemView | null>; // 恒 14 键，空部位 null
+  bonuses: EquipmentBonusesView;
 }
 
 /** /map/move 响应：同图返回 node 简要；跨图出口返回完整新图视图（与 MapCurrent 同构） */
@@ -196,5 +261,31 @@ export const api = {
     request<BattleResponse>(`/api/battle/skill?sinceSeq=${sinceSeq}`, {
       method: "POST",
       body: JSON.stringify({ code }),
+    }),
+  // 背包视图：铜币 + 背包行（slotIndex 升序）+ 14 栏位装备 + 加成汇总
+  inventory: () => request<InventoryView>("/api/inventory"),
+  // 穿戴：替换/双手联动由服务端 planEquip 处理；400 message（等级/职业/背包空间不足）直接可提示
+  equip: (inventoryId: number) =>
+    request<{ ok: boolean }>("/api/inventory/equip", {
+      method: "POST",
+      body: JSON.stringify({ inventoryId }),
+    }),
+  // 卸下：包满 400「背包已满」
+  unequip: (slotCode: EquipSlotCode) =>
+    request<{ ok: boolean }>("/api/inventory/unequip", {
+      method: "POST",
+      body: JSON.stringify({ slotCode }),
+    }),
+  // 用药：战斗中 409；非消耗品 400；成功返回并入恢复后的 hp/sp
+  useItem: (inventoryId: number) =>
+    request<{ hp: number; sp: number }>("/api/inventory/use", {
+      method: "POST",
+      body: JSON.stringify({ inventoryId }),
+    }),
+  // 丢弃：quantity 缺省=整堆；已穿戴 400
+  discard: (inventoryId: number, quantity?: number) =>
+    request<{ ok: boolean }>("/api/inventory/discard", {
+      method: "POST",
+      body: JSON.stringify(quantity === undefined ? { inventoryId } : { inventoryId, quantity }),
     }),
 };
