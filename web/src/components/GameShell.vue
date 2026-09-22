@@ -974,8 +974,8 @@ onUnmounted(() => {
   filter: drop-shadow(0 2px 2px rgba(0, 20, 40, 0.5));
   animation: bob 1.2s ease-in-out infinite;
 }
-/* 形象尺寸按用户要求 2 倍于原型（原型 .bt-sprite img 为 80px、地图形象 60px） */
-.pet-mark img { height: 120px; width: auto; display: block; }
+/* 形象尺寸不在代码中放大（用户要求）：按图片文件原始大小直出，需调整就换图 */
+.pet-mark img { display: block; }
 @keyframes bob { 50% { transform: translate(-50%, calc(-50% - 3px)); } }
 @media (prefers-reduced-motion: reduce) { .pet-mark { animation: none; } }
 
@@ -1038,8 +1038,8 @@ onUnmounted(() => {
 }
 .bt-unit { display: flex; flex-direction: column; align-items: center; gap: 6px; width: 170px; }
 .bt-sprite { display: flex; align-items: flex-end; justify-content: center; filter: drop-shadow(0 3px 2px rgba(20, 40, 20, 0.35)); }
-.bt-sprite img { height: 160px; width: auto; image-rendering: pixelated; }
-/* 我方宠物按用户要求放大到原型 2 倍；怪物保持原型 80px 不放大 */
+/* 我方宠物尺寸由图片文件直出（用户要求移除代码放大）；怪物保持原型 80px */
+.bt-sprite img { image-rendering: pixelated; }
 .bt-foe .bt-sprite img { height: 80px; }
 .bt-shadow { width: 184px; height: 13px; border-radius: 50%; background: rgba(30, 60, 30, 0.25); }
 .bt-foe .bt-shadow { width: 92px; }
