@@ -72,12 +72,18 @@ export interface BattleState {
   foeExp: number;
   seq: number;
   events: BattleEvent[];
-  /** killCount/totalExpGained 由路由层结算时补写（累计斩杀数/累计经验，引擎不碰 DB） */
+  /** killCount/totalExpGained/drops 由路由层结算时补写（引擎不碰 DB） */
   over: null | {
     result: "victory" | "defeat" | "draw";
     expGained?: number;
     killCount?: number;
     totalExpGained?: number;
+    /** 掉落展示快照（victory 结算回填）：服务端填名称/品质，前端零静态数据依赖 */
+    drops?: {
+      copper: number;
+      items: { code: string; name: string; quality: string; qty: number }[];
+      lost: { name: string; qty: number }[];
+    };
   };
 }
 

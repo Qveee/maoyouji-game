@@ -14,6 +14,9 @@ export async function resetDb() {
   await pool.query("TRUNCATE TABLE map_node_monsters");
   // 战斗胜利会写斩杀统计，角色 id 每轮重建后固定为小值，必须清掉跨 run 残留
   await pool.query("TRUNCATE TABLE character_monster_stats");
+  // 背包/装备位（切片 5）：战斗结算会写掉落入包与耐久损耗，同样不能跨 run 残留
+  await pool.query("TRUNCATE TABLE character_inventory");
+  await pool.query("TRUNCATE TABLE character_equipment");
   await pool.query("SET FOREIGN_KEY_CHECKS = 1");
 }
 

@@ -2,7 +2,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import type { ResultSetHeader, RowDataPacket } from "mysql2";
 import { buildApp } from "../../src/app.ts";
 import { getPool } from "../../src/db.ts";
-import { monsterIndex } from "../../src/data/loader.ts";
+import { itemIndex, monsterIndex } from "../../src/data/loader.ts";
 import type { BattleState } from "../../src/game/engine.ts";
 import { hpMaxOf, spMaxOf } from "../../src/game/rules.ts";
 import { resetDb, registerAndLogin, cookieOf } from "./helpers.ts";
@@ -535,5 +535,173 @@ describe("战斗结算", () => {
     expect(row.status).toBe("finished");
     expect(row.result).toBe("victory");
     expect((await killCountOf())).toBe(before + 1);
+  });
+});
+
+// ---------- 掉落与耐久结算（切片 5 Task 6）----------
+
+describe("掉落与耐久结算", () => {
+  /** 独立新角色：背包/铜币从零起步，掉落对账不受文件内其他用例结算残留的干扰 */
+  let lootCookie = "";
+  let lootCharId = 0;
+  /** victory 用例击杀的实例 id（defeat 用例换一只活怪） */
+  let slainMonsterId = 0;
+
+  beforeAll(async () => {
+    const acc = await registerAndLogin(app, "lootcat");
+    const created = await app.inject({
+      method: "POST",
+      url: "/api/characters",
+      headers: { cookie: acc },
+      payload: { name: "捡漏猫", breedCode: "mao", profession: "warrior" },
+    });
+    lootCharId = created.json().id;
+    const sel = await app.inject({
+      method: "POST",
+      url: "/api/auth/select-character",
+      headers: { cookie: acc },
+      payload: { characterId: lootCharId },
+    });
+    lootCookie = cookieOf(sel);
+    await move(lootCookie, "muye03");
+    await move(lootCookie, "my03");
+  });
+
+  it("victory：铜币入账、掉落入包、over.drops 对账", async () => {
+    // 走到有怪格开战（刷怪随机，怪种不固定 → 断言全部走关系口径，与掉落随机性解耦）
+    const view = await current(lootCookie);
+    expect(view.statusCode).toBe(200);
+    const monsters = view.json().nodes.find((n: { code: string }) => n.code === "my03").monsters;
+    expect(monsters.length).toBeGreaterThan(0);
+    slainMonsterId = monsters[0].id;
+    const monsterCode = (await monsterInstanceOf(slainMonsterId)).monster_code as string;
+    const dropTable = monsterIndex().get(monsterCode)!.drops!;
+
+    const [copperBefore] = await getPool().query<RowDataPacket[]>(
+      "SELECT copper FROM characters WHERE id = ?",
+      [lootCharId],
+    );
+    const res = await battleStart(lootCookie, slainMonsterId);
+    expect(res.statusCode).toBe(200);
+    const battleId = Number((await battleRowOf(lootCharId)).id);
+    // 种子拨成已知值（掉落续用战斗种子，快照可复现）+ 攻高首击必杀 + 时间轴拨回 60 秒前
+    await patchState(battleId, (s) => {
+      s.seed = 12345;
+      s.me.atk = 500;
+      rewindBy(s, 60_000);
+    });
+    const poll = await battleState(lootCookie, 0);
+    expect(poll.statusCode).toBe(200);
+    const over = poll.json().state.over;
+    expect(over).toMatchObject({ result: "victory" });
+
+    // ④ battles 落 victory，且 state.over.drops 持久化非空、与响应态一致
+    expect(over.drops).toBeTruthy();
+    const row = await battleRowOf(lootCharId);
+    expect(row.status).toBe("finished");
+    expect(row.result).toBe("victory");
+    expect(row.state.over?.drops).toEqual(over.drops);
+
+    // ② 角色 copper 增量 === over.drops.copper（初始铜币即战前库值）
+    const [copperAfter] = await getPool().query<RowDataPacket[]>(
+      "SELECT copper FROM characters WHERE id = ?",
+      [lootCharId],
+    );
+    expect(Number(copperAfter[0]!.copper) - Number(copperBefore[0]!.copper)).toBe(over.drops.copper);
+    // 铜币落在怪物掉落表区间内（掷点契约的最弱不变量）
+    expect(over.drops.copper).toBeGreaterThanOrEqual(dropTable.copper[0]);
+    expect(over.drops.copper).toBeLessThanOrEqual(dropTable.copper[1]);
+
+    // ③ 包内新增行的 item_code 全部 ∈ 该怪掉落表，且无丢弃
+    const [bagRows] = await getPool().query<RowDataPacket[]>(
+      "SELECT item_code, quantity FROM character_inventory WHERE character_id = ? AND slot_index IS NOT NULL",
+      [lootCharId],
+    );
+    expect(over.drops.lost).toEqual([]);
+    const lootable = new Set(dropTable.items.map((e) => e.item));
+    for (const r of bagRows) {
+      expect(lootable.has(r.item_code as string)).toBe(true);
+    }
+
+    // ① over.drops.items 与包内 (item_code, 总 quantity) 对账（同码多段掉落合并后仍相等）
+    const bagTotals = new Map<string, number>();
+    for (const r of bagRows) {
+      bagTotals.set(r.item_code as string, (bagTotals.get(r.item_code as string) ?? 0) + Number(r.quantity));
+    }
+    const dropTotals = new Map<string, number>();
+    for (const it of over.drops.items) {
+      dropTotals.set(it.code, (dropTotals.get(it.code) ?? 0) + it.qty);
+      expect(typeof it.name).toBe("string"); // 展示快照：服务端已填名称，前端零静态数据依赖
+    }
+    expect(dropTotals).toEqual(bagTotals);
+  });
+
+  it("defeat：全身装备耐久 -ceil(5%×durabilityMax)，角色回教堂满状态", async () => {
+    // SQL 直插两件装备入包并绑定穿戴位（军用盾牌/农夫之剑 durabilityMax 均 10；已穿戴 slot_index=NULL）
+    const [shield] = await getPool().query<ResultSetHeader>(
+      `INSERT INTO character_inventory (character_id, item_code, slot_index, quantity, durability)
+       VALUES (?, 'junyong_dunpai', NULL, 1, 10)`,
+      [lootCharId],
+    );
+    const [sword] = await getPool().query<ResultSetHeader>(
+      `INSERT INTO character_inventory (character_id, item_code, slot_index, quantity, durability)
+       VALUES (?, 'nongfuzhijian', NULL, 1, 10)`,
+      [lootCharId],
+    );
+    await getPool().query(
+      "INSERT INTO character_equipment (character_id, slot_code, inventory_id) VALUES (?, 'off_hand', ?)",
+      [lootCharId, shield.insertId],
+    );
+    await getPool().query(
+      "INSERT INTO character_equipment (character_id, slot_code, inventory_id) VALUES (?, 'main_hand', ?)",
+      [lootCharId, sword.insertId],
+    );
+
+    // SQL 直插一只专属活怪开战：my03 刷怪数量随机（2~4），victory 用例可能杀掉最后一只，
+    // 与刷怪随机性解耦（波利攻速 2400ms < 我方持剑 2600ms，必先手）。
+    // HP 抬到 10 万防反杀：我方农夫之剑首击 ~13 点伤害绝无胜算。
+    const [foe] = await getPool().query<ResultSetHeader>(
+      `INSERT INTO map_node_monsters (map_code, node_code, monster_code, hp, max_hp, status)
+       VALUES ('muye_caoyuan', 'my03', 'paopao', 100000, 100000, 'alive')`,
+    );
+    const res = await battleStart(lootCookie, Number(foe.insertId));
+    expect(res.statusCode).toBe(200);
+    const battleId = Number((await battleRowOf(lootCharId)).id);
+    // 我方血量压到 1 + 怪攻拉满 → 怪首击必杀（时间轴拨回 60 秒前立即出手）
+    await patchState(battleId, (s) => {
+      s.me.hp = 1;
+      s.foe.atk = 5000;
+      rewindBy(s, 60_000);
+    });
+    const poll = await battleState(lootCookie, 0);
+    expect(poll.statusCode).toBe(200);
+    expect(poll.json().state.over).toMatchObject({ result: "defeat" });
+
+    // 全身装备耐久：10 → 10 − ceil(10×0.05) = 9（损耗值 JS 侧按静态 durabilityMax 算）
+    const [inv] = await getPool().query<RowDataPacket[]>(
+      `SELECT i.item_code, i.durability FROM character_inventory i
+       JOIN character_equipment e ON e.inventory_id = i.id
+       WHERE e.character_id = ? ORDER BY i.id`,
+      [lootCharId],
+    );
+    expect(inv).toHaveLength(2);
+    for (const r of inv) {
+      const item = itemIndex().get(r.item_code as string)!;
+      if (item.kind !== "equipment") throw new Error(`非装备物品：${r.item_code as string}`); // 类型收窄
+      expect(Number(r.durability)).toBe(item.durabilityMax - Math.ceil(item.durabilityMax * 0.05));
+    }
+
+    // 既有 defeat 口径不变：角色回教堂、按库中属性回满血蓝
+    const [chars] = await getPool().query<RowDataPacket[]>(
+      "SELECT current_node_code, level, vit, intel, hp, sp FROM characters WHERE id = ?",
+      [lootCharId],
+    );
+    const c = chars[0]!;
+    expect(c.current_node_code).toBe("jiaotang");
+    expect(Number(c.hp)).toBe(hpMaxOf(Number(c.level), Number(c.vit)));
+    expect(Number(c.sp)).toBe(spMaxOf(Number(c.level), Number(c.intel)));
+    const row = await battleRowOf(lootCharId);
+    expect(row.status).toBe("finished");
+    expect(row.result).toBe("defeat");
   });
 });

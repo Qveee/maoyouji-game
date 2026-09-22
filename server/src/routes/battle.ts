@@ -2,10 +2,14 @@ import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import type { PoolConnection, RowDataPacket } from "mysql2/promise";
 import { getPool } from "../db.ts";
-import { monsterIndex, nodeIndex, petIndex, skillIndex } from "../data/loader.ts";
+import { itemIndex, monsterIndex, nodeIndex, petIndex, skillIndex } from "../data/loader.ts";
 import { requireCharacter } from "../plugins/auth.ts";
 import { resolveCurrentNode } from "../game/node.ts";
+import { rollDrops } from "../game/drops.ts";
+import { lootInto } from "../game/inventory.ts";
+import { equipmentBonusesOf } from "../game/equipment.ts";
 import { spawnForNode } from "../game/spawn.ts";
+import { createRng } from "../game/rng.ts";
 import {
   activateSkill,
   advance,
@@ -130,8 +134,10 @@ async function reviveInstance(conn: PoolConnection, instanceId: number): Promise
  * 结算临界区（唯一真源）：advance 已把 state 推到 over 非空，这里在同一事务内完成
  * 胜负分支副作用 + battles 落 finished。调用方必须已持有该 battle 行锁。
  * - victory：实例尸体化（30s 后复活，DB 侧算术与复活扫描同钟）；角色 applyLevelUps
- *   （hp/sp 用战斗结束快照覆盖，升级自加上限增量且恒 ≤ 新上限）；斩杀统计 UPSERT。
- * - defeat：角色回猫隐村教堂、HP/SP 按库中属性回满、恢复锚点重置；实例回满复活。
+ *   （hp/sp 用战斗结束快照覆盖，升级自加上限增量且恒 ≤ 新上限）；斩杀统计 UPSERT；
+ *   按战斗种子续流掷掉落（铜币入账 + 掉落入包，包满整段进 lost），drops 展示快照回填 over。
+ * - defeat：角色回猫隐村教堂、HP/SP 按库中属性回满、恢复锚点重置；全身装备耐久
+ *   -ceil(5%×durabilityMax)（地板 0）；实例回满复活。
  * - draw：无得失；实例回满复活、恢复锚点重置。
  */
 async function settleBattle(conn: PoolConnection, battle: BattleRow, state: BattleState): Promise<BattleState> {
@@ -146,7 +152,7 @@ async function settleBattle(conn: PoolConnection, battle: BattleRow, state: Batt
       [battle.monsterInstanceId],
     );
     const [rows] = await conn.query<CharacterBattleRow[]>(
-      `SELECT ${CHARACTER_FIELDS} FROM characters WHERE id = ?`,
+      `SELECT ${CHARACTER_FIELDS} FROM characters WHERE id = ? FOR UPDATE`,
       [battle.characterId],
     );
     const c = rows[0];
@@ -187,13 +193,68 @@ async function settleBattle(conn: PoolConnection, battle: BattleRow, state: Batt
       [battle.characterId, battle.monsterCode],
     );
     const stat = statRows[0];
-    if (stat) {
-      state.over = {
-        ...over,
-        killCount: Number(stat.kill_count),
-        totalExpGained: Number(stat.total_exp_gained),
-      };
+
+    // —— 掉落（续用战斗种子：advance 尾部已回写最新 RNG 状态，结算可复现）——
+    // 掉落表/堆叠上限/耐久上限全在 JS 侧经 itemIndex() 取，静态数据不进 SQL
+    const drops = monsterIndex().get(battle.monsterCode)?.drops;
+    const dropsView: NonNullable<BattleState["over"]>["drops"] = { copper: 0, items: [], lost: [] };
+    if (drops) {
+      const loot = rollDrops(drops, createRng(state.seed));
+      dropsView.copper = loot.copper;
+      if (loot.copper > 0) {
+        await conn.query("UPDATE characters SET copper = copper + ? WHERE id = ?", [
+          loot.copper,
+          battle.characterId,
+        ]);
+      }
+      if (loot.items.length > 0) {
+        // 锁背包格行（角色行上面已 FOR UPDATE，与穿脱路由的锁角色行纪律互斥），再全量入包分配
+        const [bagRows] = await conn.query<RowDataPacket[]>(
+          `SELECT id, item_code, slot_index, quantity FROM character_inventory
+           WHERE character_id = ? AND slot_index IS NOT NULL FOR UPDATE`,
+          [battle.characterId],
+        );
+        const bag = bagRows.map((r) => ({
+          id: Number(r.id),
+          itemCode: r.item_code as string,
+          slotIndex: Number(r.slot_index),
+          quantity: Number(r.quantity),
+        }));
+        const { stackAdds, newStacks, lost } = lootInto(bag, loot.items, (code) => {
+          const it = itemIndex().get(code);
+          return it && it.kind !== "equipment" ? it.stackMax : 1;
+        });
+        for (const a of stackAdds) {
+          await conn.query("UPDATE character_inventory SET quantity = quantity + ? WHERE id = ?", [
+            a.quantity,
+            a.id,
+          ]);
+        }
+        for (const n of newStacks) {
+          await conn.query(
+            `INSERT INTO character_inventory (character_id, item_code, slot_index, quantity, durability)
+             VALUES (?, ?, ?, ?, ?)`,
+            [battle.characterId, n.itemCode, n.slotIndex, n.quantity, n.durabilityMax],
+          );
+        }
+        dropsView.items = loot.items.map((li) => {
+          const it = itemIndex().get(li.itemCode);
+          return {
+            code: li.itemCode,
+            name: it?.name ?? li.itemCode,
+            quality: it?.kind === "equipment" ? it.quality : "",
+            qty: li.qty,
+          };
+        });
+        dropsView.lost = lost.map((l) => ({ name: itemIndex().get(l.itemCode)?.name ?? l.itemCode, qty: l.qty }));
+      }
     }
+
+    state.over = {
+      ...over,
+      ...(stat ? { killCount: Number(stat.kill_count), totalExpGained: Number(stat.total_exp_gained) } : {}),
+      drops: dropsView,
+    };
   } else if (result === "defeat") {
     const [rows] = await conn.query<CharacterBattleRow[]>(
       "SELECT level, vit, intel FROM characters WHERE id = ?",
@@ -206,6 +267,21 @@ async function settleBattle(conn: PoolConnection, battle: BattleRow, state: Batt
        WHERE id = ?`,
       [hpMaxOf(c.level, c.vit), spMaxOf(c.level, c.intel), battle.characterId],
     );
+    // 全身装备耐久损耗：-ceil(5%×durabilityMax)，地板 0；损耗值在 JS 侧按静态数据算（不进 SQL）
+    const [eqRows] = await conn.query<RowDataPacket[]>(
+      `SELECT i.id, i.durability, i.item_code FROM character_inventory i
+       JOIN character_equipment e ON e.inventory_id = i.id WHERE e.character_id = ? FOR UPDATE`,
+      [battle.characterId],
+    );
+    for (const r of eqRows) {
+      const max = itemIndex().get(r.item_code as string);
+      if (max?.kind !== "equipment") continue; // 静态漂移兜底：物品不存在/非装备，跳过
+      const dec = Math.ceil(max.durabilityMax * 0.05);
+      await conn.query(
+        "UPDATE character_inventory SET durability = GREATEST(0, durability - ?) WHERE id = ?",
+        [dec, r.id],
+      );
+    }
     await reviveInstance(conn, battle.monsterInstanceId);
   } else {
     await conn.query("UPDATE characters SET resources_updated_at = NOW() WHERE id = ?", [
@@ -327,6 +403,26 @@ export async function battleRoutes(app: FastifyInstance) {
         [regen.hp, regen.sp, new Date(now), characterId],
       );
 
+      // 装备加成：join 穿戴行（耐久 0/静态漂移在 equipmentBonusesOf 内失效），并入派生属性。
+      // characters.hp 列恒在基础上限内，开战快照上限 = 基础 + 装备 hp/sp 直接加成
+      const [eqRows] = await conn.query<RowDataPacket[]>(
+        `SELECT e.slot_code, i.item_code, i.durability
+         FROM character_equipment e JOIN character_inventory i ON i.id = e.inventory_id
+         WHERE e.character_id = ?`,
+        [characterId],
+      );
+      const eq = equipmentBonusesOf(
+        eqRows.map((r) => ({
+          slotCode: r.slot_code as string,
+          itemCode: r.item_code as string,
+          durability: r.durability == null ? null : Number(r.durability),
+        })),
+        (code) => itemIndex().get(code),
+      );
+      const strEff = c.str + eq.str;
+      const agiEff = c.agi + eq.agi;
+      const intelEff = c.intel + eq.intel;
+
       // 怪侧：hp/max_hp 取实例行权威值（绝不从静态数据重派生）；攻击在静态区间内
       // 开战时随机定型（与刷怪 HP roll 同口径），定型后随快照持久化；战斗内双方均不自然回血（原版口径）
       const foeAtk = monster.atkMin + Math.floor(Math.random() * (monster.atkMax - monster.atkMin + 1));
@@ -337,15 +433,18 @@ export async function battleRoutes(app: FastifyInstance) {
             sprite: "", // 形象交 Task 7 前端覆盖层处理
             level: c.level,
             hp: regen.hp,
-            maxHp,
+            maxHp: maxHp + eq.hp,
             sp: regen.sp,
-            maxSp,
-            atk: atkOf(c.profession, c.str, c.intel),
-            def: defOf(c.agi),
-            dodge: dodgeOf(c.agi),
+            maxSp: maxSp + eq.sp,
+            atk: atkOf(c.profession, strEff, intelEff) + eq.atk,
+            def: defOf(agiEff) + eq.def,
+            dodge: dodgeOf(agiEff),
             crit: BASE_CRIT,
             critMult: CRIT_MULT,
-            intervalMs: PLAYER_ATTACK_MS[c.profession],
+            intervalMs: eq.intervalMs ?? PLAYER_ATTACK_MS[c.profession],
+            // 武器区间成对写入（equipmentBonusesOf 保证同时置空/同时赋值，缺省 → 徒手 1~3）
+            dmgMin: eq.dmgMin ?? undefined,
+            dmgMax: eq.dmgMax ?? undefined,
           },
           foe: {
             name: monster.name,
