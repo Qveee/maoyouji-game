@@ -19,8 +19,8 @@
       "drops": {
         "copper": [5, 12],
         "items": [
-          { "item": "xiaoxing_buxueji", "chance": 0.12 },
-          { "item": "xiangmuzhang", "chance": 0.05 }
+          { "item": "xiaoxing_buxueji", "chance": 0.4 },
+          { "item": "xiangmuzhang", "chance": 0.35 }
         ]
       }
     },
@@ -45,12 +45,12 @@
         "items": [
           { "item": "kunchong_waike", "chance": 0.5, "qtyMin": 1, "qtyMax": 2 },
           { "item": "pingguo", "chance": 0.3 },
-          { "item": "buzhi_ruanmao", "chance": 0.03 },
-          { "item": "putong_dunpai", "chance": 0.02 },
-          { "item": "nengliang_juanrenjian", "chance": 0.02 },
-          { "item": "zhenzhi_duanbu", "chance": 0.05 },
-          { "item": "yama_waiyi", "chance": 0.05 },
-          { "item": "nongfuzhijian", "chance": 0.05 }
+          { "item": "buzhi_ruanmao", "chance": 0.2 },
+          { "item": "putong_dunpai", "chance": 0.2 },
+          { "item": "nengliang_juanrenjian", "chance": 0.2 },
+          { "item": "zhenzhi_duanbu", "chance": 0.25 },
+          { "item": "yama_waiyi", "chance": 0.25 },
+          { "item": "nongfuzhijian", "chance": 0.35 }
         ]
       }
     },
@@ -75,11 +75,11 @@
         "items": [
           { "item": "jiaozhuazi", "chance": 0.4, "qtyMin": 1, "qtyMax": 2 },
           { "item": "jitui", "chance": 0.25, "qtyMin": 1, "qtyMax": 2 },
-          { "item": "xiaoqingdun", "chance": 0.03 },
-          { "item": "linghou_zhuzhu_waitao", "chance": 0.03 },
-          { "item": "yama_duanbu", "chance": 0.05 },
-          { "item": "yama_waiyi", "chance": 0.05 },
-          { "item": "xiaoxing_buxueji", "chance": 0.12 }
+          { "item": "xiaoqingdun", "chance": 0.2 },
+          { "item": "linghou_zhuzhu_waitao", "chance": 0.2 },
+          { "item": "yama_duanbu", "chance": 0.25 },
+          { "item": "yama_waiyi", "chance": 0.25 },
+          { "item": "xiaoxing_buxueji", "chance": 0.4 }
         ]
       }
     },
@@ -101,11 +101,11 @@
         "copper": [8, 20],
         "items": [
           { "item": "hongse_baozi", "chance": 0.5, "qtyMin": 1, "qtyMax": 2 },
-          { "item": "xiao_mofaji", "chance": 0.12 },
-          { "item": "yuanxingzhe_changxue", "chance": 0.02 },
-          { "item": "liliang_juanrenjian", "chance": 0.02 },
-          { "item": "ciji_mofazhang", "chance": 0.03 },
-          { "item": "zhenzhi_waiyi", "chance": 0.04 }
+          { "item": "xiao_mofaji", "chance": 0.4 },
+          { "item": "yuanxingzhe_changxue", "chance": 0.2 },
+          { "item": "liliang_juanrenjian", "chance": 0.2 },
+          { "item": "ciji_mofazhang", "chance": 0.25 },
+          { "item": "zhenzhi_waiyi", "chance": 0.25 }
         ]
       }
     },
@@ -130,12 +130,12 @@
         "items": [
           { "item": "xiezi_weiba", "chance": 0.45, "qtyMin": 1, "qtyMax": 2 },
           { "item": "xiezi_zhi_qian", "chance": 0.3 },
-          { "item": "bubingjian", "chance": 0.04 },
-          { "item": "junyong_dunpai", "chance": 0.03 },
-          { "item": "bingfeng_xue", "chance": 0.02 },
-          { "item": "zhuzhu_shoutao", "chance": 0.04 },
-          { "item": "yama_changpao", "chance": 0.04 },
-          { "item": "yexiong_bubing_dunpai", "chance": 0.02 }
+          { "item": "bubingjian", "chance": 0.3 },
+          { "item": "junyong_dunpai", "chance": 0.25 },
+          { "item": "bingfeng_xue", "chance": 0.2 },
+          { "item": "zhuzhu_shoutao", "chance": 0.25 },
+          { "item": "yama_changpao", "chance": 0.25 },
+          { "item": "yexiong_bubing_dunpai", "chance": 0.2 }
         ]
       }
     }
