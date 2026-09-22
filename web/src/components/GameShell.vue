@@ -311,6 +311,7 @@ const LUNGE_MS = 500;
 let lungeQueued = 0; // 排队中（含在播）的前冲数
 let lungeGen = 0; // 代际：开战/收摊时作废残留队列，防旧定时器泄漏到新一场
 function lunge(side: "me" | "foe") {
+  if (lungeQueued >= 3) return; // 动画追不上（极端高攻速）时丢弃动画，飘字/伤害不受影响
   const gen = lungeGen;
   const delay = lungeQueued * LUNGE_MS;
   lungeQueued++;
