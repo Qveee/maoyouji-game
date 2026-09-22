@@ -37,6 +37,118 @@ export const PetsFileSchema = z
 export type Pet = z.infer<typeof PetSchema>;
 export type PetsFile = z.infer<typeof PetsFileSchema>;
 
+// ---------- 物品（切片 5：消耗品/材料/装备统一 code 空间，kind 判别） ----------
+
+export const QUALITY_CODES = ["gray", "green", "blue", "purple", "orange"] as const;
+
+/** 静态装备部位（13）。运行时戒指拆 ring1/ring2 两个栏位（见 game/inventory.ts EQUIP_SLOT_CODES） */
+export const SLOT_CODES = [
+  "main_hand", "off_hand", "head", "shoulder", "chest", "hands", "waist",
+  "legs", "feet", "wrist", "ring", "neck", "cloak",
+] as const;
+
+const itemBase = {
+  code: z.string().min(1).max(64),
+  name: z.string().min(1).max(32),
+  sprite: z.string().min(1),
+  desc: z.string().max(200),
+};
+
+const statBonuses = z.strictObject({
+  vit: z.number().int().min(0).max(100).optional(),
+  str: z.number().int().min(0).max(100).optional(),
+  agi: z.number().int().min(0).max(100).optional(),
+  intel: z.number().int().min(0).max(100).optional(),
+  spr: z.number().int().min(0).max(100).optional(),
+  /** 原版「攻击:+N」词条（蓝宝书口径），开战时直接并入 atk */
+  atk: z.number().int().min(0).max(999).optional(),
+  hp: z.number().int().min(0).max(9999).optional(),
+  sp: z.number().int().min(0).max(9999).optional(),
+});
+
+export const ConsumableItemSchema = z.strictObject({
+  ...itemBase,
+  kind: z.literal("consumable"),
+  /** 使用效果（至少一项非零） */
+  effect: z.strictObject({ hp: z.number().int().min(0).optional(), sp: z.number().int().min(0).optional() })
+    .refine((e) => (e.hp ?? 0) + (e.sp ?? 0) > 0, { message: "消耗品 effect 至少一项" }),
+  stackMax: z.number().int().min(1).max(99).default(99),
+});
+
+export const MaterialItemSchema = z.strictObject({
+  ...itemBase,
+  kind: z.literal("material"),
+  stackMax: z.number().int().min(1).max(99).default(99),
+});
+
+export const EquipmentItemSchema = z.strictObject({
+  ...itemBase,
+  kind: z.literal("equipment"),
+  quality: z.enum(QUALITY_CODES),
+  slot: z.enum(SLOT_CODES),
+  equipType: z.string().min(1).max(16),
+  /** 职业限定（武器+盾牌口径：战士剑/盾牌、法师魔杖）；null=通用（防具饰品） */
+  profession: z.enum(["warrior", "mage"]).nullable(),
+  levelReq: z.number().int().min(1).max(90),
+  durabilityMax: z.number().int().min(1).max(999),
+  /** 双手武器占副手；默认 1 */
+  hands: z.union([z.literal(1), z.literal(2)]).default(1),
+  // —— 武器字段（main_hand 必带；其余部位带即拒绝）——
+  dmgMin: z.number().int().min(0).optional(),
+  dmgMax: z.number().int().min(0).optional(),
+  /** 武器攻速（ms/次），覆盖职业默认 */
+  intervalMs: z.number().int().min(500).max(10000).optional(),
+  // —— 防具字段 ——
+  defBonus: z.number().int().min(0).optional(),
+  bonuses: statBonuses.default({}),
+})
+  .refine((e) => e.slot !== "main_hand" || (e.dmgMin !== undefined && e.dmgMax !== undefined && e.intervalMs !== undefined),
+    { message: "武器必带 dmgMin/dmgMax/intervalMs" })
+  .refine((e) => e.slot === "main_hand" || (e.dmgMin === undefined && e.dmgMax === undefined && e.intervalMs === undefined),
+    { message: "非武器不得带伤害/攻速字段" })
+  .refine((e) => e.dmgMin === undefined || e.dmgMax === undefined || e.dmgMin <= e.dmgMax,
+    { message: "dmgMin 不能大于 dmgMax" })
+  .refine((e) => e.slot !== "off_hand" || e.hands === 1, { message: "副手不得是双手" })
+  .refine((e) => e.slot === "main_hand" || e.slot === "off_hand" || e.profession === null, { message: "职业限定仅用于武器与盾牌（蓝宝书：盾牌战士专用）" });
+
+export const ItemSchema = z.discriminatedUnion("kind", [
+  ConsumableItemSchema,
+  MaterialItemSchema,
+  EquipmentItemSchema,
+]);
+
+export const ItemsFileSchema = z
+  .object({ items: z.array(ItemSchema).min(1) })
+  .superRefine((f, ctx) => {
+    const seen = new Set<string>();
+    for (const it of f.items) {
+      if (seen.has(it.code)) ctx.addIssue({ code: "custom", message: `物品 code 重复：${it.code}` });
+      seen.add(it.code);
+    }
+  });
+
+export type ConsumableItem = z.infer<typeof ConsumableItemSchema>;
+export type MaterialItem = z.infer<typeof MaterialItemSchema>;
+export type EquipmentItem = z.infer<typeof EquipmentItemSchema>;
+export type Item = z.infer<typeof ItemSchema>;
+export type ItemsFile = z.infer<typeof ItemsFileSchema>;
+
+/** 怪物掉落表（每次击杀：copper 区间掷一次 + items 逐条独立概率） */
+const MonsterDropEntrySchema = z.object({
+  item: z.string().min(1).max(64),
+  chance: z.number().gt(0).lte(1),
+  qtyMin: z.number().int().min(1).max(99).default(1),
+  qtyMax: z.number().int().min(1).max(99).default(1),
+}).refine((e) => e.qtyMin <= e.qtyMax, { message: "qtyMin 不能大于 qtyMax" });
+
+export const MonsterDropsSchema = z.object({
+  copper: z.tuple([z.number().int().min(0).max(999999), z.number().int().min(0).max(999999)])
+    .refine(([a, b]) => a <= b, { message: "copper 区间 min 不能大于 max" }),
+  items: z.array(MonsterDropEntrySchema),
+});
+
+export type MonsterDrops = z.infer<typeof MonsterDropsSchema>;
+
 /** 怪物（HP 区间来自原版血量大全；攻防/攻速/经验为 MVP 手写值） */
 export const MonsterSchema = z
   .object({
@@ -56,6 +168,8 @@ export const MonsterSchema = z
     /** 图鉴展示字段（照原型 MONSTERS 字典考据）：定位类型与描述，可选；缺省时前端走兜底文案 */
     type: z.string().max(32).optional(),
     desc: z.string().max(200).optional(),
+    /** 掉落表（切片 5）；交叉引用完整性在 loader 层校验 */
+    drops: MonsterDropsSchema.optional(),
   })
   .refine((m) => m.hpMin <= m.hpMax, { message: "hpMin 不能大于 hpMax" })
   .refine((m) => m.atkMin <= m.atkMax, { message: "atkMin 不能大于 atkMax" });

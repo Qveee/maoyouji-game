@@ -1,14 +1,22 @@
 import { describe, expect, it } from "vitest";
 import {
+  loadItems,
   loadMaps,
   loadMonsters,
   loadPets,
   loadSkills,
+  itemIndex,
   mapIndex,
   monsterIndex,
   validateCrossRefs,
 } from "../../src/data/loader.ts";
-import { MapsFileSchema, MonstersFileSchema, PetsFileSchema, SkillsFileSchema } from "../../src/data/schemas.ts";
+import {
+  ItemsFileSchema,
+  MapsFileSchema,
+  MonstersFileSchema,
+  PetsFileSchema,
+  SkillsFileSchema,
+} from "../../src/data/schemas.ts";
 
 describe("静态宠物数据", () => {
   it("内置 pets.json 含 17 种宠物且全部可选", () => {
@@ -273,5 +281,60 @@ describe("刷怪分区交叉引用（loader 层）", () => {
     const monsters = new Map(monsterIndex());
     monsters.delete("caoyuanxie");
     expect(() => validateCrossRefs(mapIndex(), monsters)).toThrow(/不存在的怪物/);
+  });
+});
+
+describe("items.json 静态物品", () => {
+  it("通过 zod 校验且 code 唯一", () => {
+    const f = loadItems();
+    expect(f.items.length).toBeGreaterThanOrEqual(20);
+    expect(ItemsFileSchema.safeParse(f).success).toBe(true);
+  });
+  it("装备 kind 判别：武器必带伤害区间与攻速，防具无伤害字段", () => {
+    const items = itemIndex();
+    const w = items.get("bubingjian")!;
+    expect(w.kind).toBe("equipment");
+    if (w.kind === "equipment") {
+      expect(w.dmgMin).toBe(7);
+      expect(w.dmgMax).toBe(9);
+      expect(w.intervalMs).toBe(2100);
+      expect(w.quality).toBe("green");
+    }
+    const a = items.get("yama_waiyi")!;
+    if (a.kind === "equipment") expect(a.dmgMin).toBeUndefined();
+  });
+  it("消耗品 effect 至少一项", () => {
+    const y = itemIndex().get("xiaoxing_buxueji")!;
+    expect(y.kind).toBe("consumable");
+    if (y.kind === "consumable") expect(y.effect.hp).toBe(50);
+  });
+  it("考据抽查：步兵剑 7-9/速度2.1/耐久13/等级4；能量之卷刃剑带攻击+2；冰风靴体力+2智力+2", () => {
+    const idx = itemIndex();
+    const b = idx.get("bubingjian")!;
+    if (b.kind === "equipment") {
+      expect([b.dmgMin, b.dmgMax, b.intervalMs, b.durabilityMax, b.levelReq]).toEqual([7, 9, 2100, 13, 4]);
+      expect(b.profession).toBe("warrior");
+    }
+    const e = idx.get("nengliang_juanrenjian")!;
+    if (e.kind === "equipment") expect(e.bonuses.atk).toBe(2);
+    const i = idx.get("bingfeng_xue")!;
+    if (i.kind === "equipment") expect(i.bonuses).toMatchObject({ vit: 2, intel: 2 });
+  });
+  it("非法装备（武器缺伤害区间）被拒绝", () => {
+    const bad = { items: [{ code: "x", name: "断剑", sprite: "/i.png", desc: "", kind: "equipment",
+      quality: "gray", slot: "main_hand", equipType: "剑", profession: "warrior",
+      levelReq: 1, durabilityMax: 10, hands: 1 }] };
+    expect(ItemsFileSchema.safeParse(bad).success).toBe(false);
+  });
+  it("怪物 drops 引用不存在的物品时 validateCrossRefs 抛错", () => {
+    const monsters = MonstersFileSchema.parse({ monsters: [
+      { code: "m1", name: "怪", level: 1, sprite: "/m.gif", hpMin: 1, hpMax: 2, atkMin: 0, atkMax: 1,
+        def: 0, dodgeRate: 0, critRate: 0, intervalMs: 1000, exp: 1,
+        drops: { copper: [1, 2], items: [{ item: "no_such_item", chance: 0.5 }] } },
+    ]});
+    expect(() => validateCrossRefs(new Map(), new Map(monsters.monsters.map((m) => [m.code, m])))).toThrow(/no_such_item/);
+  });
+  it("现有 monsters.json 每只怪都配了 drops", () => {
+    for (const m of loadMonsters().monsters) expect(m.drops, m.code).toBeDefined();
   });
 });

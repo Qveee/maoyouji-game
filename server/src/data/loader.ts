@@ -1,10 +1,13 @@
 import { readFileSync } from "node:fs";
 import {
+  ItemsFileSchema,
   MapsFileSchema,
   MonstersFileSchema,
   PetsFileSchema,
   SkillsFileSchema,
   type GameMap,
+  type Item,
+  type ItemsFile,
   type MapNode,
   type Monster,
   type MonstersFile,
@@ -108,14 +111,32 @@ export function skillIndex(): Map<string, Skill> {
   return skillCache;
 }
 
+const DEFAULT_ITEMS_PATH = new URL("../../data/items.json", import.meta.url);
+
+/** 读取并校验静态物品数据；校验失败抛错（共识 #4：拒绝启动） */
+export function loadItems(path: URL | string = DEFAULT_ITEMS_PATH): ItemsFile {
+  return ItemsFileSchema.parse(JSON.parse(readFileSync(path, "utf8")));
+}
+
+let itemCache: Map<string, Item> | null = null;
+
+/** 物品 code → 物品 索引（模块级缓存） */
+export function itemIndex(): Map<string, Item> {
+  if (!itemCache) {
+    itemCache = new Map(loadItems().items.map((i) => [i.code, i]));
+  }
+  return itemCache;
+}
+
 /**
- * 静态数据交叉引用校验：节点 spawns 引用的怪物必须存在。
+ * 静态数据交叉引用校验：节点 spawns 引用的怪物必须存在，怪物 drops 引用的物品必须存在。
  * 放 loader 层而非 schemas，避免 schemas 对 monsters 数据的循环依赖。
- * 在 mapIndex/monsterIndex 都就绪后调用；校验失败抛错（共识 #4：拒绝启动）。
+ * 在 mapIndex/monsterIndex/itemIndex 都就绪后调用；校验失败抛错（共识 #4：拒绝启动）。
  */
 export function validateCrossRefs(
   maps: Map<string, GameMap> = mapIndex(),
   monsters: Map<string, Monster> = monsterIndex(),
+  items: Map<string, Item> = itemIndex(),
 ): void {
   const checkNode = (mapCode: string, node: MapNode): void => {
     for (const code of node.spawns ?? []) {
@@ -127,6 +148,14 @@ export function validateCrossRefs(
   for (const map of maps.values()) {
     for (const node of map.nodes) {
       checkNode(map.code, node);
+    }
+  }
+  // 掉落表引用的物品必须存在（schema 层做不了跨文件校验，与 spawns 同理放 loader）
+  for (const m of monsters.values()) {
+    for (const d of m.drops?.items ?? []) {
+      if (!items.has(d.item)) {
+        throw new Error(`怪物 ${m.code} 的 drops 引用不存在的物品：${d.item}`);
+      }
     }
   }
 }
