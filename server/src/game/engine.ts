@@ -69,7 +69,13 @@ export interface BattleState {
   foeExp: number;
   seq: number;
   events: BattleEvent[];
-  over: null | { result: "victory" | "defeat" | "draw"; expGained?: number };
+  /** killCount/totalExpGained 由路由层结算时补写（累计斩杀数/累计经验，引擎不碰 DB） */
+  over: null | {
+    result: "victory" | "defeat" | "draw";
+    expGained?: number;
+    killCount?: number;
+    totalExpGained?: number;
+  };
 }
 
 /** 战斗时长上限：MVP 无逃跑，快进越过 3 分钟仍无胜负即平局脱战（设计决策 #3） */

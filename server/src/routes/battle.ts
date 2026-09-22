@@ -181,6 +181,19 @@ async function settleBattle(conn: PoolConnection, battle: BattleRow, state: Batt
          character_monster_stats.total_exp_gained = character_monster_stats.total_exp_gained + new.total_exp_gained`,
       [battle.characterId, battle.monsterCode, expGained],
     );
+    // 结算信息回填 over 快照（累计值），随尾部 UPDATE battles.state 一并持久化，前端终局展示用
+    const [statRows] = await conn.query<RowDataPacket[]>(
+      "SELECT kill_count, total_exp_gained FROM character_monster_stats WHERE character_id = ? AND monster_code = ?",
+      [battle.characterId, battle.monsterCode],
+    );
+    const stat = statRows[0];
+    if (stat) {
+      state.over = {
+        ...over,
+        killCount: Number(stat.kill_count),
+        totalExpGained: Number(stat.total_exp_gained),
+      };
+    }
   } else if (result === "defeat") {
     const [rows] = await conn.query<CharacterBattleRow[]>(
       "SELECT level, vit, intel FROM characters WHERE id = ?",

@@ -32,7 +32,9 @@ const fitScale = ref(1);
 /** 聊天记录行：战斗行在 push 时以当帧怪名烘焙分词结果（parts），战斗结束后历史行配色不回退 */
 type LogLine =
   | { time: string; text: string; kind: "sys" | "chat" }
-  | { time: string; text: string; kind: "battle"; parts: { t: string; cls: string }[] };
+  | { time: string; text: string; kind: "battle"; parts: { t: string; cls: string }[] }
+  /** 战斗结算行：金橙加粗大字号，与普通战斗行明显区分 */
+  | { time: string; text: string; kind: "battle-end" };
 const messages = ref<LogLine[]>([]);
 const chatBodyEl = ref<HTMLElement | null>(null); // 聊天记录滚动容器（自动贴底用）
 const chatText = ref("");
@@ -237,6 +239,23 @@ function pushBattleLine(text: string, t?: number) {
   void nextTick(stickChat);
 }
 
+/** 战斗结算行：终局一次性 push（斩杀数/累计经验取服务端结算补写值），独立醒目样式 */
+function pushBattleResult(over: NonNullable<BattleResponseState["over"]>) {
+  const foeName = battle.value?.foeName ?? "";
+  let text: string;
+  if (over.result === "victory") {
+    const exp = over.expGained ?? 0;
+    text = `【战斗胜利】击败 ${foeName}！斩杀数 ${over.killCount ?? 1}，获取总经验 ${over.totalExpGained ?? exp}（本场 +${exp}）`;
+  } else if (over.result === "defeat") {
+    text = `【战斗失败】你被 ${foeName} 击败，已在猫隐村教堂复活。`;
+  } else {
+    text = `【战斗平局】3 分钟未分胜负，各自罢手。`;
+  }
+  messages.value.push({ time: now(), text, kind: "battle-end" });
+  if (messages.value.length > 60) messages.value.shift();
+  void nextTick(stickChat);
+}
+
 /** 日志行分词上色：仅按「怪名」「你」两个 token 切分，不做逐词解析；foeName 由调用方在 push 时传入 */
 function battleParts(text: string, foeName: string): { t: string; cls: string }[] {
   const name = foeName;
@@ -262,8 +281,8 @@ function spawnFloat(target: "me" | "foe", cls: string, text: string) {
 const meUnitEl = ref<HTMLElement | null>(null);
 const foeUnitEl = ref<HTMLElement | null>(null);
 
-/** 出手前冲：一直冲到对方精灵所在位置再回位（用户要求：幅度=两单位实际间距）。
- *  距离实时测量两精灵中心差写入 --lx（keyframes 里 var() 取值）；
+/** 出手前冲：冲到对方精灵跟前留一小段空隙再回位（用户要求：不重叠、稍微留距）。
+ *  距离 = 两精灵中心差 − 双方半宽 − 24px 间隙，实时测量写入 --lx（keyframes 里 var() 取值）；
  *  stage-fit 的 transform scale 会让 getBoundingClientRect 含缩放，除回系数还原布局坐标。
  *  移除类 → 强制 reflow → 加回，同类连发可重新起播；.5s 播完自然静止 */
 function lunge(side: "me" | "foe") {
@@ -277,7 +296,9 @@ function lunge(side: "me" | "foe") {
     const b = theirs.getBoundingClientRect();
     const scale = a.width / mine.offsetWidth || 1; // 屏幕/布局宽 = 缩放系数
     const dx = (b.left + b.width / 2 - (a.left + a.width / 2)) / scale;
-    el.style.setProperty("--lx", `${dx.toFixed(1)}px`);
+    const gap = (a.width + b.width) / 2 / scale + 24; // 贴脸空隙：双方半宽 + 24px
+    const travel = dx - Math.sign(dx || 1) * gap;
+    el.style.setProperty("--lx", `${travel.toFixed(1)}px`);
   }
   el.classList.remove("atk");
   void el.offsetWidth; // 强制 reflow，保证动画从头重播
@@ -337,9 +358,10 @@ function applyBattle(res: BattleResponse, animate = true) {
   if (res.state.over && !battleEnding) startSettlement(res.state.over);
 }
 
-/** 终局：不做胜利/战败横幅（战斗记录区已有击杀播报，按用户要求），短暂定格 180ms → 关覆盖层 → 重拉地图（尸体/复活可见）+ 通知 App 刷新角色（升级/回城即时反映） */
+/** 终局：不做胜利/战败横幅（战斗记录区已有击杀播报，按用户要求），先落一条醒目结算行，短暂定格 180ms → 关覆盖层 → 重拉地图（尸体/复活可见）+ 通知 App 刷新角色（升级/回城即时反映） */
 function startSettlement(over: NonNullable<BattleResponseState["over"]>) {
   battleEnding = true;
+  pushBattleResult(over); // 结算行先进日志（收摊后仍留档可读）
   markDead(over.result); // 终局倒地表现同帧出现（收摊极快，仅作瞬时反馈）
   settleTimer = window.setTimeout(() => {
     settleTimer = undefined;
@@ -1081,6 +1103,14 @@ onUnmounted(() => {
   text-overflow: ellipsis;
 }
 .chatlog p.chat { color: #1e5f3f; }
+/* 战斗结算行：金橙加粗放大（正文 12px），与普通战斗行/下一场开场一眼可辨 */
+.chatlog p.battle-end {
+  color: #c56a00;
+  font-weight: 800;
+  font-size: 14px;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.65);
+  margin: 5px 0 2px;
+}
 /* 战斗日志行配色（照原型）：你=红、怪名=绿下划线 */
 .chatlog .you { color: #f52627; }
 .chatlog .mk { color: #178714; text-decoration: underline; }

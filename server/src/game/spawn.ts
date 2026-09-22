@@ -18,14 +18,16 @@ function randInt(min: number, max: number): number {
   return min + Math.floor(Math.random() * (max - min + 1));
 }
 
-/** 一格随机刷 2~4 只：类型从 spawns 配置的怪物池均匀随机，HP 在静态区间内随机 */
+/** 一格随机刷 2~4 只：类型从 spawns 配置的怪物池均匀随机，HP 在静态区间内随机。
+ *  出生即满血展示：max_hp 跟随 roll 出的 hp（roll 到下限就以下限为 100%），血条不会一出生就缺角 */
 async function insertFreshSpawns(mapCode: string, nodeCode: string, spawns: string[]): Promise<void> {
   const count = randInt(2, 4);
   const values: Array<[string, string, string, number, number, string]> = [];
   for (let i = 0; i < count; i++) {
     const code = spawns[randInt(0, spawns.length - 1)]!; // spawns 非空由调用方保证
     const monster = monsterIndex().get(code)!; // validateCrossRefs 已保证引用存在
-    values.push([mapCode, nodeCode, code, randInt(monster.hpMin, monster.hpMax), monster.hpMax, "alive"]);
+    const hp = randInt(monster.hpMin, monster.hpMax);
+    values.push([mapCode, nodeCode, code, hp, hp, "alive"]);
   }
   await getPool().query<ResultSetHeader>(
     "INSERT INTO map_node_monsters (map_code, node_code, monster_code, hp, max_hp, status) VALUES ?",
@@ -34,8 +36,8 @@ async function insertFreshSpawns(mapCode: string, nodeCode: string, spawns: stri
 }
 
 /**
- * 把一批到期尸体复活：status='alive'、HP 按静态区间重新 roll（即回满新血量）、
- * max_hp 同步为静态 hpMax、respawn_at 清空。
+ * 把一批到期尸体复活：status='alive'、HP 按静态区间重新 roll，max_hp 同步为该值
+ * （同刷怪口径：出生即满血），respawn_at 清空。
  * 静态数据漂移兜底：怪物已改名/删 code 的尸体永久搁置（保持 dead 且 respawn_at=NULL，
  * 不再参与扫描），避免复活路径 500。
  */
@@ -49,9 +51,10 @@ async function reviveRows(rows: RowDataPacket[]): Promise<void> {
       );
       continue;
     }
+    const hp = randInt(monster.hpMin, monster.hpMax);
     await getPool().query(
       "UPDATE map_node_monsters SET status = 'alive', hp = ?, max_hp = ?, respawn_at = NULL WHERE id = ?",
-      [randInt(monster.hpMin, monster.hpMax), monster.hpMax, row.id],
+      [hp, hp, row.id],
     );
   }
 }

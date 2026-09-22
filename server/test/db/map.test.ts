@@ -190,7 +190,8 @@ describe("格子惰性刷怪与复活", () => {
       expect(m.name).toBe(staticMonster.name);
       expect(m.level).toBe(staticMonster.level);
       expect(m.sprite).toBe(staticMonster.sprite);
-      expect(m.maxHp).toBe(staticMonster.hpMax);
+      // 出生即满血展示：max_hp 跟随 roll 出的 hp（roll 下限就以下限为 100%）
+      expect(m.maxHp).toBe(m.hp);
       expect(m.hp).toBeGreaterThanOrEqual(staticMonster.hpMin);
       expect(m.hp).toBeLessThanOrEqual(staticMonster.hpMax);
       expect(m.id).toBeGreaterThan(0);

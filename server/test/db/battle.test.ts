@@ -336,6 +336,11 @@ describe("战斗结算", () => {
     expect(poll.statusCode).toBe(200);
     const body = poll.json();
     expect(body.state.over).toMatchObject({ result: "victory" });
+    // 结算信息随 over 快照回传：本场经验与累计斩杀数/累计经验（首次击杀即 1 / exp）
+    const expGained = body.state.over.expGained;
+    expect(expGained).toBeGreaterThan(0);
+    expect(body.state.over.killCount).toBe(1);
+    expect(body.state.over.totalExpGained).toBe(expGained);
 
     const row = await battleRowOf(warriorId);
     expect(row.status).toBe("finished");

@@ -108,7 +108,12 @@ export interface BattleResponseState {
   pendingSkill: BattlePendingSkill | null;
   skillCdUntil: number; // 服务器时钟毫秒；倒计时须以 state.now 锚定，勿直接比本地时钟
   now: number; // 服务器当前毫秒（本地时钟锚定基准）
-  over: null | { result: "victory" | "defeat" | "draw"; expGained?: number };
+  over: null | {
+    result: "victory" | "defeat" | "draw";
+    expGained?: number;
+    killCount?: number; // 累计斩杀数（结算时服务端补写）
+    totalExpGained?: number; // 该怪累计获取经验（结算时服务端补写）
+  };
 }
 
 export interface BattleResponse {
