@@ -42,10 +42,20 @@ describe("静态宠物数据", () => {
 });
 
 describe("静态怪物数据", () => {
-  it("内置 monsters.json 含 4 种牧野草原怪物且通过 zod 校验", () => {
+  it("内置 monsters.json 含 5 种牧野草原怪物且通过 zod 校验", () => {
     const file = loadMonsters();
-    expect(file.monsters).toHaveLength(4);
-    expect(file.monsters.map((m) => m.code)).toEqual(["lvmaochong", "xiaoji", "hongmogu", "caoyuanxie"]);
+    expect(file.monsters).toHaveLength(5);
+    expect(file.monsters.map((m) => m.code)).toEqual(["paopao", "lvmaochong", "xiaoji", "hongmogu", "caoyuanxie"]);
+  });
+
+  it("泡泡考据数值：原版血量大全 1~3 级 HP20~40 动物中型（MVP 取 1 级入门）", () => {
+    const paopao = loadMonsters().monsters.find((m) => m.code === "paopao")!;
+    expect(paopao.name).toBe("泡泡");
+    expect(paopao.level).toBe(1);
+    expect(paopao.sprite).toBe("/monsters/BoLi.gif");
+    expect(paopao.hpMin).toBe(20);
+    expect(paopao.hpMax).toBe(40);
+    expect(paopao.exp).toBe(40); // 与同级绿毛虫对齐
   });
 
   it("code 重复被拒绝", () => {
@@ -243,6 +253,14 @@ describe("牧野草原地图", () => {
     for (const code of ["my_rukou", "my_wanma", "my_aolin"]) {
       expect(muye.nodes.find((n) => n.code === code)!.spawns).toBeUndefined();
     }
+  });
+
+  it("泡泡与绿毛虫同区：原版 1~3 级新手区 10 节点刷怪池均含 paopao", () => {
+    const muye = mapIndex().get("muye_caoyuan")!;
+    const withPaopao = muye.nodes.filter((n) => n.spawns?.includes("paopao"));
+    expect(withPaopao.map((n) => n.code)).toEqual([
+      "my00", "my01", "my02", "my03", "my07", "my10", "my11", "my12", "my13", "my14",
+    ]);
   });
 });
 

@@ -184,8 +184,8 @@ describe("格子惰性刷怪与复活", () => {
     expect(my13.monsters.length).toBeGreaterThanOrEqual(2);
     expect(my13.monsters.length).toBeLessThanOrEqual(4);
     for (const m of my13.monsters) {
-      // my13 的刷怪池只有绿毛虫/小鸡；静态信息取自 monsters.json
-      expect(["lvmaochong", "xiaoji"]).toContain(m.code);
+      // my13 属新手区刷怪池（泡泡/绿毛虫/小鸡）；静态信息取自 monsters.json
+      expect(["paopao", "lvmaochong", "xiaoji"]).toContain(m.code);
       const staticMonster = monsterIndex().get(m.code)!;
       expect(m.name).toBe(staticMonster.name);
       expect(m.level).toBe(staticMonster.level);

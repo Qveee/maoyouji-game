@@ -1,6 +1,24 @@
 {
   "monsters": [
     {
+      "code": "paopao",
+      "name": "泡泡",
+      "level": 1,
+      "sprite": "/monsters/BoLi.gif",
+      "hpMin": 20,
+      "hpMax": 40,
+      "atkMin": 2,
+      "atkMax": 4,
+      "def": 0,
+      "dodgeRate": 0.01,
+      "critRate": 0.01,
+      "intervalMs": 2400,
+      "spr": 0,
+      "exp": 40,
+      "type": "平衡 动物中型",
+      "desc": "牧野草原上飘荡的透明圆泡，身子软乎乎一戳就晃，是每个猫隐村勇士打响名号的第一只怪。"
+    },
+    {
       "code": "lvmaochong",
       "name": "绿毛虫",
       "level": 1,
