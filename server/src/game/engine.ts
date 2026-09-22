@@ -26,6 +26,9 @@ export interface Combatant {
   maxSp?: number;
   atk: number;
   def: number;
+  /** 武器伤害区间；无武器/旧快照缺省 → 徒手 1~3 */
+  dmgMin?: number;
+  dmgMax?: number;
   dodge: number;
   crit: number;
   critMult: number;
@@ -147,12 +150,13 @@ function resolveAttack(
   }
   // b. 暴击判定（技能同样走这道判定）
   const isCrit = rng.next() < attacker.crit;
-  // c. 伤害 roll：普攻徒手 1~3；next_hit_bonus = 徒手 roll + 固定加成；direct_damage = 技能自带区间
+  // c. 伤害 roll：普攻/next_hit_bonus 用攻击者武器伤害区间（无字段兜底徒手 1~3）；
+  //    next_hit_bonus 另加固定加成；direct_damage = 技能自带区间
   let roll: number;
   if (skill === null) {
-    roll = rng.int(UNARMED_MIN, UNARMED_MAX);
+    roll = rng.int(attacker.dmgMin ?? UNARMED_MIN, attacker.dmgMax ?? UNARMED_MAX);
   } else if (skill.kind === "next_hit_bonus") {
-    roll = rng.int(UNARMED_MIN, UNARMED_MAX) + (skill.bonusDamage ?? 0);
+    roll = rng.int(attacker.dmgMin ?? UNARMED_MIN, attacker.dmgMax ?? UNARMED_MAX) + (skill.bonusDamage ?? 0);
   } else {
     const lo = skill.dmgMin ?? UNARMED_MIN;
     roll = rng.int(lo, skill.dmgMax ?? lo);

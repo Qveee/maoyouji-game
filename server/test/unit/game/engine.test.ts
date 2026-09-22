@@ -328,6 +328,29 @@ describe("advance 时间快进", () => {
   });
 });
 
+describe("武器伤害区间（Combatant.dmgMin/dmgMax）", () => {
+  it("普攻用武器伤害区间替代徒手", () => {
+    // 必中不暴击：伤害 = roll + atk − def；徒手 roll∈[1,3]、武器 [7,9]
+    const unarmed = createBattleState({ me: meFixture(), foe: foeFixture(), foeExp: 10 }, 42, 0);
+    const armed = createBattleState(
+      { me: meFixture({ dmgMin: 7, dmgMax: 9 }), foe: foeFixture(), foeExp: 10 }, 42, 0,
+    );
+    const a = advance(unarmed, 1000);
+    const b = advance(armed, 1000);
+    const da = a.events.find((e) => e.kind === "hit")!.amount!;
+    const db = b.events.find((e) => e.kind === "hit")!.amount!;
+    expect(da).toBeGreaterThanOrEqual(1 + 5 - 0);  // roll_min + atk − def
+    expect(db).toBeGreaterThanOrEqual(7 + 5 - 0);  // 武器下限抬升
+    expect(db).toBeLessThanOrEqual(9 + 5 - 0);
+  });
+
+  it("旧快照无 dmgMin/dmgMax 字段时间线不变（?? UNARMED 兜底）", () => {
+    const s = createBattleState({ me: meFixture(), foe: foeFixture(), foeExp: 10 }, 42, 0);
+    const hacked = JSON.parse(JSON.stringify(s)); // 模拟持久化往返后无新字段
+    expect(advance(hacked, 60000).events.map((e) => e.text)).toEqual(advance(s, 60000).events.map((e) => e.text));
+  });
+});
+
 describe("activateSkill 技能激活", () => {
   it("通过路径：扣 SP、写 CD、标记待发、咏唱顺延 nextActAt，且不改入参", () => {
     const s0 = battle(7);
