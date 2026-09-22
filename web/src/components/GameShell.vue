@@ -281,11 +281,11 @@ function spawnFloat(target: "me" | "foe", cls: string, text: string) {
 const meUnitEl = ref<HTMLElement | null>(null);
 const foeUnitEl = ref<HTMLElement | null>(null);
 
-/** 出手前冲：冲到对方精灵跟前留一小段空隙再回位（用户要求：不重叠、稍微留距）。
+/** 出手前冲：冲到对方精灵跟前留一小段空隙再回位。
  *  距离 = 两精灵中心差 − 双方半宽 − 24px 间隙，实时测量写入 --lx（keyframes 里 var() 取值）；
  *  stage-fit 的 transform scale 会让 getBoundingClientRect 含缩放，除回系数还原布局坐标。
  *  移除类 → 强制 reflow → 加回，同类连发可重新起播；.5s 播完自然静止 */
-function lunge(side: "me" | "foe") {
+function doLunge(side: "me" | "foe") {
   const el = side === "me" ? meUnitEl.value : foeUnitEl.value;
   const other = side === "me" ? foeUnitEl.value : meUnitEl.value;
   if (!el || !other) return;
@@ -305,14 +305,32 @@ function lunge(side: "me" | "foe") {
   el.classList.add("atk");
 }
 
+/** 前冲排队：一次轮询常带回双方各一击，若同帧相向前冲会交错穿过（用户要求不交叉），
+ *  按 0.5s 一击串行播放，任一时刻只有一方在前冲 */
+const LUNGE_MS = 500;
+let lungeQueued = 0; // 排队中（含在播）的前冲数
+let lungeGen = 0; // 代际：开战/收摊时作废残留队列，防旧定时器泄漏到新一场
+function lunge(side: "me" | "foe") {
+  const gen = lungeGen;
+  const delay = lungeQueued * LUNGE_MS;
+  lungeQueued++;
+  window.setTimeout(() => {
+    lungeQueued--;
+    if (gen !== lungeGen) return; // 已换场，本次前冲作废
+    doLunge(side);
+  }, delay);
+}
+
 /** 终局倒地：victory 怪倒、defeat 我倒、draw 都不倒 */
 function markDead(result: "victory" | "defeat" | "draw") {
   if (result === "victory") foeUnitEl.value?.classList.add("dead");
   else if (result === "defeat") meUnitEl.value?.classList.add("dead");
 }
 
-/** 清掉两个单位的 atk/dead 类：开战/恢复/收摊时调用，防跨场残留 */
+/** 清掉两个单位的 atk/dead 类：开战/恢复/收摊时调用，防跨场残留；同时作废排队中的前冲 */
 function resetUnitAnim() {
+  lungeGen++;
+  lungeQueued = 0;
   for (const el of [meUnitEl.value, foeUnitEl.value]) el?.classList.remove("atk", "dead");
 }
 
