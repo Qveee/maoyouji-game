@@ -10,13 +10,13 @@
 4. **静态数据组织**：单 `items.json`（discriminated union，统一 code 空间），掉落表内嵌 `monsters.json` 每怪 `drops` 字段。
 5. **品质表里定死**：掉落表直接配具体物品（含品质），不做品质二次随机（蓝宝书口径）。
 6. **武器攻速生效**：武器 `intervalMs` 本切片即按蓝宝书真实速度生效（如步兵剑 2.1s），接受战斗节奏变化；无武器时用现行职业默认（战士 2000ms/法师 2200ms）。
-7. **穿戴冲突拒绝**：部位占用/双手↔副手互斥/等级职业不符一律拒绝并提示，不自动换装。
+7. **穿戴冲突直接替换**（2026-09-22 修订）：目标部位已有装备 → 旧装备自动回背包、新装备上位（如单手剑在位再穿枪，直接换）；穿双手武器时副手有装备 → 副手件自动回背包；反之穿副手时主手是双手武器 → 双手武器自动回背包。旧装备回包需要 1 个空格，**背包满则整次穿戴拒绝**并提示（不静默丢弃玩家装备）。等级/职业不符仍拒绝。
 
 ## 范围
 
 - 静态数据：`server/data/items.json` + `monsters.json` 加 `drops`；loader 交叉校验（掉落引用物品必存在、slot 枚举合法），失败拒绝启动。
 - 掉落引擎：`server/src/game/drops.ts` 纯函数 `rollDrops(drops, rng)`，RNG 消耗顺序锁定（先 copper，再按表序逐条 chance、命中后掷 qty）并写注释。
-- 背包：`game/inventory.ts` 纯函数（入包分配/穿戴校验）+ `routes/inventory.ts`（GET / equip / unequip / use / discard），300 格上限，可堆叠物先堆后开格，装备 qty 恒 1 独立行。
+- 背包：`game/inventory.ts` 纯函数（入包分配/穿戴校验与替换联装）+ `routes/inventory.ts`（GET / equip / unequip / use / discard），300 格上限，可堆叠物先堆后开格，装备 qty 恒 1 独立行。部位占用走直接替换（决策 7）。
 - 装备属性接入战斗：`game/equipment.ts` 纯函数汇总加成；`battle.ts` 开战组装 Combatant 时并入；`engine.ts` Combatant 加可选 `dmgMin/dmgMax`（`?? UNARMED` 兜底，怪物侧与旧快照行为不变）；`rules.ts` 签名不动（保持无装备基准）。
 - 铜币：victory 时按 `drops.copper` 区间 roll 入账 `characters.copper`（结算缺口补齐）。
 - 死亡耐久：defeat 时全身装备 `durability -= ceil(durabilityMax × 5%)`，下限 0。
@@ -73,7 +73,7 @@ drops: { copper: [min, max],
 ## 验收
 
 - unit（固定种子）：rollDrops 全 miss/命中/qty/顺序锁定；lootInto 堆叠/满包 lost；equipmentBonusesOf 汇总/耐久 0 失效；engine 武器区间替换徒手且怪物侧时间线不变。
-- db：victory 掉落入包+铜币+state.over.drops；defeat 耐久 -5%；穿脱校验链（等级/职业/双手/部位占用）；用药/丢弃；300 格上限。
+- db：victory 掉落入包+铜币+state.over.drops；defeat 耐久 -5%；穿脱校验链（等级/职业拒绝、部位占用直接替换、双手↔副手联动卸下、背包满替换拒绝）；用药/丢弃；300 格上限。
 - 浏览器实测：打怪 → 掉落进包 → 穿装备 → 面板属性变化 → 再打怪伤害提升；背包满丢提示；1400×832 手动回归。
 
 ## 实施顺序（writing-plans 阶段细化）
