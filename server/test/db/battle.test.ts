@@ -705,3 +705,71 @@ describe("掉落与耐久结算", () => {
     expect(row.result).toBe("defeat");
   });
 });
+
+// ---------- 开战并入装备加成（终审补充用例）----------
+
+describe("开战并入装备加成", () => {
+  /** 独立新角色：裸装基准值可按规则式精确预期，不受文件内其他用例的装备/结算残留干扰 */
+  let eqCookie = "";
+  let eqCharId = 0;
+
+  beforeAll(async () => {
+    const acc = await registerAndLogin(app, "equipcat");
+    const created = await app.inject({
+      method: "POST",
+      url: "/api/characters",
+      headers: { cookie: acc },
+      payload: { name: "并装猫", breedCode: "mao", profession: "warrior" },
+    });
+    eqCharId = created.json().id;
+    const sel = await app.inject({
+      method: "POST",
+      url: "/api/auth/select-character",
+      headers: { cookie: acc },
+      payload: { characterId: eqCharId },
+    });
+    eqCookie = cookieOf(sel);
+    await move(eqCookie, "muye03");
+    await move(eqCookie, "my03");
+  });
+
+  it("穿农夫之剑开战：武器区间/攻速并入 state.me（裸装为徒手 1~3 / 2000ms）", async () => {
+    // SQL 直插背包行（满耐久 10）并绑定 main_hand（与 defeat 用例同写法；levelReq 1 战士可用）
+    const [inv] = await getPool().query<ResultSetHeader>(
+      `INSERT INTO character_inventory (character_id, item_code, slot_index, quantity, durability)
+       VALUES (?, 'nongfuzhijian', NULL, 1, 10)`,
+      [eqCharId],
+    );
+    await getPool().query(
+      "INSERT INTO character_equipment (character_id, slot_code, inventory_id) VALUES (?, 'main_hand', ?)",
+      [eqCharId, inv.insertId],
+    );
+
+    const view = await current(eqCookie);
+    expect(view.statusCode).toBe(200);
+    const monsters = view.json().nodes.find((n: { code: string }) => n.code === "my03").monsters;
+    expect(monsters.length).toBeGreaterThan(0);
+
+    const res = await battleStart(eqCookie, monsters[0].id);
+    expect(res.statusCode).toBe(200);
+    // state.me 持久化快照对账（items.json 实际数值：农夫之剑 2-4 伤害 / 攻速 2600 / 无 bonuses）；
+    // 裸装对照：dmgMin/dmgMax 缺省（攻击时兜底徒手 1~3）、战士攻速 2000
+    const row = await battleRowOf(eqCharId);
+    expect(row.state.me.dmgMin).toBe(2);
+    expect(row.state.me.dmgMax).toBe(4);
+    expect(row.state.me.intervalMs).toBe(2600);
+    // 农夫之剑无 hp 词条 → maxHp 恒等于裸装基础值 hpMaxOf(1,5)=100，不得幻影抬升
+    // （items.json 无任何 bonuses.hp 装备，且路由的 vit 加成不并入 maxHp，抬升断言无真实数据可构造）
+    expect(row.state.me.maxHp).toBe(100);
+    expect(row.state.me.hp).toBe(100);
+
+    // 收尾：怪血抬高防误杀 + 时间轴拨回 181 秒前 → 超时平局释放 active 名额（文件内用例互不残留）
+    await patchState(Number(row.id), (s) => {
+      s.foe.hp = 100000;
+      s.foe.maxHp = 100000;
+      rewindBy(s, 181_000);
+    });
+    const draw = await battleState(eqCookie, 0);
+    expect(draw.json().state.over).toMatchObject({ result: "draw" });
+  });
+});

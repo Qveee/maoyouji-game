@@ -151,7 +151,7 @@ async function doDiscard(item: BagItemView) {
 
       <!-- 右：300 格背包（10 列滚动），品质色名字 + 数量角标 -->
       <div class="bagwrap">
-        <div class="grid scr">
+        <div class="grid">
           <div
             v-for="(it, i) in bagCells"
             :key="i"

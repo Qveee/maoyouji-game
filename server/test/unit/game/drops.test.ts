@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { expect, it } from "vitest";
 import { createRng } from "../../../src/game/rng.ts";
 import { rollDrops } from "../../../src/game/drops.ts";
 

@@ -41,7 +41,7 @@ function durabilityMaxOf(code: string, stackMax: number): number | null {
 
 /**
  * 把掉落依序装入背包：先填同码未满堆（从低 slot 行开始），再开最小空闲格。
- * 全程不改入参；放不下的进 lost（整段数量，不拆分丢弃——单次掉落条目要么全进要么全丢）。
+ * 全程不改入参；放不下的进 lost（贪心部分入包：能放多少放多少，剩余整段进 lost）。
  * stackAdds 只指向调用前已存在的行（id 为 db 真实 id）；本次调用新开的格之间互相堆叠
  * 时直接并进对应 newStacks.quantity，不产出 id=0 的假 StackAdd（防 db 层 UPDATE 空转丢物）。
  */
@@ -50,7 +50,7 @@ export function lootInto(
   loot: LootItem[],
   stackMaxOf: StackMaxOf,
 ): { stackAdds: StackAdd[]; newStacks: NewStack[]; lost: LostItem[] } {
-  // 工作副本：slotIndex → 行（深拷贝行对象，不改入参）
+  // 工作副本：slotIndex → 行（浅拷贝行对象，不改入参）
   const work = new Map<number, BagRow>();
   for (const r of bag) work.set(r.slotIndex, { ...r });
   // 本次调用新开的格：slotIndex → 对应 newStacks 条目（后续掉落条目堆上去时并量）

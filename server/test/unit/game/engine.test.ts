@@ -344,6 +344,23 @@ describe("武器伤害区间（Combatant.dmgMin/dmgMax）", () => {
     expect(db).toBeLessThanOrEqual(9 + 5 - 0);
   });
 
+  it("next_hit_bonus 技能击走武器伤害区间（armed 分支），加成叠在武器 roll 之上", () => {
+    // 同种子对照：双方夹具唯一差异是 dmgMin/dmgMax。三掷顺序锁定（命中 → 暴击 → roll），
+    // seed=7 首击 roll 落在区间最高档（int(1,3)=3，见「技能强化」用例）→ 持械同掷点 int(7,9)=9。
+    // 徒手技能击 16~18 与持械 22~24 两区间不相交：断言值落在持械区间即证 roll 源已切换为武器。
+    const unarmed = advance(activateOk(battle(7), QIANGLI, 0), 1200);
+    const armed = advance(activateOk(battle(7, { dmgMin: 7, dmgMax: 9 }), QIANGLI, 0), 1200);
+    const da = unarmed.events[0]!;
+    const db = armed.events[0]!;
+    expect(da.kind).toBe("skill");
+    expect(db.kind).toBe("skill");
+    expect(da.amount).toBe(3 + 10 + 5 - 0); // 徒手：int(1,3)=3，+10 加成 +攻5
+    expect(db.amount).toBe(9 + 10 + 5 - 0); // 持械：int(7,9)=9，非徒手区间的 18
+    expect(db.amount).toBeGreaterThanOrEqual(7 + 10 + 5 - 0); // 双保险：持械区间下界
+    expect(db.amount).toBeLessThanOrEqual(9 + 10 + 5 - 0); // 双保险：持械区间上界
+    expect(db.text).toContain("强力打击");
+  });
+
   it("旧快照无 dmgMin/dmgMax 字段时间线不变（?? UNARMED 兜底）", () => {
     const s = createBattleState({ me: meFixture(), foe: foeFixture(), foeExp: 10 }, 42, 0);
     const hacked = JSON.parse(JSON.stringify(s)); // 模拟持久化往返后无新字段

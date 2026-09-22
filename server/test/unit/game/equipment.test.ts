@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { expect, it } from "vitest";
 import { equipmentBonusesOf, type EquippedRow } from "../../../src/game/equipment.ts";
 import type { Item } from "../../../src/data/schemas.ts";
 
