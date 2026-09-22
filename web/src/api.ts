@@ -140,6 +140,7 @@ export interface BagItemEquip {
   equipType: string;
   hands: 1 | 2;
   levelReq: number;
+  durabilityMax: number; // 耐久上限（详情窗「耐久 x/y」的分母）
   dmgMin?: number;
   dmgMax?: number;
   intervalMs?: number;
@@ -157,6 +158,7 @@ export interface BagItemView {
   name: string;
   quality: string; // 仅装备有 gray/green/blue/purple/orange，其余为 ""
   sprite: string;
+  desc: string; // 静态描述文案（未知 code 兜底为空串）
   kind: "consumable" | "material" | "equipment";
   stackMax: number;
   equip?: BagItemEquip; // JSON 序列化时 undefined 字段省略

@@ -82,6 +82,7 @@ function toBagItemView(row: {
     name: it?.name ?? row.item_code,
     quality: it?.kind === "equipment" ? it.quality : "",
     sprite: it?.sprite ?? "",
+    desc: it?.desc ?? "",
     kind: it?.kind ?? "material",
     stackMax: it && it.kind !== "equipment" ? it.stackMax : 1,
     // 仅装备带 equip 子对象（可选字段 undefined 在 JSON 序列化时省略）
@@ -92,6 +93,7 @@ function toBagItemView(row: {
             equipType: it.equipType,
             hands: it.hands,
             levelReq: it.levelReq,
+            durabilityMax: it.durabilityMax, // 详情窗「耐久 x/y」的分母
             dmgMin: it.dmgMin,
             dmgMax: it.dmgMax,
             intervalMs: it.intervalMs,
