@@ -315,7 +315,7 @@ export async function battleRoutes(app: FastifyInstance) {
       );
 
       // 怪侧：hp/max_hp 取实例行权威值（绝不从静态数据重派生）；攻击在静态区间内
-      // 开战时随机定型（与刷怪 HP roll 同口径），定型后随快照持久化；foe.spr 锁定 0（战斗内不回血）
+      // 开战时随机定型（与刷怪 HP roll 同口径），定型后随快照持久化；战斗内双方均不自然回血（原版口径）
       const foeAtk = monster.atkMin + Math.floor(Math.random() * (monster.atkMax - monster.atkMin + 1));
       const state = createBattleState(
         {
@@ -333,7 +333,6 @@ export async function battleRoutes(app: FastifyInstance) {
             crit: BASE_CRIT,
             critMult: CRIT_MULT,
             intervalMs: PLAYER_ATTACK_MS[c.profession],
-            spr: c.spr,
           },
           foe: {
             name: monster.name,
@@ -347,7 +346,6 @@ export async function battleRoutes(app: FastifyInstance) {
             crit: monster.critRate,
             critMult: CRIT_MULT,
             intervalMs: monster.intervalMs,
-            spr: 0,
           },
           foeExp: monster.exp,
         },

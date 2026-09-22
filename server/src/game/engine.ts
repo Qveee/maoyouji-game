@@ -30,7 +30,6 @@ export interface Combatant {
   crit: number;
   critMult: number;
   intervalMs: number;
-  spr: number;
   /** 昏迷截止时刻（ms）；> 当前行动时刻则跳过出手 */
   stunUntil: number;
   /** 下一次出手的时刻（ms） */
@@ -52,6 +51,7 @@ export interface BattleEvent {
   seq: number;
   t: number;
   side: "me" | "foe";
+  /** regen 已停产（战斗内不回血，原版口径），仅旧快照回放时可能出现 */
   kind: "hit" | "crit" | "miss" | "skill" | "stun" | "regen" | "end";
   amount?: number;
   text: string;
@@ -206,7 +206,7 @@ export function advance(state: BattleState, targetMs: number): BattleState {
     const targetSide: "me" | "foe" = side === "me" ? "foe" : "me";
     const target = s[targetSide];
 
-    // 昏迷：跳过本次行动，顺延到昏迷截止（结束当刻立即出手）；不回血、不消耗 RNG
+    // 昏迷：跳过本次行动，顺延到昏迷截止（结束当刻立即出手）；不消耗 RNG
     if (actor.stunUntil > t) {
       pushEvent(s, {
         t,
@@ -225,19 +225,7 @@ export function advance(state: BattleState, targetMs: number): BattleState {
       s.pendingSkill = null; // 无论命中与否，这一击已把技能消耗掉（SP 在激活时已扣）
     }
 
-    // f. 行动后回血：战斗内每跳 floor(1 + spr×0.5)，封顶上限；增量 > 0 才发事件（满血不刷屏）
-    const regen = Math.floor(1 + actor.spr * 0.5);
-    const healed = Math.min(actor.maxHp, actor.hp + regen) - actor.hp;
-    if (healed > 0) {
-      actor.hp += healed;
-      pushEvent(s, {
-        t,
-        side,
-        kind: "regen",
-        amount: healed,
-        text: side === "me" ? `你恢复了 ${healed} 点生命。` : `${actor.name} 恢复了 ${healed} 点生命。`,
-      });
-    }
+    // 战斗内不自然回血（原版口径）：HP 恢复只发生在战斗外（按 5 秒窗口惰性补算）与药品
 
     // g. 推进下一次出手（仅未昏迷路径）
     actor.nextActAt += actor.intervalMs;

@@ -46,7 +46,7 @@ const TENGCI: SkillInput = {
   castMs: 0,
 };
 
-/** 玩家夹具：必中（dodge=0）不暴击（crit=0），攻 5 防 2，出手间隔 1s，血 90/100（不满便于观察回血） */
+/** 玩家夹具：必中（dodge=0）不暴击（crit=0），攻 5 防 2，出手间隔 1s，血 90/100 */
 function meFixture(overrides: Partial<Omit<Combatant, "stunUntil" | "nextActAt">> = {}) {
   return {
     name: "你",
@@ -62,7 +62,6 @@ function meFixture(overrides: Partial<Omit<Combatant, "stunUntil" | "nextActAt">
     crit: 0,
     critMult: 1.5,
     intervalMs: 1000,
-    spr: 0,
     ...overrides,
   };
 }
@@ -81,7 +80,6 @@ function foeFixture(overrides: Partial<Omit<Combatant, "stunUntil" | "nextActAt"
     crit: 0,
     critMult: 1.5,
     intervalMs: 1500,
-    spr: 0,
     ...overrides,
   };
 }
@@ -138,15 +136,14 @@ describe("createBattleState 初始状态", () => {
 });
 
 describe("advance 时间快进", () => {
-  it("命中：固定种子下普攻造成精确伤害并产生 hit/regen 事件", () => {
+  it("命中：固定种子下普攻造成精确伤害，行动后不回血（原版口径：战斗内无自然恢复）", () => {
     // seed=7 我方 t=1000 出手的三掷：0.0117(命中) → 0.0620(未暴击) → int(1,3)=3
     // 伤害 = max(1, 3 + 5(攻) - 0(防)) = 8
     const s1 = advance(battle(7), 1200);
     expect(s1.foe.hp).toBe(100 - 8);
-    expect(s1.me.hp).toBe(90 + 1); // 行动后回血 floor(1+0×0.5)=1
+    expect(s1.me.hp).toBe(90); // 行动不回血
     expect(eventRows(s1)).toEqual([
       ["hit", "me", 8, 1000],
-      ["regen", "me", 1, 1000],
     ]);
     expect(s1.now).toBe(1200);
     expect(s1.me.nextActAt).toBe(2000);
@@ -156,13 +153,11 @@ describe("advance 时间快进", () => {
     // 在 s1 基础上继续快进：种子已回写，时间线无缝续跑（敌方 t=1500 还手）
     // 敌方三掷：0.6990(命中) → 0.5214(未暴击) → int(1,3)=2 → 伤害 = 2 + 2 - 2 = 2
     const s2 = advance(s1, 1600);
-    expect(s2.me.hp).toBe(91 - 2);
-    expect(s2.foe.hp).toBe(92 + 1); // 敌方行动后也回 1 点
+    expect(s2.me.hp).toBe(90 - 2);
+    expect(s2.foe.hp).toBe(92); // 敌方行动同样不回血
     expect(eventRows(s2)).toEqual([
       ["hit", "me", 8, 1000],
-      ["regen", "me", 1, 1000],
       ["hit", "foe", 2, 1500],
-      ["regen", "foe", 1, 1500],
     ]);
     expect(s2.now).toBe(1600);
   });
@@ -171,18 +166,17 @@ describe("advance 时间快进", () => {
     // 敌方 dodge=1 → 命中阈值 0，第一掷 0.0117 必未中
     const s = advance(battle(7, {}, { dodge: 1 }), 1200);
     expect(s.foe.hp).toBe(100); // 毫发无损
-    // miss 也是一次完整行动：攻击事件后照常回血
+    // miss 也是一次完整出手：只发 miss 事件
     expect(eventRows(s)).toEqual([
       ["miss", "me", undefined, 1000],
-      ["regen", "me", 1, 1000],
     ]);
     const miss = s.events[0]!;
     expect(miss.kind).toBe("miss");
     expect(miss.side).toBe("me");
     expect("amount" in miss).toBe(false); // miss 无伤害数值
     expect(miss.text).toContain("闪避");
-    // 闪避仍算一次行动：照常回血并推进出手时刻
-    expect(s.me.hp).toBe(91);
+    // 闪避仍算一次行动：推进出手时刻
+    expect(s.me.hp).toBe(90);
     expect(s.me.nextActAt).toBe(2000);
   });
 
@@ -193,7 +187,6 @@ describe("advance 时间快进", () => {
     expect(s.foe.hp).toBe(100 - 9);
     expect(eventRows(s)).toEqual([
       ["crit", "me", 9, 1000],
-      ["regen", "me", 1, 1000],
     ]);
     const ev = s.events[0]!;
     expect(ev.kind).toBe("crit");
@@ -206,8 +199,8 @@ describe("advance 时间快进", () => {
     s0.foe.stunUntil = 5200; // 模拟已被控制到 5.2s
     const s = advance(s0, 6500);
     // 敌方 t=1500 轮到出手时处于昏迷 → 发 stun 事件并顺延到 5200，苏醒当刻立即出手
-    expect(s.events[2]).toMatchObject({ kind: "stun", side: "foe", t: 1500 });
-    expect(s.events[2]!.text).toContain("击晕");
+    expect(s.events[1]).toMatchObject({ kind: "stun", side: "foe", t: 1500 });
+    expect(s.events[1]!.text).toContain("击晕");
     const foeHits = s.events.filter((e) => e.side === "foe" && (e.kind === "hit" || e.kind === "crit"));
     expect(foeHits).toHaveLength(1); // 昏迷期 1500~5200 之间一次都没出手
     expect(foeHits[0]!.t).toBe(5200);
@@ -224,7 +217,7 @@ describe("advance 时间快进", () => {
     // t=1000 技能命中 → 目标 stunUntil = 1000 + 3000 = 4000
     expect(s.foe.stunUntil).toBe(4000);
     // 敌方 t=1500 昏迷顺延，t=4000 与我方同刻但我方先手，敌方随后苏醒出手
-    expect(s.events[2]).toMatchObject({ kind: "stun", side: "foe", t: 1500 });
+    expect(s.events[1]).toMatchObject({ kind: "stun", side: "foe", t: 1500 });
     const foeHits = s.events.filter((e) => e.side === "foe" && (e.kind === "hit" || e.kind === "crit"));
     expect(foeHits).toHaveLength(1);
     expect(foeHits[0]!.t).toBe(4000);
@@ -240,12 +233,12 @@ describe("advance 时间快进", () => {
     expect(s.foe.nextActAt).toBe(9000); // 苏醒时刻仍是最长眩晕
   });
 
-  it("满血行动不产生 regen 事件（增量 >0 才发）", () => {
-    // 双方满血：行动后回血量为 0，不刷 regen 事件
-    const s = advance(battle(7, { hp: 100 }, { hp: 100 }), 1200);
-    expect(s.events.map((e) => e.kind)).toEqual(["hit"]); // 只有我方普攻
-    expect(s.me.hp).toBe(100);
+  it("战斗内不回血：双方受损后行动也绝不产生 regen 事件", () => {
+    // 原版口径：战斗中无自然恢复（回血靠药品，战斗外才按 5 秒窗口惰性补算）
+    const s = advance(battle(7), 1600);
+    expect(s.me.hp).toBe(90 - 2); // 掉血不回补
     expect(s.foe.hp).toBe(100 - 8);
+    expect(s.events.map((e) => e.kind)).toEqual(["hit", "hit"]);
   });
 
   it("击杀：victory 结算 expGained=foeExp 并发 end 事件，此后不再产生事件", () => {
@@ -253,8 +246,8 @@ describe("advance 时间快进", () => {
     const s = advance(battle(7, { atk: 50 }, { hp: 20, maxHp: 20 }), 60000);
     expect(s.over).toEqual({ result: "victory", expGained: 40 });
     expect(s.foe.hp).toBe(0);
-    expect(s.events.map((e) => e.kind)).toEqual(["hit", "regen", "end"]);
-    const end = s.events[2]!;
+    expect(s.events.map((e) => e.kind)).toEqual(["hit", "end"]);
+    const end = s.events[1]!;
     expect(end.t).toBe(1000);
     expect(end.text).toBe("你击败了 绿毛虫，获得 40 点经验！");
     expect(s.now).toBe(60000); // 胜负已分，剩余时间只推进 now
@@ -269,8 +262,8 @@ describe("advance 时间快进", () => {
     expect(s.over?.result).toBe("defeat");
     expect(s.over?.expGained).toBeUndefined(); // 只有 victory 才有 expGained
     expect(s.me.hp).toBe(0);
-    expect(s.events.map((e) => e.kind)).toEqual(["hit", "regen", "hit", "regen", "end"]);
-    expect(s.events[4]!.text).toBe("你被 草原蝎 击败了！");
+    expect(s.events.map((e) => e.kind)).toEqual(["hit", "hit", "end"]);
+    expect(s.events[2]!.text).toBe("你被 草原蝎 击败了！");
   });
 
   it("3 分钟平局：targetMs 远超上限时判定 draw 且推进停在 180 秒", () => {
@@ -304,13 +297,10 @@ describe("advance 时间快进", () => {
     // t=1500 敌方还手 2 点；t=2000 我方恢复徒手普攻：int=2 → 伤害 = 2 + 5 = 7（无 +10）
     expect(eventRows(s)).toEqual([
       ["skill", "me", 18, 1000],
-      ["regen", "me", 1, 1000],
       ["hit", "foe", 2, 1500],
-      ["regen", "foe", 1, 1500],
       ["hit", "me", 7, 2000],
-      ["regen", "me", 1, 2000],
     ]);
-    expect(s.foe.hp).toBe(100 - 18 - 7 + 1); // 受 18+7，敌方 t=1500 行动回 1（此后未再行动）
+    expect(s.foe.hp).toBe(100 - 18 - 7); // 受 18+7，行动不回血
   });
 
   it("direct_damage 技能：按 dmgMin~dmgMax roll 走命中/暴击管线，咏唱期间不出手", () => {
@@ -323,21 +313,18 @@ describe("advance 时间快进", () => {
     expect(fireball).toMatchObject({ kind: "skill", side: "me", amount: 23, t: 5000 });
     expect(fireball.text).toBe("你对 绿毛虫 发动了火球术，造成 23 点伤害！");
     expect(s.pendingSkill).toBeNull();
-    // 我方出手前挨 3+2+2=7 点（1500/3000/4500 三次还手）；t=5000 出火球后回 1 点；
+    // 我方出手前挨 3+2+2=7 点（1500/3000/4500 三次还手）；
     // t=6000 与敌方同刻，我方先手普攻（掷 d13~d15 → int=1 → 伤害 6），敌方随后还手 2 点
     expect(eventRows(s)).toEqual([
       ["hit", "foe", 3, 1500],
       ["hit", "foe", 2, 3000],
       ["hit", "foe", 2, 4500],
       ["skill", "me", 23, 5000],
-      ["regen", "me", 1, 5000],
       ["hit", "me", 6, 6000],
-      ["regen", "me", 1, 6000],
       ["hit", "foe", 2, 6000],
-      ["regen", "foe", 1, 6000],
     ]);
-    expect(s.me.hp).toBe(90 - 7 + 1 + 1 - 2);
-    expect(s.foe.hp).toBe(100 - 23 - 6 + 1); // 敌方 t=6000 先挨 6 点再回 1 点
+    expect(s.me.hp).toBe(90 - 7 - 2);
+    expect(s.foe.hp).toBe(100 - 23 - 6);
   });
 });
 

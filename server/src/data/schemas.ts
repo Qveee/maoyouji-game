@@ -52,7 +52,6 @@ export const MonsterSchema = z
     dodgeRate: z.number().min(0).lt(1),
     critRate: z.number().min(0).lt(1),
     intervalMs: z.number().int().min(500).max(10000),
-    spr: z.number().int().min(0),
     exp: z.number().int().min(0),
     /** 图鉴展示字段（照原型 MONSTERS 字典考据）：定位类型与描述，可选；缺省时前端走兜底文案 */
     type: z.string().max(32).optional(),

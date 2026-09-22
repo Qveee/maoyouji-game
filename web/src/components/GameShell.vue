@@ -262,10 +262,23 @@ function spawnFloat(target: "me" | "foe", cls: string, text: string) {
 const meUnitEl = ref<HTMLElement | null>(null);
 const foeUnitEl = ref<HTMLElement | null>(null);
 
-/** 出手前冲：原型 unitAnim 同款手法（移除类 → 强制 reflow → 加回），同类连发可重新起播；.5s 播完自然静止 */
+/** 出手前冲：一直冲到对方精灵所在位置再回位（用户要求：幅度=两单位实际间距）。
+ *  距离实时测量两精灵中心差写入 --lx（keyframes 里 var() 取值）；
+ *  stage-fit 的 transform scale 会让 getBoundingClientRect 含缩放，除回系数还原布局坐标。
+ *  移除类 → 强制 reflow → 加回，同类连发可重新起播；.5s 播完自然静止 */
 function lunge(side: "me" | "foe") {
   const el = side === "me" ? meUnitEl.value : foeUnitEl.value;
-  if (!el) return;
+  const other = side === "me" ? foeUnitEl.value : meUnitEl.value;
+  if (!el || !other) return;
+  const mine = el.querySelector<HTMLElement>(".bt-sprite");
+  const theirs = other.querySelector<HTMLElement>(".bt-sprite");
+  if (mine && theirs) {
+    const a = mine.getBoundingClientRect();
+    const b = theirs.getBoundingClientRect();
+    const scale = a.width / mine.offsetWidth || 1; // 屏幕/布局宽 = 缩放系数
+    const dx = (b.left + b.width / 2 - (a.left + a.width / 2)) / scale;
+    el.style.setProperty("--lx", `${dx.toFixed(1)}px`);
+  }
   el.classList.remove("atk");
   void el.offsetWidth; // 强制 reflow，保证动画从头重播
   el.classList.add("atk");
@@ -296,6 +309,7 @@ function consumeEvent(e: BattleEvent, animate: boolean) {
   if (e.kind === "miss") {
     spawnFloat(stricken, "f-miss", "闪避");
   } else if (e.kind === "regen") {
+    // 战斗内回血已停产（原版口径），仅旧 battles 快照回放时可能出现，保留绿字兼容
     if (e.amount) spawnFloat(e.side, "f-heal", `+${e.amount}`);
   } else if (e.amount !== undefined) {
     spawnFloat(stricken, e.kind === "crit" ? "f-crit" : "f-dmg", `-${e.amount}`);
@@ -1011,11 +1025,11 @@ onUnmounted(() => {
   to { opacity: 0; transform: translate(-50%, -54px); }
 }
 @media (prefers-reduced-motion: reduce) { .bt-float { animation: none; opacity: 0; } }
-/* 出手前冲与终局倒地（CSS 照原型逐字）：我方在左往右冲、怪在右往左冲 */
+/* 出手前冲与终局倒地：我方在左往右冲、怪在右往左冲，冲程=两精灵实际间距（--lx 由 lunge() 实时测量写入） */
 .bt-me.atk .bt-sprite { animation: lungeR .5s ease; }
 .bt-foe.atk .bt-sprite { animation: lungeL .5s ease; }
-@keyframes lungeR { 35% { transform: translateX(64px); } }
-@keyframes lungeL { 35% { transform: translateX(-64px); } }
+@keyframes lungeR { 35% { transform: translateX(var(--lx, 64px)); } }
+@keyframes lungeL { 35% { transform: translateX(var(--lx, -64px)); } }
 .bt-unit.dead .bt-sprite { filter: grayscale(1) brightness(.65); transform: translateY(12px) rotate(9deg); transition: all .6s ease; }
 @media (prefers-reduced-motion: reduce) { .bt-me.atk .bt-sprite, .bt-foe.atk .bt-sprite { animation: none; } }
 /* 场景内轻提示 */
