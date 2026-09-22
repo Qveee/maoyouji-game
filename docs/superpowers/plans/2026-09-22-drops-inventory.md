@@ -68,13 +68,25 @@ describe("items.json 静态物品", () => {
       expect(w.intervalMs).toBe(2100);
       expect(w.quality).toBe("green");
     }
-    const a = items.get("cubuyi")!;
+    const a = items.get("yama_waiyi")!;
     if (a.kind === "equipment") expect(a.dmgMin).toBeUndefined();
   });
   it("消耗品 effect 至少一项", () => {
-    const y = itemIndex().get("xiaohongyao")!;
+    const y = itemIndex().get("xiaoxing_buxueji")!;
     expect(y.kind).toBe("consumable");
     if (y.kind === "consumable") expect(y.effect.hp).toBe(50);
+  });
+  it("考据抽查：步兵剑 7-9/速度2.1/耐久13/等级4；能量之卷刃剑带攻击+2；冰风靴体力+2智力+2", () => {
+    const idx = itemIndex();
+    const b = idx.get("bubingjian")!;
+    if (b.kind === "equipment") {
+      expect([b.dmgMin, b.dmgMax, b.intervalMs, b.durabilityMax, b.levelReq]).toEqual([7, 9, 2100, 13, 4]);
+      expect(b.profession).toBe("warrior");
+    }
+    const e = idx.get("nengliang_juanrenjian")!;
+    if (e.kind === "equipment") expect(e.bonuses.atk).toBe(2);
+    const i = idx.get("bingfeng_xue")!;
+    if (i.kind === "equipment") expect(i.bonuses).toMatchObject({ vit: 2, intel: 2 });
   });
   it("非法装备（武器缺伤害区间）被拒绝", () => {
     const bad = { items: [{ code: "x", name: "断剑", sprite: "/i.png", desc: "", kind: "equipment",
@@ -127,6 +139,8 @@ const statBonuses = z.strictObject({
   agi: z.number().int().min(0).max(100).optional(),
   intel: z.number().int().min(0).max(100).optional(),
   spr: z.number().int().min(0).max(100).optional(),
+  /** 原版「攻击:+N」词条（蓝宝书口径），开战时直接并入 atk */
+  atk: z.number().int().min(0).max(999).optional(),
   hp: z.number().int().min(0).max(9999).optional(),
   sp: z.number().int().min(0).max(9999).optional(),
 });
@@ -152,7 +166,7 @@ export const EquipmentItemSchema = z.strictObject({
   quality: z.enum(QUALITY_CODES),
   slot: z.enum(SLOT_CODES),
   equipType: z.string().min(1).max(16),
-  /** 职业限定（武器口径：战士刀剑枪匕爪 / 法师魔杖）；null=通用（防具饰品） */
+  /** 职业限定（武器+盾牌口径：战士剑/盾牌、法师魔杖）；null=通用（防具饰品） */
   profession: z.enum(["warrior", "mage"]).nullable(),
   levelReq: z.number().int().min(1).max(90),
   durabilityMax: z.number().int().min(1).max(999),
@@ -174,7 +188,7 @@ export const EquipmentItemSchema = z.strictObject({
   .refine((e) => e.dmgMin === undefined || e.dmgMax === undefined || e.dmgMin <= e.dmgMax,
     { message: "dmgMin 不能大于 dmgMax" })
   .refine((e) => e.slot !== "off_hand" || e.hands === 1, { message: "副手不得是双手" })
-  .refine((e) => e.slot === "main_hand" || e.profession === null, { message: "职业限定仅用于武器" });
+  .refine((e) => e.slot === "main_hand" || e.slot === "off_hand" || e.profession === null, { message: "职业限定仅用于武器与盾牌（蓝宝书：盾牌战士专用）" });
 
 export const ItemSchema = z.discriminatedUnion("kind", [
   ConsumableItemSchema,
@@ -260,52 +274,69 @@ export function validateCrossRefs(
 
 注意 import：`ItemsFileSchema/ItemSchema/ItemsFile/Item/MonsterDropsSchema` 及类型加入 schemas.ts 的 import 列表；`loadMonsters` 也要在本文件里被 import（data.test.ts 用）。
 
-- [ ] **Step 5: 写 server/data/items.json**（数值锁定，照抄；desc 一句话风味文案，实现时可润色但字段与数值不许变）
+- [ ] **Step 5: 写 server/data/items.json**（**全部数值照抄蓝宝书第二篇考据**，来源 `docs/猫游记蓝宝书.doc`「第二篇：装备属性及出处」与 1-3 楼怪物掉落清单，antiword 提取核对；仅两处系统性映射，规则锁定）：
+  - **防御缩放**：MVP 战斗公式 `roll + atk − def` 与原版防御尺度不同，`defBonus = ceil(原版防御 ÷ 25)`（布帽+10→1、军用盾+135→6、普通盾+189→8）。伤害/速度/耐久/等级/五维/攻击加成照抄。
+  - **品质映射**：原版`[蓝]`标注 → `blue`；带词缀前缀（野熊之/能量之/力量之…）→ `green`；无标注基础装 → `gray`。
+  - 魔杖伤害的火/圣/暗属性 MVP 忽略只取数值；「命中:+N」「闪避:+N」词条 MVP 不做；耐久「15 / 16」取上限 16（生成满耐久）；原版未载耐久的饰品手配 10 并注记。
+  - 原版 1~10 级无真双手武器（枪类最低 20 级）——items.json 不含 hands=2 物品，双手规则由 Task 3 合成夹具单测验证。
 
 ```json
 {
   "items": [
-    { "code": "xiaohongyao", "name": "小红药", "sprite": "/items/xiaohongyao.png", "desc": "猫隐村药铺最常见的伤药，喝一口暖到尾巴尖。", "kind": "consumable", "effect": { "hp": 50 }, "stackMax": 99 },
-    { "code": "zhonghongyao", "name": "中红药", "sprite": "/items/zhonghongyao.png", "desc": "浓稠的红色药汁，疗效是小红药的三倍。", "kind": "consumable", "effect": { "hp": 150 }, "stackMax": 99 },
-    { "code": "xiaolanyao", "name": "小蓝药", "sprite": "/items/xiaolanyao.png", "desc": "泛着微光的蓝色药水，恢复少量法力。", "kind": "consumable", "effect": { "sp": 30 }, "stackMax": 99 },
-    { "code": "paopao_nianye", "name": "泡泡粘液", "sprite": "/items/paopao_nianye.png", "desc": "泡泡破裂后留下的黏糊糊液体，据说可以入药。", "kind": "material", "stackMax": 99 },
-    { "code": "lvmaochong_ke", "name": "绿毛虫壳", "sprite": "/items/lvmaochong_ke.png", "desc": "绿毛虫蜕下的外壳，轻而坚韧。", "kind": "material", "stackMax": 99 },
+    { "code": "xiaoxing_buxueji", "name": "小型补血剂", "sprite": "/items/xiaoxing_buxueji.png", "desc": "猫隐村药铺最常见的伤药（回复量原版未详载，MVP 手配 50）。", "kind": "consumable", "effect": { "hp": 50 }, "stackMax": 99 },
+    { "code": "xiao_mofaji", "name": "小魔法剂", "sprite": "/items/xiao_mofaji.png", "desc": "泛着微光的蓝色药剂（回复量原版未详载，MVP 手配 30）。", "kind": "consumable", "effect": { "sp": 30 }, "stackMax": 99 },
 
-    { "code": "mujian", "name": "木剑", "sprite": "/items/mujian.png", "desc": "新手练武用的木剑，挥起来啪啪作响。", "kind": "equipment", "quality": "gray", "slot": "main_hand", "equipType": "剑", "profession": "warrior", "levelReq": 1, "durabilityMax": 10, "hands": 1, "dmgMin": 2, "dmgMax": 4, "intervalMs": 2200 },
-    { "code": "bubingjian", "name": "步兵剑", "sprite": "/items/bubingjian.png", "desc": "制式步兵佩剑，出处：牧野草原——草原蝎。", "kind": "equipment", "quality": "green", "slot": "main_hand", "equipType": "剑", "profession": "warrior", "levelReq": 4, "durabilityMax": 13, "hands": 1, "dmgMin": 7, "dmgMax": 9, "intervalMs": 2100 },
-    { "code": "jingtiejian", "name": "精铁剑", "sprite": "/items/jingtiejian.png", "desc": "百炼精铁打造，剑身隐有寒光。", "kind": "equipment", "quality": "blue", "slot": "main_hand", "equipType": "剑", "profession": "warrior", "levelReq": 8, "durabilityMax": 18, "hands": 1, "dmgMin": 11, "dmgMax": 15, "intervalMs": 2000 },
-    { "code": "shuangshou_dajian", "name": "双手大剑", "sprite": "/items/shuangshou_dajian.png", "desc": "需要两只手才能挥动的巨剑，威猛有余灵巧不足。", "kind": "equipment", "quality": "green", "slot": "main_hand", "equipType": "剑", "profession": "warrior", "levelReq": 6, "durabilityMax": 15, "hands": 2, "dmgMin": 10, "dmgMax": 14, "intervalMs": 2600 },
-    { "code": "xinshou_mozhang", "name": "新手魔杖", "sprite": "/items/xinshou_mozhang.png", "desc": "学徒入门魔杖，杖头嵌着颗小玻璃珠。", "kind": "equipment", "quality": "gray", "slot": "main_hand", "equipType": "魔杖", "profession": "mage", "levelReq": 1, "durabilityMax": 10, "hands": 1, "dmgMin": 2, "dmgMax": 4, "intervalMs": 2400 },
-    { "code": "xiangmu_mozhang", "name": "橡木魔杖", "sprite": "/items/xiangmu_mozhang.png", "desc": "百年橡木雕成，导魔性佳。", "kind": "equipment", "quality": "green", "slot": "main_hand", "equipType": "魔杖", "profession": "mage", "levelReq": 4, "durabilityMax": 13, "hands": 1, "dmgMin": 6, "dmgMax": 8, "intervalMs": 2300, "bonuses": { "intel": 1 } },
-    { "code": "xinghui_mozhang", "name": "星辉魔杖", "sprite": "/items/xinghui_mozhang.png", "desc": "杖尖凝聚着星辉，夜战中格外耀眼。", "kind": "equipment", "quality": "blue", "slot": "main_hand", "equipType": "魔杖", "profession": "mage", "levelReq": 8, "durabilityMax": 18, "hands": 1, "dmgMin": 10, "dmgMax": 14, "intervalMs": 2200, "bonuses": { "intel": 2 } },
+    { "code": "kunchong_waike", "name": "昆虫外壳", "sprite": "/items/kunchong_waike.png", "desc": "绿毛虫蜕下的外壳，轻而坚韧。", "kind": "material", "stackMax": 99 },
+    { "code": "pingguo", "name": "苹果", "sprite": "/items/pingguo.png", "desc": "草原上随处可见的红苹果，小怪物们的心头好。", "kind": "material", "stackMax": 99 },
+    { "code": "jiaozhuazi", "name": "鸡爪子", "sprite": "/items/jiaozhuazi.png", "desc": "机警小鸡掉落的爪子，据说卤过很好吃。", "kind": "material", "stackMax": 99 },
+    { "code": "jitui", "name": "鸡腿", "sprite": "/items/jitui.png", "desc": "肥嫩的鸡腿，冒险者干粮首选。", "kind": "material", "stackMax": 99 },
+    { "code": "hongse_baozi", "name": "红色孢子", "sprite": "/items/hongse_baozi.png", "desc": "红蘑菇飘散的红色孢子，随风远行。", "kind": "material", "stackMax": 99 },
+    { "code": "xiezi_weiba", "name": "蝎子尾巴", "sprite": "/items/xiezi_weiba.png", "desc": "草原蝎的尾巴，毒钩犹在，可入药。", "kind": "material", "stackMax": 99 },
+    { "code": "xiezi_zhi_qian", "name": "蝎子之钳", "sprite": "/items/xiezi_zhi_qian.png", "desc": "草原蝎的大钳，坚硬无比。", "kind": "material", "stackMax": 99 },
 
-    { "code": "cubuyi", "name": "粗布衣", "sprite": "/items/cubuyi.png", "desc": "粗糙的布衣，聊胜于无。", "kind": "equipment", "quality": "gray", "slot": "chest", "equipType": "布甲", "profession": null, "levelReq": 1, "durabilityMax": 10, "defBonus": 2 },
-    { "code": "pijia", "name": "皮甲", "sprite": "/items/pijia.png", "desc": "硝好的兽皮缝制，出处：牧野草原——草原蝎。", "kind": "equipment", "quality": "green", "slot": "chest", "equipType": "皮甲", "profession": null, "levelReq": 3, "durabilityMax": 14, "defBonus": 5, "bonuses": { "hp": 10 } },
-    { "code": "cubumao", "name": "粗布帽", "sprite": "/items/cubumao.png", "desc": "灰色布帽，遮阳挡灰。", "kind": "equipment", "quality": "gray", "slot": "head", "equipType": "布甲", "profession": null, "levelReq": 1, "durabilityMax": 8, "defBonus": 1 },
-    { "code": "pimao", "name": "皮帽", "sprite": "/items/pimao.png", "desc": "软皮帽子，护住脑袋和耳朵。", "kind": "equipment", "quality": "green", "slot": "head", "equipType": "皮甲", "profession": null, "levelReq": 3, "durabilityMax": 10, "defBonus": 3 },
-    { "code": "cubuku", "name": "粗布裤", "sprite": "/items/cubuku.png", "desc": "耐磨的粗布裤子。", "kind": "equipment", "quality": "gray", "slot": "legs", "equipType": "布甲", "profession": null, "levelReq": 1, "durabilityMax": 8, "defBonus": 1 },
-    { "code": "pikuku", "name": "皮裤", "sprite": "/items/pikuku.png", "desc": "行动自如的皮裤，跑得更快了。", "kind": "equipment", "quality": "green", "slot": "legs", "equipType": "皮甲", "profession": null, "levelReq": 3, "durabilityMax": 10, "defBonus": 4, "bonuses": { "agi": 1 } },
-    { "code": "caoxie", "name": "草鞋", "sprite": "/items/caoxie.png", "desc": "草编的鞋子，走起路来沙沙响。", "kind": "equipment", "quality": "gray", "slot": "feet", "equipType": "布甲", "profession": null, "levelReq": 1, "durabilityMax": 8, "defBonus": 1 },
-    { "code": "pixie", "name": "皮靴", "sprite": "/items/pixie.png", "desc": "结实的短皮靴，护踝保暖。", "kind": "equipment", "quality": "green", "slot": "feet", "equipType": "皮甲", "profession": null, "levelReq": 3, "durabilityMax": 10, "defBonus": 3, "bonuses": { "hp": 5 } },
-    { "code": "mudun", "name": "木盾", "sprite": "/items/mudun.png", "desc": "包铁边的木盾，战士的忠实伙伴。", "kind": "equipment", "quality": "gray", "slot": "off_hand", "equipType": "盾牌", "profession": "warrior", "levelReq": 1, "durabilityMax": 10, "defBonus": 3 },
-    { "code": "xinshou_fadian", "name": "新手法典", "sprite": "/items/xinshou_fadian.png", "desc": "抄写工整的入门法典，默读可安神凝气。", "kind": "equipment", "quality": "gray", "slot": "off_hand", "equipType": "法典", "profession": "mage", "levelReq": 1, "durabilityMax": 10, "defBonus": 1, "bonuses": { "sp": 10 } },
-    { "code": "tongjiezhi", "name": "铜戒指", "sprite": "/items/tongjiezhi.png", "desc": "黄铜打的戒指，戴上暖乎乎的。", "kind": "equipment", "quality": "green", "slot": "ring", "equipType": "戒指", "profession": null, "levelReq": 2, "durabilityMax": 8, "bonuses": { "hp": 5 } },
-    { "code": "beike_xianglian", "name": "贝壳项链", "sprite": "/items/beike_xianglian.png", "desc": "用海边贝壳串成，泛着珍珠光泽。", "kind": "equipment", "quality": "green", "slot": "neck", "equipType": "项链", "profession": null, "levelReq": 2, "durabilityMax": 8, "bonuses": { "sp": 5 } }
+    { "code": "nongfuzhijian", "name": "农夫之剑", "sprite": "/items/nongfuzhijian.png", "desc": "出处：牧野草原——波力。右手，剑，2-4 伤害，速度 2.6，耐久 10/10，装备需要等级 1。", "kind": "equipment", "quality": "gray", "slot": "main_hand", "equipType": "剑", "profession": "warrior", "levelReq": 1, "durabilityMax": 10, "hands": 1, "dmgMin": 2, "dmgMax": 4, "intervalMs": 2600 },
+    { "code": "bubingjian", "name": "步兵剑", "sprite": "/items/bubingjian.png", "desc": "出处：牧野草原——草原蝎。右手，剑，7-9 伤害，速度 2.1，每秒伤害 3.8，耐久 13/13，装备需要等级 4。", "kind": "equipment", "quality": "green", "slot": "main_hand", "equipType": "剑", "profession": "warrior", "levelReq": 4, "durabilityMax": 13, "hands": 1, "dmgMin": 7, "dmgMax": 9, "intervalMs": 2100 },
+    { "code": "nengliang_juanrenjian", "name": "能量之卷刃剑", "sprite": "/items/nengliang_juanrenjian.png", "desc": "出处：牧野草原——绿毛虫。右手，剑，10-14 伤害，速度 2.1，每秒伤害 5.5，耐久 14/17，攻击:+2，装备需要等级 5。", "kind": "equipment", "quality": "green", "slot": "main_hand", "equipType": "剑", "profession": "warrior", "levelReq": 5, "durabilityMax": 17, "hands": 1, "dmgMin": 10, "dmgMax": 14, "intervalMs": 2100, "bonuses": { "atk": 2 } },
+    { "code": "liliang_juanrenjian", "name": "力量之卷刃剑", "sprite": "/items/liliang_juanrenjian.png", "desc": "出处：北牧野草原——红蘑菇。右手，剑，10-14 伤害，速度 2.1，每秒伤害 5.5，耐久 17/17，力量:+1，装备需要等级 5。", "kind": "equipment", "quality": "green", "slot": "main_hand", "equipType": "剑", "profession": "warrior", "levelReq": 5, "durabilityMax": 17, "hands": 1, "dmgMin": 10, "dmgMax": 14, "intervalMs": 2100, "bonuses": { "str": 1 } },
+    { "code": "doushi_dujian", "name": "斗士短剑", "sprite": "/items/doushi_dujian.png", "desc": "出处：牧野草原——机警小鸡。右手，剑，13-17 伤害，速度 2.2，每秒伤害 6.8，耐久 17/17，装备需要等级 10。", "kind": "equipment", "quality": "green", "slot": "main_hand", "equipType": "剑", "profession": "warrior", "levelReq": 10, "durabilityMax": 17, "hands": 1, "dmgMin": 13, "dmgMax": 17, "intervalMs": 2200 },
+    { "code": "xiangmuzhang", "name": "橡木杖", "sprite": "/items/xiangmuzhang.png", "desc": "出处：幼儿园——盗虫卵。右手，魔杖，1-3 火焰伤害（属性 MVP 忽略），速度 1.9，每秒伤害 1.1，耐久 10/10，装备需要等级 1。", "kind": "equipment", "quality": "gray", "slot": "main_hand", "equipType": "魔杖", "profession": "mage", "levelReq": 1, "durabilityMax": 10, "hands": 1, "dmgMin": 1, "dmgMax": 3, "intervalMs": 1900 },
+    { "code": "ciji_mofazhang", "name": "次级魔法杖", "sprite": "/items/ciji_mofazhang.png", "desc": "出处：北牧野草原——野兔、红蘑菇、草原巨蝎、苍蝇。右手，魔杖，3-5 神圣伤害，速度 1.5，每秒伤害 2.8，耐久 14/14，装备需要等级 5。", "kind": "equipment", "quality": "gray", "slot": "main_hand", "equipType": "魔杖", "profession": "mage", "levelReq": 5, "durabilityMax": 14, "hands": 1, "dmgMin": 3, "dmgMax": 5, "intervalMs": 1500 },
+    { "code": "huoyan_mozhang", "name": "火焰魔杖", "sprite": "/items/huoyan_mozhang.png", "desc": "出处：北牧野草原——野兔。右手，魔杖，5-7 火焰伤害，速度 1.5，每秒伤害 4.3，耐久 19/19，装备需要等级 7。", "kind": "equipment", "quality": "green", "slot": "main_hand", "equipType": "魔杖", "profession": "mage", "levelReq": 7, "durabilityMax": 19, "hands": 1, "dmgMin": 5, "dmgMax": 7, "intervalMs": 1500 },
+    { "code": "anying_mozhang", "name": "暗影魔杖", "sprite": "/items/anying_mozhang.png", "desc": "出处：万马草原——白波力、草鸡、白老鼠。右手，魔杖，6-8 暗影伤害，速度 1.4，每秒伤害 5.2，耐久 21/21，装备需要等级 9。", "kind": "equipment", "quality": "green", "slot": "main_hand", "equipType": "魔杖", "profession": "mage", "levelReq": 9, "durabilityMax": 21, "hands": 1, "dmgMin": 6, "dmgMax": 8, "intervalMs": 1400 },
+
+    { "code": "xiaoqingdun", "name": "小轻盾", "sprite": "/items/xiaoqingdun.png", "desc": "出处：牧野草原——小鸡。左手，盾牌，防御:+112（映射 5），耐久 9/9，装备需要等级 3。", "kind": "equipment", "quality": "gray", "slot": "off_hand", "equipType": "盾牌", "profession": "warrior", "levelReq": 3, "durabilityMax": 9, "defBonus": 5 },
+    { "code": "junyong_dunpai", "name": "军用盾牌", "sprite": "/items/junyong_dunpai.png", "desc": "出处：牧野草原——草原蝎。盾牌，防御:+135（映射 6），耐久 10/10，装备需要等级 4。", "kind": "equipment", "quality": "gray", "slot": "off_hand", "equipType": "盾牌", "profession": "warrior", "levelReq": 4, "durabilityMax": 10, "defBonus": 6 },
+    { "code": "minbing_dunpai", "name": "民兵盾牌", "sprite": "/items/minbing_dunpai.png", "desc": "出处：牧野草原——波力。左手，盾牌，防御:+161（映射 7），耐久 11/11，装备需要等级 5。", "kind": "equipment", "quality": "gray", "slot": "off_hand", "equipType": "盾牌", "profession": "warrior", "levelReq": 5, "durabilityMax": 11, "defBonus": 7 },
+    { "code": "putong_dunpai", "name": "普通盾牌", "sprite": "/items/putong_dunpai.png", "desc": "出处：牧野草原——绿毛虫。左手，盾牌，防御:+189（映射 8），耐久 11/11，装备需要等级 6。", "kind": "equipment", "quality": "gray", "slot": "off_hand", "equipType": "盾牌", "profession": "warrior", "levelReq": 6, "durabilityMax": 11, "defBonus": 8 },
+    { "code": "yexiong_bubing_dunpai", "name": "野熊之步兵盾牌", "sprite": "/items/yexiong_bubing_dunpai.png", "desc": "出处：牧野草原——草原蝎。左手，盾牌，力量:+1，体力:+1，防御:+207（映射 9），装备需要等级 6。", "kind": "equipment", "quality": "green", "slot": "off_hand", "equipType": "盾牌", "profession": "warrior", "levelReq": 6, "durabilityMax": 14, "defBonus": 9, "bonuses": { "str": 1, "vit": 1 } },
+
+    { "code": "buzhi_ruanmao", "name": "布质软帽", "sprite": "/items/buzhi_ruanmao.png", "desc": "出处：牧野草原——绿毛虫。头，布甲，耐久 30/30，智力:+2，防御:+10（映射 1），装备需要等级 1。", "kind": "equipment", "quality": "blue", "slot": "head", "equipType": "布甲", "profession": null, "levelReq": 1, "durabilityMax": 30, "defBonus": 1, "bonuses": { "intel": 2 } },
+    { "code": "yama_waiyi", "name": "亚麻外衣", "sprite": "/items/yama_waiyi.png", "desc": "出处：幼儿园——葡萄藤、知鸟；牧野草原——绿毛虫。胸，布甲，耐久 19/19，防御:+15（映射 1），装备需要等级 1。", "kind": "equipment", "quality": "gray", "slot": "chest", "equipType": "布甲", "profession": null, "levelReq": 1, "durabilityMax": 19, "defBonus": 1 },
+    { "code": "yuanxingzhe_changxue", "name": "远行者长靴", "sprite": "/items/yuanxingzhe_changxue.png", "desc": "出处：北牧野草原——红蘑菇；牧野草原——波力。脚，锁甲，耐久 30/30，体力:+2，防御:+44（映射 2），装备需要等级 1。", "kind": "equipment", "quality": "blue", "slot": "feet", "equipType": "锁甲", "profession": null, "levelReq": 1, "durabilityMax": 30, "defBonus": 2, "bonuses": { "vit": 2 } },
+    { "code": "yama_duanbu", "name": "亚麻短裤", "sprite": "/items/yama_duanbu.png", "desc": "出处：幼儿园——捕蝇草；牧野草原——波力、绿毛虫。腿，布甲，耐久 15/16（取上限），防御:+12（映射 1），装备需要等级 2。", "kind": "equipment", "quality": "gray", "slot": "legs", "equipType": "布甲", "profession": null, "levelReq": 2, "durabilityMax": 16, "defBonus": 1 },
+    { "code": "yuanzhi_shoutao", "name": "园艺手套", "sprite": "/items/yuanzhi_shoutao.png", "desc": "出处：幼儿园——太阳花；牧野草原——波力。手套，布甲，耐久 18/18，防御:+10（映射 1），装备需要等级 4。", "kind": "equipment", "quality": "gray", "slot": "hands", "equipType": "布甲", "profession": null, "levelReq": 4, "durabilityMax": 18, "defBonus": 1 },
+    { "code": "yama_changpao", "name": "亚麻长袍", "sprite": "/items/yama_changpao.png", "desc": "出处：牧野草原——草原蝎。胸，布甲，耐久 32/32，智力:+1，防御:+19（映射 1），装备需要等级 5。", "kind": "equipment", "quality": "green", "slot": "chest", "equipType": "布甲", "profession": null, "levelReq": 5, "durabilityMax": 32, "defBonus": 1, "bonuses": { "intel": 1 } },
+    { "code": "zhenzhi_waiyi", "name": "针织外衣", "sprite": "/items/zhenzhi_waiyi.png", "desc": "出处：牧野草原——黑蘑菇。胸，布甲，耐久 26/26，防御:+18（映射 1），装备需要等级 5。", "kind": "equipment", "quality": "gray", "slot": "chest", "equipType": "布甲", "profession": null, "levelReq": 5, "durabilityMax": 26, "defBonus": 1 },
+    { "code": "zhuzhu_shoutao", "name": "珠串手套", "sprite": "/items/zhuzhu_shoutao.png", "desc": "出处：牧野草原——黑蘑菇、草原蝎。手套，布甲，耐久 19/19，防御:+11（映射 1），装备需要等级 5。", "kind": "equipment", "quality": "gray", "slot": "hands", "equipType": "布甲", "profession": null, "levelReq": 5, "durabilityMax": 19, "defBonus": 1 },
+    { "code": "zhenzhi_duanbu", "name": "针织短裤", "sprite": "/items/zhenzhi_duanbu.png", "desc": "出处：牧野草原——绿毛虫。腿，布甲，耐久 19/19，防御:+16（映射 1），装备需要等级 5。", "kind": "equipment", "quality": "gray", "slot": "legs", "equipType": "布甲", "profession": null, "levelReq": 5, "durabilityMax": 19, "defBonus": 1 },
+    { "code": "linghou_zhuzhu_waitao", "name": "灵猴之珠串外套", "sprite": "/items/linghou_zhuzhu_waitao.png", "desc": "出处：牧野草原——小鸡、机警小鸡。胸，布甲，耐久 34/34，敏捷:+1，体力:+1，防御:+21（映射 1），装备需要等级 6。", "kind": "equipment", "quality": "green", "slot": "chest", "equipType": "布甲", "profession": null, "levelReq": 6, "durabilityMax": 34, "defBonus": 1, "bonuses": { "agi": 1, "vit": 1 } },
+    { "code": "bingfeng_xue", "name": "冰风靴", "sprite": "/items/bingfeng_xue.png", "desc": "出处：牧野草原——草原蝎。脚，布甲，耐久 45/45，体力:+2，智力:+2，防御:+15（映射 1），装备需要等级 7。", "kind": "equipment", "quality": "blue", "slot": "feet", "equipType": "布甲", "profession": null, "levelReq": 7, "durabilityMax": 45, "defBonus": 1, "bonuses": { "vit": 2, "intel": 2 } },
+    { "code": "bingling_jiezhi", "name": "冰灵戒指", "sprite": "/items/bingling_jiezhi.png", "desc": "出处：万马草原——白波力。手指，戒指，智力:+3，装备需要等级 7（原版未载耐久，MVP 手配 10）。", "kind": "equipment", "quality": "blue", "slot": "ring", "equipType": "戒指", "profession": null, "levelReq": 7, "durabilityMax": 10, "bonuses": { "intel": 3 } }
   ]
 }
 ```
 
-- [ ] **Step 6: monsters.json 5 怪加 drops**（数值锁定）
+- [ ] **Step 6: monsters.json 5 怪加 drops**（蓝宝书掉落清单考据；chance/qty/copper 为 MVP 手配平衡值，物品种类按原版）
 
 | 怪 code | copper | items（item / chance / qty） |
 |---|---|---|
-| paopao | [5,15] | paopao_nianye 0.6 [1,2]；xiaohongyao 0.15 [1,1] |
-| lvmaochong | [5,15] | lvmaochong_ke 0.6 [1,2]；xiaohongyao 0.15 [1,1] |
-| xiaoji | [8,20] | xiaohongyao 0.18 [1,1]；mujian 0.05 [1,1] |
-| hongmogu | [12,28] | xiaolanyao 0.15 [1,1]；cubuyi 0.04；cubumao 0.04 |
-| caoyuanxie | [15,35] | zhonghongyao 0.12 [1,1]；bubingjian 0.05；pijia 0.04 |
+| paopao | [5,12] | xiaoxing_buxueji 0.12；xiangmuzhang 0.05（泡泡原版不在牧野草原、无掉落记载，物品池自配——橡木杖为法师第一件武器） |
+| lvmaochong | [4,12] | kunchong_waike 0.5 [1,2]；pingguo 0.3；buzhi_ruanmao 0.03；putong_dunpai 0.02；nengliang_juanrenjian 0.02；zhenzhi_duanbu 0.05；yama_waiyi 0.05；nongfuzhijian 0.05（农夫之剑原版出处波力不在池内，MVP 手配——战士第一件武器） |
+| xiaoji | [6,15] | jiaozhuazi 0.4 [1,2]；jitui 0.25 [1,2]；xiaoqingdun 0.03；linghou_zhuzhu_waitao 0.03；yama_duanbu 0.05；yama_waiyi 0.05；xiaoxing_buxueji 0.12 |
+| hongmogu | [8,20] | hongse_baozi 0.5 [1,2]；xiao_mofaji 0.12；yuanxingzhe_changxue 0.02；liliang_juanrenjian 0.02；ciji_mofazhang 0.03；zhenzhi_waiyi 0.04 |
+| caoyuanxie | [10,25] | xiezi_weiba 0.45 [1,2]；xiezi_zhi_qian 0.3；bubingjian 0.04；junyong_dunpai 0.03；bingfeng_xue 0.02；zhuzhu_shoutao 0.04；yama_changpao 0.04；yexiong_bubing_dunpai 0.02 |
 
-（qty 默认 1 可省略；写不省略也行，保持文件内风格统一）
+（qty 默认 1 可省略；写不省略也行，保持文件内风格统一。民兵盾牌/园艺手套/斗士短剑/冰灵戒指/暗影魔杖/火焰魔杖不进本表——它们出自波力/太阳花/机警小鸡/万马草原怪，MVP 怪物池无来源，留作后续地图扩展；农夫之剑/橡木杖为新手第一件武器 MVP 手配进绿毛虫/泡泡掉落）
 
 - [ ] **Step 7: 跑测试通过**
 
@@ -615,6 +646,7 @@ export interface EquippedRow {
 export interface EquipmentBonuses {
   vit: number; str: number; agi: number; intel: number; spr: number; // 五维加成（开战时并入派生属性）
   hp: number; sp: number;
+  atk: number;            // 原版「攻击:+N」词条汇总（蓝宝书武器带，如能量之卷刃剑 +2），开战时直接加 atk
   def: number;            // defBonus 汇总
   dmgMin: number | null;  // 主手武器区间（无武器/耐久0 → null）
   dmgMax: number | null;
@@ -639,6 +671,7 @@ const mk = (over: Partial<Item> = {}): Item => ({
 
 const byCode = (code: string): Item | undefined => {
   if (code === "eq_sword") return mk({ code, slot: "main_hand", dmgMin: 7, dmgMax: 9, intervalMs: 2100, defBonus: undefined, bonuses: {} });
+  if (code === "eq_atk_sword") return mk({ code, slot: "main_hand", dmgMin: 10, dmgMax: 14, intervalMs: 2100, defBonus: undefined, bonuses: { atk: 2 } }); // 能量之卷刃剑型
   if (code === "eq_2h") return mk({ code, slot: "main_hand", hands: 2, dmgMin: 10, dmgMax: 14, intervalMs: 2600, defBonus: undefined, bonuses: {} });
   if (code === "gone") return undefined; // 静态漂移
   return mk({ code });
@@ -656,6 +689,12 @@ it("汇总防具 def/bonuses 与武器区间攻速", () => {
   expect(b.dmgMin).toBe(7);
   expect(b.dmgMax).toBe(9);
   expect(b.intervalMs).toBe(2100);
+});
+
+it("atk 词条汇总（蓝宝书「攻击:+N」）", () => {
+  const b = equipmentBonusesOf([{ slotCode: "main_hand", itemCode: "eq_atk_sword", durability: 3 }], byCode);
+  expect(b.atk).toBe(2);
+  expect(b.str).toBe(0); // atk 词条不进五维
 });
 
 it("耐久 0 整件失效（武器失效无区间）", () => {
@@ -676,14 +715,14 @@ it("静态漂移行跳过不崩溃", () => {
 
 it("空装备全零无武器", () => {
   expect(equipmentBonusesOf([], byCode)).toEqual({
-    vit: 0, str: 0, agi: 0, intel: 0, spr: 0, hp: 0, sp: 0, def: 0,
+    vit: 0, str: 0, agi: 0, intel: 0, spr: 0, hp: 0, sp: 0, atk: 0, def: 0,
     dmgMin: null, dmgMax: null, intervalMs: null,
   });
 });
 ```
 
 - [ ] **Step 2: 跑测试确认失败**
-- [ ] **Step 3: 实现**（五维/hp/sp 从 `bonuses` 累加；`def` 累加 `defBonus ?? 0`；主手武器行（`item.slot === "main_hand"` 且耐久 > 0）取 `dmgMin/dmgMax/intervalMs`——副手不会带这些字段（schema 已锁），无需特判）
+- [ ] **Step 3: 实现**（五维/hp/sp/atk 从 `bonuses` 累加；`def` 累加 `defBonus ?? 0`；主手武器行（`item.slot === "main_hand"` 且耐久 > 0）取 `dmgMin/dmgMax/intervalMs`——副手不会带这些字段（schema 已锁），无需特判）
 - [ ] **Step 4: 跑测试通过**
 - [ ] **Step 5: Commit**
 
@@ -804,7 +843,7 @@ const intelEff = c.intel + eq.intel;
 // me 组装处替换（口径：characters.hp 列恒基础上限内，开战快照上限 = 基础 + 装备 hp 加成）：
 //   maxHp: maxHp + eq.hp
 //   maxSp: maxSp + eq.sp
-//   atk: atkOf(c.profession, strEff, intelEff)
+//   atk: atkOf(c.profession, strEff, intelEff) + eq.atk
 //   def: defOf(agiEff) + eq.def
 //   dodge: dodgeOf(agiEff)
 //   intervalMs: eq.intervalMs ?? PLAYER_ATTACK_MS[c.profession]
@@ -930,10 +969,10 @@ git commit -m "feat: 战斗结算接入掉落铜币与死亡耐久损耗,开战�
 3. `equip`：等级不足 → 400 且 message 含「等级」；职业不符（战士穿魔杖）→ 400。
 4. `equip`：空部位成功 → inventory 行 slot_index=NULL，equipment 表出现 targetSlot。
 5. `equip`：部位占用直接替换 → 旧装备回背包空格（slot_index=0）、新装备上位。
-6. `equip`：穿双手武器联动卸下副手（副手件回包）。
+6. `equip`：替换后 equipment 表行校验——被替换件行 DELETE、新装备行 UPSERT 到 targetSlot（腾格顺序 ③④；双手联动 db 无法造数——items.json 无 hands=2 物品且静态数据不进库，由 Task 3 合成夹具单测覆盖）。
 7. `equip`：**满包替换成功**（300 格全占时替换主手 → 旧装备进新装备腾出的原格，净 0；规格决策 7 二次修订）。
 8. `unequip`：成功回包；**包满 → 400**（脱下净 +1 格）。
-9. `use`：小红药 → quantity -1（归零删行）、hp 回复不溢基础上限（把 hp 改成 max-10，用 50 药 → hp=max）、resources_updated_at 推进；非消耗品 → 400。
+9. `use`：小型补血剂 → quantity -1（归零删行）、hp 回复不溢基础上限（把 hp 改成 max-10，用 50 药 → hp=max）、resources_updated_at 推进；非消耗品 → 400。
 10. `use`：active 战斗中 → 409（先开一场战斗再 use）。
 11. `discard`：整堆丢弃删行；带 quantity 部分丢弃减量；已穿戴（slot_index NULL）→ 400。
 12. `equip`：inventoryId 不存在/不是当前角色的 → 404。
@@ -1029,21 +1068,23 @@ git commit -m "web: 背包装备栏面板与结算掉落展示(品质色)"
 - [ ] **Step 3:** `pnpm --filter maoyouji-web build` 零错误
 - [ ] **Step 4: 1400×832 手动回归**（`pnpm dev`，浏览器 1400×832）：
   1. 建战士角色 → 牧野草原打绿毛虫/泡泡 ×N → 出现铜币/材料/药水掉落，聊天区掉落行品质色正确
-  2. 开背包 → 300 格滚动正常 → 使用小红药回血（血条/数值变化）
-  3. 装备木剑 → 再打怪伤害明显抬升、攻速变慢（2200ms 可感知）
-  4. 穿双手大剑 → 副手件自动回包；再穿副手 → 双手剑回包
-  5. 替换主手武器（木剑→打怪掉步兵剑穿上）→ 旧剑回包
-  6. 故意送死 → 复活教堂 → 装备耐久减少可见（背包查看）
-  7. 法师角色重复 2/3（魔杖线）
+  2. 开背包 → 300 格滚动正常 → 使用小型补血剂回血（血条/数值变化）
+  3. 装备农夫之剑 → 再打怪伤害明显抬升、攻速变慢（2600ms 可感知）
+  4. 替换主手武器（农夫之剑→打怪掉步兵剑穿上）→ 旧剑回包
+  5. 故意送死 → 复活教堂 → 装备耐久减少可见（背包查看）
+  6. 法师角色重复 2/3（橡木杖线）
+  （双手占副手规则原版 1~10 级无实装物品，由 Task 3 合成夹具单测验证，手动回归不覆盖）
 - [ ] **Step 5: 收尾 commit**（如有手动回归发现的小修）+ 汇报
 
 ---
 
 ## 数值与口径速查（实现时勿再决策，全在此锁定）
 
-- 装备 24 件/消耗品 3/材料 2 —— Task 1 Step 5 全量 JSON
-- 5 怪掉落表 —— Task 1 Step 6 表格
-- 开战属性组装：`strEff=str+eq.str` 等 → `atkOf/defOf/dodgeOf` 用有效五维；`maxHp+eq.hp`、`maxSp+eq.sp`；`intervalMs = eq.intervalMs ?? PLAYER_ATTACK_MS[profession]`；`dmgMin/dmgMax = eq.* ?? undefined`
+- 物品 35 件 = 装备 26（战士剑 5 + 魔杖 4 + 盾牌 5 + 穿着 11 + 戒指 1）+ 消耗品 2 + 材料 7（蓝宝书考据）—— Task 1 Step 5 全量 JSON
+- 5 怪掉落表 —— Task 1 Step 6 表格（物品种类按原版，chance/qty/copper 手配）
+- 蓝宝书映射：伤害/速度（×1000→intervalMs）/耐久（取上限）/等级/五维加成照抄；防御 `ceil(原版防御 ÷ 25)`；「攻击：+N」→ `bonuses.atk`；魔杖属性伤害只取数值；命中/闪避词条不做
+- 双手武器：原版 1~10 级无真双手，规则由 Task 3 合成夹具验证，items.json 不配
+- 开战属性组装：`strEff=str+eq.str` 等 → `atkOf/defOf/dodgeOf` 用有效五维；`atk + eq.atk`；`maxHp+eq.hp`、`maxSp+eq.sp`；`intervalMs = eq.intervalMs ?? PLAYER_ATTACK_MS[profession]`；`dmgMin/dmgMax = eq.* ?? undefined`
 - `characters.hp/sp` 列恒为基础口径（不含装备）；用药/复活/惰性恢复全部 clamp 基础上限
 - 死亡耐久 `-ceil(durabilityMax × 0.05)`、下限 0；耐久 0 可穿可用（展示失效状态）但加成全失效
 - RNG 契约：rollDrops ①copper 1 掷 ②逐条 chance 1 掷+命中后 qty 恒 1 掷；qtyMin===qtyMax 也掷
