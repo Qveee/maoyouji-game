@@ -6,6 +6,7 @@ import { characterRoutes } from "./routes/characters.ts";
 import { petsRoutes } from "./routes/pets.ts";
 import { mapRoutes } from "./routes/map.ts";
 import { battleRoutes } from "./routes/battle.ts";
+import { inventoryRoutes } from "./routes/inventory.ts";
 import { chatRoutes } from "./routes/chat.ts";
 
 export function buildApp(): FastifyInstance {
@@ -17,6 +18,7 @@ export function buildApp(): FastifyInstance {
   app.register(petsRoutes, { prefix: "/api/pets" });
   app.register(mapRoutes, { prefix: "/api/map" });
   app.register(battleRoutes, { prefix: "/api/battle" });
+  app.register(inventoryRoutes, { prefix: "/api/inventory" });
   app.register(chatRoutes, { prefix: "/api/chat" });
   return app;
 }
