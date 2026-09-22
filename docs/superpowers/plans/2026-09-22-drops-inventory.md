@@ -469,7 +469,8 @@ export interface LostItem { itemCode: string; qty: number }
 
 /**
  * 把掉落依序装入背包：先填同码未满堆（从低 slot 行开始），再开最小空闲格。
- * 全程不改入参；放不下的进 lost（整段数量，不拆分丢弃——单次掉落条目要么全进要么全丢）。
+ * 全程不改入参；放不下的进 lost（贪心部分入包：能放多少放多少，剩余数量整段进 lost——
+ * 规格决策 2「先入账能放的」口径，2026-09-22 评审修订，替代旧「要么全进要么全丢」表述）。
  */
 export function lootInto(
   bag: BagRow[],
@@ -489,8 +490,10 @@ export type EquipPlan =
  * - 等级/职业不符 → 拒绝；耐久 0 允许穿（属性失效由 equipment.ts 处理）
  * - 目标部位占用 → 直接替换（旧装备回包）；戒指优先 ring1 再 ring2，都满替换 ring1
  * - 穿双手武器 → 副手占用则一并卸下；穿副手 → 主手是双手武器则一并卸下
- * - 不做背包空位校验：被穿装备必来自背包，离包即腾格，任何替换净占用 ≤ 0（规格决策 7
- *   二次修订「替换永可行」）；「腾格」由路由层执行顺序保证（先置 NULL 再给回包件分配格）
+ * - 空位可行性（2026-09-22 评审修订，替代旧「替换永可行」表述）：单件替换净占用 ≤ 0 永可行；
+ *   双手双卸替换净 +1 格（新件离包腾 1、回包 2 件），需 `bagFreeSlots ≥ 回包件数 − 1`，
+ *   不满足返回 { ok: false, reason: "背包空间不足" }——装备永不丢失；「腾格」由路由层执行
+ *   顺序保证（先置 NULL 再给回包件分配格）
  */
 export function planEquip(
   item: Item,
@@ -498,6 +501,7 @@ export function planEquip(
   character: { level: number; profession: "warrior" | "mage" },
   equipped: { slotCode: EquipSlotCode; inventoryId: number; itemCode: string }[],
   itemByCode: (code: string) => Item | undefined,
+  bagFreeSlots?: number, // 背包当前空闲格数（路由层传 300 − 背包行数）；缺省 Infinity 不校验
 ): EquipPlan
 ```
 
@@ -983,7 +987,7 @@ git commit -m "feat: 战斗结算接入掉落铜币与死亡耐久损耗,开战�
 
 关键 SQL 与口径：
 - 读背包视图：`SELECT id, item_code, slot_index, quantity, durability FROM character_inventory WHERE character_id = ?`，JS 里分 `slot_index === null`（已穿）与背包行；静态字段从 `itemIndex()` 取，未知 code 兜底 `{ name: itemCode, kind: "material", stackMax: 1, quality: "" }`（Review Focus #1）。
-- `equip`：`planEquip(item, inventoryId, {level, profession}, equipped, itemIndex().get)` → 失败 400（reason 直传）→ 成功按**腾格顺序**执行：① `UPDATE character_inventory SET slot_index = NULL WHERE id = inventoryId`（新装备离包，其原格即刻空闲）② `unequipInventoryIds` 逐件重算 firstFreeSlot 分配空格并 `UPDATE ... SET slot_index = ?` ③ `INSERT ... ON DUPLICATE KEY UPDATE` 写 equipment（`uk (character_id, slot_code)`）④ 被替换件的 equipment 行 DELETE。替换在满包时天然成功（①腾出的格 ≥ 回包件数，规格决策 7）。
+- `equip`：`planEquip(item, inventoryId, {level, profession}, equipped, itemIndex().get, 300 - bag行数)` → 失败 400（reason 直传，含「背包空间不足」——双手双卸满包场景，单测覆盖；db 无法造 hands=2 物品不做集成用例）→ 成功按**腾格顺序**执行：① `UPDATE character_inventory SET slot_index = NULL WHERE id = inventoryId`（新装备离包，其原格即刻空闲）② `unequipInventoryIds` 逐件重算 firstFreeSlot 分配空格并 `UPDATE ... SET slot_index = ?` ③ `INSERT ... ON DUPLICATE KEY UPDATE` 写 equipment（`uk (character_id, slot_code)`）④ 被替换件的 equipment 行 DELETE。单件替换满包天然成功（①腾出的格 ≥ 1 = 回包件数）；双手双卸满包已被 bagFreeSlots 校验拒绝（评审修订裁决，规格决策 7）。
 - `unequip`：`firstFreeSlot(bag)` 无空格 400；`UPDATE character_inventory SET slot_index = ? WHERE id = ?` + `DELETE FROM character_equipment WHERE character_id = ? AND slot_code = ?`。
 - `use`：查 active battle（`SELECT id FROM battles WHERE character_id = ? AND status = 'active' LIMIT 1`）→ 409「战斗中无法使用物品」；物品 kind !== "consumable" → 400；`hp = MIN(hpMaxOf(level, vit), hp + effect.hp)`、`sp = MIN(spMaxOf(level, intel), sp + effect.sp)`；`UPDATE characters SET hp=?, sp=?, resources_updated_at = NOW()`；`UPDATE character_inventory SET quantity = quantity - 1`，quantity 归零 `DELETE`。**并入口径**：effect.hp/effect.sp 都按「基础上限」clamp（characters 列恒基础口径，Global Constraints）。
 - `discard`：`slot_index IS NULL` → 400「已穿戴的装备不能丢弃」；带 quantity → `GREATEST(0, quantity - ?)` 归零删行。
