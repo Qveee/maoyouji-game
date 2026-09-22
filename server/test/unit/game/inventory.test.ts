@@ -80,6 +80,28 @@ describe("planEquip", () => {
     expect(p.ok).toBe(true);
     if (p.ok) expect(p.unequipInventoryIds).toEqual([3]);
   });
+  it("双手双卸替换：满包（bagFreeSlots=0）拒绝", () => {
+    const equipped = [
+      { slotCode: "main_hand" as const, inventoryId: 3, itemCode: "eq_old" },
+      { slotCode: "off_hand" as const, inventoryId: 5, itemCode: "eq_shield" },
+    ];
+    const p = planEquip(mk({ hands: 2, code: "eq_2h" }), 11, char, equipped, itemByCode, 0);
+    expect(p.ok).toBe(false);
+    if (!p.ok) expect(p.reason).toBe("背包空间不足");
+  });
+  it("双手双卸替换：bagFreeSlots=1 可行（净 +1 格）", () => {
+    const equipped = [
+      { slotCode: "main_hand" as const, inventoryId: 3, itemCode: "eq_old" },
+      { slotCode: "off_hand" as const, inventoryId: 5, itemCode: "eq_shield" },
+    ];
+    const p = planEquip(mk({ hands: 2, code: "eq_2h" }), 11, char, equipped, itemByCode, 1);
+    expect(p).toEqual({ ok: true, targetSlot: "main_hand", unequipInventoryIds: [3, 5] });
+  });
+  it("单件替换 bagFreeSlots=0 仍永可行", () => {
+    const equipped = [{ slotCode: "main_hand" as const, inventoryId: 3, itemCode: "eq_old" }];
+    const p = planEquip(mk(), 11, char, equipped, itemByCode, 0);
+    expect(p).toEqual({ ok: true, targetSlot: "main_hand", unequipInventoryIds: [3] });
+  });
   it("戒指：优先 ring1，再 ring2，都满替换 ring1", () => {
     const ring = mk({ slot: "ring", dmgMin: undefined, dmgMax: undefined, intervalMs: undefined, code: "eq_ring" });
     const p0 = planEquip(ring, 11, char, [], itemByCode);

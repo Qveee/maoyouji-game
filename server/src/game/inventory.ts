@@ -126,8 +126,9 @@ export type EquipPlan =
  * - 等级/职业不符 → 拒绝；耐久 0 允许穿（属性失效由 equipment.ts 处理）
  * - 目标部位占用 → 直接替换（旧装备回包）；戒指优先 ring1 再 ring2，都满替换 ring1
  * - 穿双手武器 → 副手占用则一并卸下；穿副手 → 主手是双手武器则一并卸下
- * - 不做背包空位校验：被穿装备必来自背包，离包即腾格，任何替换净占用 ≤ 0（规格决策 7
- *   二次修订「替换永可行」）；「腾格」由路由层执行顺序保证（先置 NULL 再给回包件分配格）
+ * - 背包空位（可选 bagFreeSlots，缺省 Infinity=不校验）：单件替换净占用 ≤ 0 永可行；
+ *   双手双卸替换净 +1 格，需 bagFreeSlots ≥ 回包件数 − 1，不满足拒绝（装备不丢，仅拒绝操作）。
+ *   「腾格」由路由层执行顺序保证（先置 NULL 再给回包件分配格）（规格决策 7 二次修订按此口径修正）
  *
  * inventoryId 仅供路由层定位被穿的背包行，计划结果本身用不到。
  */
@@ -137,6 +138,7 @@ export function planEquip(
   character: { level: number; profession: "warrior" | "mage" },
   equipped: { slotCode: EquipSlotCode; inventoryId: number; itemCode: string }[],
   itemByCode: (code: string) => Item | undefined,
+  bagFreeSlots?: number,
 ): EquipPlan {
   if (item.kind !== "equipment") return { ok: false, reason: "只有装备可以穿戴" };
 
@@ -158,7 +160,8 @@ export function planEquip(
     targetSlot = item.slot;
   }
 
-  // 替换联动：目标部位旧件 + 双手/副手互斥件，全部回包（离包即腾格，替换永可行）
+  // 替换联动：目标部位旧件 + 双手/副手互斥件，全部回包（离包即腾格；单件替换净占用 ≤ 0，
+  // 双手双卸替换净 +1 格，空位校验见下）
   const unequipInventoryIds: number[] = [];
   const target = bySlot.get(targetSlot);
   if (target) unequipInventoryIds.push(target.inventoryId);
@@ -174,6 +177,12 @@ export function planEquip(
     if (main && mainItem?.kind === "equipment" && mainItem.hands === 2) {
       unequipInventoryIds.push(main.inventoryId);
     }
+  }
+
+  // 背包空位校验（缺省 Infinity=不校验，既有 5 参调用点行为不变）：新装备自身离包腾 1 格，
+  // 回包件数超过「空位 + 1」才拒绝——拒绝即不落任何改动，装备不丢
+  if (unequipInventoryIds.length > (bagFreeSlots ?? Infinity) + 1) {
+    return { ok: false, reason: "背包空间不足" };
   }
 
   return { ok: true, targetSlot, unequipInventoryIds };
