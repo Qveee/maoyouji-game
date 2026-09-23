@@ -294,19 +294,20 @@ function pushBattleLine(text: string, t?: number) {
   void nextTick(stickChat);
 }
 
-/** 战斗结算行：终局一次性 push（斩杀数/累计经验取服务端结算补写值），独立醒目样式 */
+/** 战斗结算行：终局一次性 push，照原版截图「怪名(总斩数:x 总经验:y)被杀死了！」（累计值取服务端击杀统计），金橙醒目样式 */
 function pushBattleResult(over: NonNullable<BattleResponseState["over"]>) {
   const foeName = battle.value?.foeName ?? "";
   let text: string;
   if (over.result === "victory") {
     const exp = over.expGained ?? 0;
-    text = `【战斗胜利】击败 ${foeName}！斩杀数 ${over.killCount ?? 1}，获取总经验 ${over.totalExpGained ?? exp}（本场 +${exp}）`;
+    text = `${foeName}(总斩数:${over.killCount ?? 1} 总经验:${over.totalExpGained ?? exp})被杀死了！`;
   } else if (over.result === "defeat") {
     text = `【战斗失败】你被 ${foeName} 击败，已在猫隐村教堂复活。`;
   } else {
     text = `【战斗平局】3 分钟未分胜负，各自罢手。`;
   }
   messages.value.push({ time: now(), text, kind: "battle-end" });
+  if (over.result === "victory") pushBattleLine(`【结算】获得经验+${over.expGained ?? 0}`); // 照原型结算行：经验在此播报，铜币/物品走掉落明细行
   if (messages.value.length > 60) messages.value.shift();
   if (over.drops) pushDropLines(over.drops); // 掉落明细紧随结算行（仅 victory 结算会回填）
   void nextTick(stickChat);

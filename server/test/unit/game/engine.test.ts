@@ -191,7 +191,7 @@ describe("advance 时间快进", () => {
     const ev = s.events[0]!;
     expect(ev.kind).toBe("crit");
     expect(ev.amount).toBe(9);
-    expect(ev.text).toContain("暴击");
+    expect(ev.text).toContain("致命一击");
   });
 
   it("控制昏迷：昏迷方跳过行动顺延到 stunUntil，昏迷结束立即出手", () => {
@@ -249,7 +249,7 @@ describe("advance 时间快进", () => {
     expect(s.events.map((e) => e.kind)).toEqual(["hit", "end"]);
     const end = s.events[1]!;
     expect(end.t).toBe(1000);
-    expect(end.text).toBe("你击败了 绿毛虫，获得 40 点经验！");
+    expect(end.text).toBe("绿毛虫被你杀死了…");
     expect(s.now).toBe(60000); // 胜负已分，剩余时间只推进 now
   });
 
@@ -311,7 +311,7 @@ describe("advance 时间快进", () => {
     // 第 10~12 掷：0.7298(命中) → 0.2578(未暴击) → int(17,23)=17+floor(0.1559×7)=18 → 伤害 = 18 + 5 = 23
     const fireball = s.events[3]!;
     expect(fireball).toMatchObject({ kind: "skill", side: "me", amount: 23, t: 5000 });
-    expect(fireball.text).toBe("你对 绿毛虫 发动了火球术，造成 23 点伤害！");
+    expect(fireball.text).toBe("你对绿毛虫释放【火球术】，造成23点伤害！");
     expect(s.pendingSkill).toBeNull();
     // 我方出手前挨 3+2+2=7 点（1500/3000/4500 三次还手）；
     // t=6000 与敌方同刻，我方先手普攻（掷 d13~d15 → int=1 → 伤害 6），敌方随后还手 2 点

@@ -214,21 +214,18 @@ function resolveAttack(
 
   // e. 事件 kind 优先级：暴击 > 技能 > 普攻（前端暴击样式优先展示；text 始终带足信息）
   const kind = isCrit ? "crit" : skill !== null ? "skill" : "hit";
+  // 文案照原版截图/原型（assets/游戏主界面.html playerHit）：普攻「发出（致命）一击」、技能「释放【技能名】」，
+  // 怪方统一「向你发起攻击」；暴击在文本上只体现于普攻（kind 仍标 crit 供前端样式）
   let text: string;
   if (side === "me") {
-    if (skill !== null) {
-      text = isCrit
-        ? `你对 ${target.name} 发动了${skill.name}，触发暴击造成 ${dealt} 点伤害！`
-        : `你对 ${target.name} 发动了${skill.name}，造成 ${dealt} 点伤害！`;
-    } else {
-      text = isCrit
-        ? `你对 ${target.name} 发动了暴击，造成 ${dealt} 点伤害！`
-        : `你攻击 ${target.name}，造成 ${dealt} 点伤害！`;
-    }
+    text =
+      skill !== null
+        ? `你对${target.name}释放【${skill.name}】，造成${dealt}点伤害！`
+        : isCrit
+          ? `你对${target.name}发出致命一击，造成${dealt}点伤害！`
+          : `你对${target.name}发出一击，造成${dealt}点伤害！`;
   } else {
-    text = isCrit
-      ? `${attacker.name} 的暴击对你造成 ${dealt} 点伤害！`
-      : `${attacker.name} 攻击你，造成 ${dealt} 点伤害！`;
+    text = `${attacker.name}向你发起攻击，造成${dealt}点伤害！`;
   }
   pushEvent(s, { t, side, kind, amount: dealt, text });
 
@@ -296,7 +293,7 @@ export function advance(state: BattleState, targetMs: number): BattleState {
         side,
         kind: "end",
         text: victory
-          ? `你击败了 ${target.name}，获得 ${s.foeExp} 点经验！`
+          ? `${target.name}被你杀死了…` // 照原版截图：击杀播报行；「(总斩数:x 总经验:y)被杀死了！」累计口径走前端结算行
           : `你被 ${actor.name} 击败了！`,
       });
     }
