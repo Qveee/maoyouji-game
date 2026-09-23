@@ -181,11 +181,21 @@ const menuButtons = computed(() => {
   return acts;
 });
 
-async function onMenuAction(actName: string) {
+/** 屏幕点击坐标 → 游戏窗口布局坐标（除以 stage-fit 缩放；取不到定位基准返回 null，详情窗走默认位） */
+function originFromEvent(e?: MouseEvent): { x: number; y: number } | null {
+  const shell = winEl.value?.offsetParent as HTMLElement | null;
+  if (!e || !shell) return null;
+  const g = shell.getBoundingClientRect();
+  const scale = g.width / shell.offsetWidth || 1;
+  return { x: (e.clientX - g.left) / scale, y: (e.clientY - g.top) / scale };
+}
+
+async function onMenuAction(actName: string, e?: MouseEvent) {
   const row = menu.value?.row;
   closeBagActions();
   if (!row) return;
   if (actName === "desc") {
+    detailOrigin.value = originFromEvent(e); // 详情窗锚到鼠标隔壁（2026-09-23 用户指定）
     detail.value = row.item; // 详情窗独立常开，直到点它自己的关闭
   } else if (actName === "equip") {
     // 两段式确认第一击：「装备后绑定」装备被服务端拦下 → 上报 GameShell 在聊天区插确认行；
@@ -219,6 +229,7 @@ async function onMenuAction(actName: string) {
 
 // ---------- 道具说明窗（共享 ItemDetailWindow 组件，宠物窗装备名点击同用；显隐由下方 v-if 控制） ----------
 const detail = ref<BagItemView | null>(null);
+const detailOrigin = ref<{ x: number; y: number } | null>(null); // 开窗锚点（鼠标位；null=默认位）
 
 // ---------- 丢弃二次确认（防误删；仅丢弃走确认，穿戴/使用/卸下不变） ----------
 const discardTarget = ref<ListRow | null>(null);
@@ -354,7 +365,7 @@ function onDragEnd() {
   <!-- 道具操作菜单（照原型 #bag-menu：fixed 紧贴鼠标，Teleport 到 body 避开 stage-fit 缩放劫持） -->
   <Teleport to="body">
     <div v-if="menu" ref="menuEl" class="bag-menu" :style="{ left: menu.x + 'px', top: menu.y + 'px' }">
-      <button v-for="b in menuButtons" :key="b.act" type="button" @click="onMenuAction(b.act)">{{ b.label }}</button>
+      <button v-for="b in menuButtons" :key="b.act" type="button" @click="onMenuAction(b.act, $event)">{{ b.label }}</button>
     </div>
   </Teleport>
 
@@ -390,7 +401,7 @@ function onDragEnd() {
   </Teleport>
 
   <!-- 道具说明窗（共享 ItemDetailWindow 组件：照原型 #item-detail-win，与背包窗同为游戏窗口的绝对定位兄弟节点） -->
-  <ItemDetailWindow v-if="detail" :item="detail" @close="detail = null" />
+  <ItemDetailWindow v-if="detail" :item="detail" :origin="detailOrigin" @close="detail = null" />
 </template>
 
 <style scoped>

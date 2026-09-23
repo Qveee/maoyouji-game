@@ -36,8 +36,8 @@ const fitScale = ref(1);
 type LogLine =
   | { time: string; text: string; kind: "sys" | "chat" }
   | { time: string; text: string; kind: "battle"; parts: { t: string; cls: string }[] }
-  /** 战斗结算行：金橙加粗大字号，与普通战斗行明显区分 */
-  | { time: string; text: string; kind: "battle-end" }
+  /** 战斗结算行：加粗大字号与普通战斗行区分；胜利击杀播报绿字（battle-end-win），失败/平局金橙（battle-end） */
+  | { time: string; text: string; kind: "battle-end" | "battle-end-win" }
   /** 掉落行（样式同 sys）：parts 内联品质色（QUALITY_COLORS），丢失段整行红 */
   | { time: string; kind: "drops"; parts: { t: string; color?: string }[] }
   /** 装备绑定确认行（左下聊天区交互提示）：「装备后绑定」装备第一击被拦下后的求确认，[确认装备]/[取消] 可点 */
@@ -306,7 +306,11 @@ function pushBattleResult(over: NonNullable<BattleResponseState["over"]>) {
   } else {
     text = `【战斗平局】3 分钟未分胜负，各自罢手。`;
   }
-  messages.value.push({ time: now(), text, kind: "battle-end" });
+  messages.value.push({
+    time: now(),
+    text,
+    kind: over.result === "victory" ? "battle-end-win" : "battle-end",
+  });
   if (over.result === "victory") pushBattleLine(`【结算】获得经验+${over.expGained ?? 0}`); // 照原型结算行：经验在此播报，铜币/物品走掉落明细行
   if (messages.value.length > 60) messages.value.shift();
   if (over.drops) pushDropLines(over.drops); // 掉落明细紧随结算行（仅 victory 结算会回填）
@@ -823,7 +827,6 @@ onUnmounted(() => {
         <div class="chatlog panel">
           <div ref="chatBodyEl" class="body scr">
             <p v-for="(m, i) in messages" :key="i" :class="m.kind === 'drops' ? 'sys' : m.kind">
-              <time>{{ m.time }}</time>
               <!-- 战斗日志行：你=红 #F52627、怪名=绿下划线（格式照原型）；parts 已在 push 时烘焙，历史行不再重建 -->
               <template v-if="m.kind === 'battle'">
                 <template v-for="(p, j) in m.parts" :key="j">
@@ -1237,22 +1240,22 @@ onUnmounted(() => {
 .private-hint { color: #74A5CF; font-size: 14px; font-weight: 800; text-shadow: 0 0 0.4px currentColor; text-align: left; margin: -3px 0 0; }
 
 .chatlog { flex: 1; min-height: 0; }
-.chatlog time { color: #8b7b55; margin-right: 4px; }
 .chatlog p {
   margin: 1px 0;
+  font-size: 14px; /* 左下记录区比全局正文（12px）大两档（2026-09-23 用户两次指定） */
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 .chatlog p.chat { color: #1e5f3f; }
-/* 战斗结算行：金橙加粗放大（正文 12px），与普通战斗行/下一场开场一眼可辨 */
-.chatlog p.battle-end {
-  color: #c56a00;
-  font-weight: 800;
-  font-size: 14px;
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.65);
-  margin: 5px 0 2px;
+/* 战斗结算行：字号/行高/边距与正文完全一致，仅加粗（2026-09-23 用户指定：高度随正文，只是字稍粗）；
+   胜利击杀播报绿字（与怪名 .mk 同款绿），失败/平局金橙 */
+.chatlog p.battle-end,
+.chatlog p.battle-end-win {
+  font-weight: 700;
 }
+.chatlog p.battle-end { color: #c56a00; }
+.chatlog p.battle-end-win { color: #178714; }
 /* 战斗日志行配色（照原型）：你=红、怪名=绿下划线 */
 .chatlog .you { color: #f52627; }
 .chatlog .mk { color: #178714; text-decoration: underline; }

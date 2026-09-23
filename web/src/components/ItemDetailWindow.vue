@@ -1,31 +1,37 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { api, type BagItemView, type BindState } from "../api";
-import { QUALITY_COLORS, QUALITY_NAMES } from "../quality";
+import { QUALITY_COLORS } from "../quality";
 import { fallbackIconOf } from "../itemIcon";
 
 /**
- * 道具说明窗（照原型 #item-detail-win，含装备完整属性卡）。
+ * 道具说明窗（照原版截图 游戏内截图/装备信息展示.png 逐像素复刻：#EEE 平底 + 1px #777 边框 + 宋体）。
  * 背包窗「说明」菜单与宠物窗装备名单击共用的唯一实现（品质色/属性卡逻辑随组件走，勿在调用方复刻）；
  * 显隐由父级 v-if 控制，关闭经 close 事件上报（父级清空详情数据）。
  */
-const props = defineProps<{ item: BagItemView }>();
+const props = defineProps<{
+  item: BagItemView;
+  /** 开启锚点（游戏窗口布局坐标，通常=「说明」点击处鼠标位）：null=走默认初始位（宠物窗入口） */
+  origin?: { x: number; y: number } | null;
+}>();
 const emit = defineEmits<{ close: [] }>();
 
-/** 静态部位中文名（equip.slot 是静态 code，ring 未拆分；信息行用） */
+/** 静态部位中文短名（equip.slot 是静态 code）：照原版口径（静态 desc 用语「头/胸/脚/腿/手套/右手/左手」与截图「脚.」） */
 const PART_LABELS: Record<string, string> = {
-  main_hand: "主手", off_hand: "副手", head: "头部", shoulder: "肩部", chest: "胸部",
-  hands: "手部", waist: "腰部", legs: "腿部", feet: "足部", wrist: "手腕",
+  main_hand: "右手", off_hand: "左手", head: "头", shoulder: "肩", chest: "胸",
+  hands: "手套", waist: "腰", legs: "腿", feet: "脚", wrist: "腕",
   ring: "戒指", neck: "项链", cloak: "披风",
 };
-/** 属性加成词条中文（属性卡用；口径照 docs/游戏规则设计.md 五维：力量/敏捷/体力/智力/精神） */
+/** 属性加成词条中文（口径照 docs/游戏规则设计.md 五维：力量/敏捷/体力/智力/精神） */
 const STAT_LABELS: Record<string, string> = {
   vit: "体力", str: "力量", agi: "敏捷", intel: "智力", spr: "精神",
   atk: "攻击", hp: "HP", sp: "SP",
 };
+/** 属性词条展示顺序（截图口径：体力→智力→精神为其子列；先五维后战斗词条） */
+const STAT_ORDER = ["str", "agi", "vit", "intel", "spr", "atk", "hp", "sp"] as const;
 
-/** 绑定状态行文案（bind_state 列两取值；统一灰 #666 仅文字区分，2026-09-23 用户指定；
- *  bind_on_equip=装备后绑定（可交易地基）、bound=已绑定（不可交易）） */
+/** 绑定状态行文案（bind_state 列两取值；统一灰字仅文字区分，2026-09-23 用户指定；
+ *  灰度照截图实测 #999999；bind_on_equip=装备后绑定（可交易地基）、bound=已绑定（不可交易）） */
 const BIND_STATE_LABELS: Record<BindState, string> = {
   bind_on_equip: "装备后绑定",
   bound: "已绑定",
@@ -47,137 +53,183 @@ onMounted(async () => {
 /** 精灵图缺文件（public/items 素材尚未入库）时切换到像素 SVG 兜底（共享 itemIcon 模块） */
 const broken = ref(false);
 
-/** 装备属性卡逐行内容（样式与原型描述文字一致；color 为品质色/未达标红） */
-const equipLines = computed<{ text: string; color?: string }[]>(() => {
+/** ■ 为拖动把手（2026-09-23 用户指正：原版 ■ 代表可拖动，非最小化/隐藏）。
+ *  拖动写法照 InventoryPanel/PetPanel：按住 ■ 平移整窗，屏幕坐标经 stage-fit 缩放折算回布局坐标，钳制在游戏窗口内 */
+const winEl = ref<HTMLElement | null>(null);
+const winPos = ref({ x: 410, y: 126 }); // 默认坐标（相对 1400×832 游戏窗口；带 origin 时被锚点覆盖）
+let drag: { dx: number; dy: number } | null = null;
+
+/** 锚到鼠标隔壁（+6px 让指针不压窗角），并钳制在游戏窗口内；窗自身尺寸要挂载后才有 */
+function anchorTo(origin: { x: number; y: number }) {
+  const win = winEl.value;
+  const shell = win?.offsetParent as HTMLElement | null; // 定位基准 = GameShell .shell（1400×832）
+  if (!win || !shell) {
+    winPos.value = { ...origin };
+    return;
+  }
+  winPos.value = {
+    x: Math.max(0, Math.min(origin.x + 6, shell.offsetWidth - win.offsetWidth)),
+    y: Math.max(0, Math.min(origin.y + 6, shell.offsetHeight - win.offsetHeight)),
+  };
+}
+onMounted(() => {
+  if (props.origin) anchorTo(props.origin);
+});
+watch(
+  () => props.origin,
+  (o) => {
+    if (o) anchorTo(o); // 窗常开时再点别的「说明」：重新锚到新点击处
+  },
+);
+
+function onDragStart(e: MouseEvent) {
+  const win = winEl.value;
+  const shell = win?.offsetParent as HTMLElement | null; // 定位基准 = GameShell .shell（1400×832）
+  if (!win || !shell) return;
+  const scale = shell.getBoundingClientRect().width / shell.offsetWidth || 1; // stage-fit 缩放系数
+  const rect = win.getBoundingClientRect();
+  drag = { dx: (e.clientX - rect.left) / scale, dy: (e.clientY - rect.top) / scale };
+  e.preventDefault();
+  document.addEventListener("mousemove", onDragMove);
+  document.addEventListener("mouseup", onDragEnd);
+}
+function onDragMove(e: MouseEvent) {
+  const win = winEl.value;
+  const shell = win?.offsetParent as HTMLElement | null;
+  if (!drag || !win || !shell) return;
+  const g = shell.getBoundingClientRect();
+  const scale = g.width / shell.offsetWidth || 1;
+  let x = (e.clientX - g.left) / scale - drag.dx;
+  let y = (e.clientY - g.top) / scale - drag.dy;
+  x = Math.max(0, Math.min(shell.offsetWidth - win.offsetWidth, x));
+  y = Math.max(0, Math.min(shell.offsetHeight - win.offsetHeight, y));
+  winPos.value = { x, y };
+}
+function onDragEnd() {
+  drag = null;
+  document.removeEventListener("mousemove", onDragMove);
+  document.removeEventListener("mouseup", onDragEnd);
+}
+
+/** 名字品质色（截图实测蓝 #0070dd，经 quality.ts 全局口径）；无品质（消耗品/材料）回落黑字 */
+const nameColor = computed(() => QUALITY_COLORS[props.item.quality]);
+
+/** 装备属性卡（照截图行序：绑定 → 部位·类型 → 耐久 → 伤害/攻速 → 防御 → 属性 → 空行 → 等级需求） */
+const equipCard = computed(() => {
   const it = props.item;
-  if (it.kind !== "equipment" || !it.equip) return [];
+  if (it.kind !== "equipment" || !it.equip) return null;
   const e = it.equip;
-  const lines: { text: string; color?: string }[] = [];
-  if (it.quality) {
-    lines.push({ text: `品质：${QUALITY_NAMES[it.quality] ?? it.quality}`, color: QUALITY_COLORS[it.quality] });
-  }
-  // 绑定状态行（仅装备显示；消耗品/材料不出现该行）：两种取值统一灰 #666，仅文字区分
-  lines.push({ text: `状态：${BIND_STATE_LABELS[it.bindState]}`, color: "#666666" });
-  lines.push({ text: `部位：${PART_LABELS[e.slot] ?? e.slot}·${e.equipType}` });
-  const lvText = `等级需求：${e.levelReq}`;
-  lines.push(
-    charLevel.value != null && charLevel.value < e.levelReq
-      ? { text: lvText, color: "#c33812" } // 原型页签红：等级不足标红
-      : { text: lvText },
-  );
-  if (it.durability != null) {
-    lines.push({ text: `耐久：${it.durability}/${e.durabilityMax}${it.durability === 0 ? "（失效）" : ""}` });
-  }
-  if (e.dmgMin != null && e.dmgMax != null) {
-    lines.push({ text: `伤害：${e.dmgMin}~${e.dmgMax}` });
-    if (e.intervalMs != null) {
-      lines.push({ text: `攻速：${(e.intervalMs / 1000).toFixed(1).replace(/\.0$/, "")} 秒` });
-    }
-  }
-  if (e.defBonus != null) {
-    lines.push({ text: `防御：+${e.defBonus}` });
-  }
-  for (const [k, v] of Object.entries(e.bonuses)) {
-    if (v) lines.push({ text: `${STAT_LABELS[k] ?? k}：+${v}` });
-  }
-  return lines;
+  return {
+    bind: BIND_STATE_LABELS[it.bindState],
+    slotLabel: `${PART_LABELS[e.slot] ?? e.slot}.`,
+    typeName: e.equipType,
+    fail: it.durability === 0 ? "（失效）" : "",
+    dur: it.durability != null ? `${it.durability}/${e.durabilityMax}` : null,
+    dmg: e.dmgMin != null && e.dmgMax != null ? `${e.dmgMin}-${e.dmgMax}` : null,
+    speed: e.intervalMs != null ? `${(e.intervalMs / 1000).toFixed(1).replace(/\.0$/, "")} 秒` : null,
+    def: e.defBonus,
+    /** 属性词条按固定顺序输出（Object 顺序随静态 JSON，不可依赖） */
+    stats: STAT_ORDER.filter((k) => e.bonuses[k]).map((k) => ({ label: STAT_LABELS[k] ?? k, value: e.bonuses[k]! })),
+    levelReq: e.levelReq,
+    unmet: charLevel.value != null && charLevel.value < e.levelReq,
+  };
 });
 </script>
 
 <template>
-  <div class="item-detail-win" role="dialog" aria-label="道具说明">
-    <div class="item-head">
-      <b>道具说明</b>
-      <div class="win-btns">
-        <button type="button" class="win-btn" title="关闭" @click="emit('close')">
-          <svg viewBox="0 0 12 12"><g stroke="currentColor" stroke-width="2" stroke-linecap="square"><line x1="2" y1="2" x2="10" y2="10"/><line x1="10" y1="2" x2="2" y2="10"/></g></svg>
-        </button>
-      </div>
+  <div ref="winEl" class="item-detail-win" :style="{ left: winPos.x + 'px', top: winPos.y + 'px' }" role="dialog" aria-label="道具说明">
+    <div class="win-btns">
+      <span class="win-drag" title="拖动" @mousedown="onDragStart">
+        <svg viewBox="0 0 12 12"><rect x="2" y="2" width="8" height="8" fill="currentColor"/></svg>
+      </span>
+      <button type="button" class="win-btn" title="关闭" @click="emit('close')">
+        <svg viewBox="0 0 12 12"><g stroke="currentColor" stroke-width="2" stroke-linecap="square"><line x1="2" y1="2" x2="10" y2="10"/><line x1="10" y1="2" x2="2" y2="10"/></g></svg>
+      </button>
     </div>
     <div class="item-body">
-      <span class="item-figure">
-        <img
-          v-if="item.sprite && !broken"
-          :src="item.sprite"
-          :alt="item.name"
-          @error="broken = true"
-        />
-        <span v-else class="ic-fallback lg" aria-hidden="true" v-html="fallbackIconOf(item)"></span>
-      </span>
-      <div class="item-info">
-        <b>{{ item.name }}</b>
-        <p>{{ item.desc || "（暂无描述。）" }}</p>
-        <p
-          v-for="(l, i) in equipLines"
-          :key="i"
-          :style="l.color ? { color: l.color } : undefined"
-        >{{ l.text }}</p>
+      <div class="item-top">
+        <span class="item-figure">
+          <img
+            v-if="item.sprite && !broken"
+            :src="item.sprite"
+            :alt="item.name"
+            @error="broken = true"
+          />
+          <span v-else class="ic-fallback" aria-hidden="true" v-html="fallbackIconOf(item)"></span>
+        </span>
+        <b class="item-name" :style="nameColor ? { color: nameColor } : undefined">{{ item.name }}</b>
+      </div>
+      <div v-if="equipCard" class="item-rest">
+        <p class="ln gray">{{ equipCard.bind }}</p>
+        <p class="ln slot"><span>{{ equipCard.slotLabel }}</span><span>{{ equipCard.typeName }}</span></p>
+        <p v-if="equipCard.dur" class="ln">耐久:{{ equipCard.dur }}{{ equipCard.fail }}</p>
+        <p v-if="equipCard.dmg" class="ln">伤害:{{ equipCard.dmg }}</p>
+        <p v-if="equipCard.speed" class="ln">攻速:{{ equipCard.speed }}</p>
+        <p v-if="equipCard.def != null" class="ln">防御:<i class="gv">+{{ equipCard.def }}</i></p>
+        <p v-for="s in equipCard.stats" :key="s.label" class="ln">{{ s.label }}:<i class="gv">+{{ s.value }}</i></p>
+        <p class="ln req" :class="{ unmet: equipCard.unmet }">装备需要:等级:{{ equipCard.levelReq }}</p>
+      </div>
+      <div v-else class="item-rest">
+        <p v-if="item.desc" class="ln desc">{{ item.desc }}</p>
       </div>
     </div>
   </div>
 </template>
 
 <style scoped>
-/* ============ 道具说明窗（CSS 照抄原型 #item-detail-win 段） ============ */
+/* ============ 道具说明窗（照原版截图逐段实测复刻，勿改回毛玻璃风）；
+   2026-09-23 用户指定整体放大两档（12→14px / 234→280px），非截图原尺寸 ============ */
 .item-detail-win {
   position: absolute;
-  left: 410px;
-  top: 126px;
   z-index: 55;
-  width: 270px;
-  display: flex;
-  flex-direction: column;
-  border: 1px solid rgba(255, 255, 255, 0.72);
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.72);
-  backdrop-filter: blur(14px);
-  box-shadow: 0 8px 28px rgba(31, 38, 135, 0.3);
-  font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
-  overflow: hidden;
+  width: 280px; /* 含边框；截图原尺寸 234px，放大见上注 */
+  border: 1px solid #777777;
+  background: #eeeeee;
+  box-shadow: 0 0 7px rgba(20, 40, 60, 0.35);
+  font: 14px/22px SimSun, "宋体", serif;
+  color: #000000;
 }
-.item-head {
-  height: 34px;
-  flex: none;
+.win-btns {
+  position: absolute;
+  top: 6px;
+  right: 5px;
+  z-index: 1;
   display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 0 8px 0 12px;
-  background: rgba(255, 255, 255, 0.45);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.7);
-  user-select: none;
+  gap: 8px;
 }
-.item-head b { font: 600 13px "Microsoft YaHei", sans-serif; color: #1e293b; }
-.win-btns { margin-left: auto; display: flex; gap: 2px; }
-.win-btn {
-  width: 22px;
-  height: 22px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
+.win-btn,
+.win-drag {
+  width: 12px;
+  height: 12px;
   padding: 0;
-  background: rgba(255, 255, 255, 0.5);
-  color: #334155;
+  border: none;
+  background: none;
+  color: #000000;
   display: grid;
   place-items: center;
 }
-.win-btn:hover { background: rgba(255, 255, 255, 0.9); }
-.win-btn svg { width: 11px; height: 11px; display: block; }
-.item-body { display: flex; gap: 12px; padding: 12px 14px 14px; }
-.item-figure {
-  width: 64px;
-  height: 64px;
-  flex: none;
-  display: grid;
-  place-items: center;
-  background: rgba(255, 255, 255, 0.75);
-  border: 1px solid rgba(148, 163, 184, 0.55);
-  border-radius: 8px;
-  overflow: hidden;
+.win-btn { cursor: pointer; }
+.win-drag { cursor: move; user-select: none; } /* ■ 拖动把手 */
+.win-btn svg,
+.win-drag svg { width: 10px; height: 10px; display: block; }
+.item-body { padding: 10px 11px 11px; }
+.item-top {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  margin-right: 30px; /* 让出右上 ■/× 按钮 */
 }
-.item-figure img { width: 52px; height: 52px; object-fit: contain; display: block; image-rendering: pixelated; }
-.item-figure .ic-fallback { display: block; width: 52px; height: 52px; }
-.item-figure .ic-fallback :deep(svg) { display: block; width: 52px; height: 52px; }
-.item-info { min-width: 0; flex: 1; }
-.item-info b { display: block; font: 600 14px/1.4 "Microsoft YaHei", sans-serif; color: #1e293b; margin-bottom: 5px; }
-.item-info p { font: 12px/1.7 "Microsoft YaHei", sans-serif; color: #334155; white-space: pre-wrap; }
+.item-figure { flex: none; display: grid; place-items: center; }
+.item-figure img { width: 26px; height: 26px; object-fit: contain; display: block; image-rendering: pixelated; }
+.item-figure .ic-fallback { display: block; width: 26px; height: 26px; }
+.item-figure .ic-fallback :deep(svg) { display: block; width: 26px; height: 26px; }
+.item-name { font: bold 14px/22px SimSun, "宋体", serif; } /* 品质名加粗（截图笔画粗于正文） */
+.item-rest { margin-top: 6px; }
+.item-body p { margin: 0; }
+.ln.gray { color: #999999; }
+.ln.slot { display: flex; justify-content: space-between; }
+.ln.req { margin-top: 18px; } /* 空一行（截图口径） */
+.ln.req.unmet { color: #c33812; } /* 等级不足整行标红（原版页签红） */
+.gv { font-style: normal; color: #008000; } /* 属性数值绿：截图实测 #008000 */
+.ln.desc { white-space: pre-wrap; }
 </style>

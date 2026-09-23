@@ -80,13 +80,10 @@ const critText = computed(() => {
 });
 
 // ---------- 装备行品质与图标 ----------
-/** 品质 → 原型品质类（仅 gray/blue/purple 有对应类）；green/orange 原型未定义，回退 QUALITY_COLORS 内联色 */
-const Q_CLASS: Record<string, string> = { gray: "q-w", blue: "q-b", purple: "q-p" };
-function nmClass(quality: string): string | undefined {
-  return Q_CLASS[quality];
-}
+/** 品质名颜色统一走 QUALITY_COLORS（原版口径，与背包窗同源）；
+ *  2026-09-23 用户指正：灰装（如农夫之剑）照原型 .q-w=#333 显示近黑，应为灰色 #9c9c9c */
 function nmStyle(quality: string): { color: string } | undefined {
-  return Q_CLASS[quality] ? undefined : QUALITY_COLORS[quality] ? { color: QUALITY_COLORS[quality] } : undefined;
+  return QUALITY_COLORS[quality] ? { color: QUALITY_COLORS[quality] } : undefined;
 }
 
 /** 精灵图缺文件（public/items 素材尚未入库）时记入破图集：该行切换到像素 SVG 兜底（共享 itemIcon 模块） */
@@ -165,7 +162,7 @@ function onDragEnd() {
 </script>
 
 <template>
-  <!-- 宠物窗（照原型 #pet-win：421×760 浅灰白底，隐形标题条 + 左竖线内容区） -->
+  <!-- 宠物窗（照原型 #pet-win：浅灰白底，隐形标题条 + 左竖线内容区；2026-09-23 用户要求收紧：宽 421→356、内距/行距同步缩小） -->
   <div
     ref="winEl"
     class="pet-win"
@@ -223,7 +220,7 @@ function onDragEnd() {
             <span v-else class="ic-fb" aria-hidden="true" v-html="fallbackIconOf(row.item)"></span>
           </td>
           <td class="nm">
-            <a :class="nmClass(row.item.quality)" :style="nmStyle(row.item.quality)" @click="onNameClick(row.item)">{{ row.item.name }}</a><span class="pislot">({{ SLOT_LABELS[row.slot] }})</span>
+            <a :style="nmStyle(row.item.quality)" @click="onNameClick(row.item)">{{ row.item.name }}</a><span class="pislot">({{ SLOT_LABELS[row.slot] }})</span>
           </td>
           <td class="ops"><a title="卸下到背包" @click="onUnequip(row)">卸下</a></td>
         </tr>
@@ -236,11 +233,12 @@ function onDragEnd() {
 </template>
 
 <style scoped>
-/* ============ 宠物窗（CSS 照抄原型 #pet-win 段；left/top 由拖动绑定接管，初始值 920/40 与原型一致） ============ */
+/* ============ 宠物窗（CSS 照抄原型 #pet-win 段；left/top 由拖动绑定接管，初始值 920/40 与原型一致；
+   2026-09-23 用户要求比原型收紧：宽 421→356，内距/hr/行距同步缩小，勿按原型改回） ============ */
 .pet-win {
   position: absolute;
   z-index: 41;
-  width: 421px;
+  width: 356px;
   height: 760px;
   display: flex;
   flex-direction: column;
@@ -287,7 +285,7 @@ function onDragEnd() {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  padding: 15px 30px 20px 26px;
+  padding: 12px 20px 16px 22px;
   margin-left: 8px;
   border-left: 1px solid #c0c0c0;
 }
@@ -297,7 +295,7 @@ function onDragEnd() {
 .pet-win .lv b { color: red; }
 .pet-win .spk { vertical-align: -12px; margin: 0 10px 0 3px; }
 .pet-win .expline { color: #2747a7; }
-.pet-win hr { border: none; border-top: 1px solid #c0c0c0; margin: 12px 0 13px; }
+.pet-win hr { border: none; border-top: 1px solid #c0c0c0; margin: 10px 0 11px; }
 .pet-win .attr { border-collapse: collapse; width: 100%; }
 .pet-win .attr td { padding: 3px 2px; width: 50%; line-height: 22px; vertical-align: middle; }
 .pet-win .add { color: #009900; }
@@ -305,15 +303,12 @@ function onDragEnd() {
 .pet-win .dps { color: #ff4000; }
 .pet-win .atk { color: #f32c77; }
 .pet-win .def { color: #217081; }
-.pet-win .eqs { border-collapse: separate; border-spacing: 0 6px; width: 100%; margin-top: -4px; }
+.pet-win .eqs { border-collapse: separate; border-spacing: 0 5px; width: 100%; margin-top: -2px; }
 .pet-win .eqs td { vertical-align: middle; padding: 0; }
 .pet-win .eqs .ic { width: 32px; }
 .pet-win .eqs .nm { width: 172px; line-height: 22px; }
 .pet-win .eqs .nm a { font-weight: bold; }
-.pet-win .eqs .ops { text-align: right; padding-right: 15px; white-space: nowrap; }
-.pet-win .q-b { color: #0070dd; }
-.pet-win .q-p { color: #a335ee; }
-.pet-win .q-w { color: #333; }
+.pet-win .eqs .ops { text-align: right; padding-right: 8px; white-space: nowrap; }
 .pet-win .pislot { color: #000; }
 /* 精灵图位（原型为 31×31 内联 SVG 图标；真 sprite 图按同尺寸盒子直出，缺文件回退共享像素 SVG） */
 .pet-win .eqs .ic img { display: block; width: 31px; height: 31px; object-fit: contain; image-rendering: pixelated; }
