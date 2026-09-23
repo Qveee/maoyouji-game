@@ -291,7 +291,7 @@ async function onDiscardConfirm() {
   discardTarget.value = null;
   if (!row) return;
   if (await act(() => api.discard(row.item.inventoryId, 1), "丢弃失败")) {
-    emit("toast", `丢弃了 ${row.item.name}×1`);
+    emit("toast", `${row.item.name}×1 丢弃成功！`);
   }
 }
 
