@@ -37,7 +37,8 @@ pnpm monorepo，两个 workspace 包：`server/`（Fastify 5 + TS + mysql2 手�
 - **战斗惰性结算**（切片 4，最高风险项）：状态持久化、服务器零定时器；前端 1s 轮询触发时间线快进，技能 = POST 指令，3 分钟上限在结算时判定。战斗结算器要求纯函数化 + 固定种子 RNG 以便单测。战斗外 HP/SP 恢复按 `characters.resources_updated_at` 时间差惰性补算。
 - **认证**：用户名 + 密码（argon2id）+ httpOnly cookie JWT（cookie 名 `mj_token`）。受保护路由用 `server/src/plugins/auth.ts` 的 `requireAccount` / `requireCharacter` preHandler；JWT payload 挂在 `req.account`。
 - **路由**：全部挂 `/api` 前缀（app.ts），请求体用 zod `safeParse` 校验，错误统一 `{ message }` JSON。
-- **前端**：`App.vue` 是视图状态机（loading→auth→select→game），`GameShell.vue` 是 1400×832 主界面框架，复刻原版视觉（原型参考 `prototype/`、界面结构 `docs/游戏界面结构参考.md`）。web 所有 API 调用集中在 `src/api.ts`，vite 将 `/api` 代理到 127.0.0.1:3000。零 CDN、零运行时联网。
+- **前端**：`App.vue` 是视图状态机（loading→auth→select→game），`GameShell.vue` 是 1400×832 主界面框架，复刻原版视觉（界面结构 `docs/游戏界面结构参考.md`）。web 所有 API 调用集中在 `src/api.ts`，vite 将 `/api` 代理到 127.0.0.1:3000。零 CDN、零运行时联网。
+- **UI 权威原型（2026-09-23 用户约定）**：**一切样式与风格开发必须严格参考 `assets/游戏主界面.html`**——窗口结构、配色、字体、交互（列表行/操作菜单/说明窗/拖动等）逐段照抄该文件对应段落，不得自创视觉词汇；新界面动手前先读原型相关段落。
 - **素材**：`assets/` 存原版参考素材（授权见 `assets/来源与授权.md`），用到的精灵图复制进 `web/public/`。
 
 ## 实施切片与工作流
