@@ -736,6 +736,11 @@ onUnmounted(() => {
                 <i :style="{ width: pct(battle.foeHp, battle.foeMaxHp) + '%' }"></i>
                 <span>{{ Math.max(0, battle.foeHp) }}/{{ battle.foeMaxHp }}</span>
               </div>
+              <!-- 怪物不施法、考据资料亦无怪物 MP 数值：蓝条恒满纯视觉，数字显示 -/- -->
+              <div class="bar mp">
+                <i style="width: 100%"></i>
+                <span>-/-</span>
+              </div>
             </div>
 
             <div class="bt-stage">
@@ -1064,11 +1069,11 @@ onUnmounted(() => {
   white-space: nowrap;
 }
 /* 血/蓝格子（嵌数字）按用户要求加高至 20px（原型 14px），数字放大并随 line-height 垂直居中 */
+/* 条框无背景色（按用户要求），仅保留边框与内阴影的凹陷感，未填充部分透出战斗层底色 */
 .bar {
   position: relative;
   height: 20px;
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.25);
   border: 1px solid rgba(255, 255, 255, 0.45);
   box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.4);
   overflow: hidden;
