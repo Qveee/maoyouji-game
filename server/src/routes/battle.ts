@@ -14,18 +14,15 @@ import {
   activateSkill,
   advance,
   createBattleState,
+  playerCombatOf,
   type BattleState,
 } from "../game/engine.ts";
 import {
   applyLevelUps,
-  atkOf,
-  BASE_CRIT,
   CRIT_MULT,
-  defOf,
   dodgeOf,
   hpMaxOf,
   lazyRegen,
-  PLAYER_ATTACK_MS,
   spMaxOf,
 } from "../game/rules.ts";
 
@@ -422,6 +419,9 @@ export async function battleRoutes(app: FastifyInstance) {
       const strEff = c.str + eq.str;
       const agiEff = c.agi + eq.agi;
       const intelEff = c.intel + eq.intel;
+      // 玩家侧战斗数值（atk/def/暴击/攻速/武器区间）统一由 engine.playerCombatOf 组装，
+      // 与背包 GET /api/inventory 的 combat 块（宠物窗）同源，禁止在路由里复刻公式
+      const combat = playerCombatOf(c.profession, { str: strEff, agi: agiEff, intel: intelEff }, eq);
 
       // 怪侧：hp/max_hp 取实例行权威值（绝不从静态数据重派生）；攻击在静态区间内
       // 开战时随机定型（与刷怪 HP roll 同口径），定型后随快照持久化；战斗内双方均不自然回血（原版口径）
@@ -436,15 +436,15 @@ export async function battleRoutes(app: FastifyInstance) {
             maxHp: maxHp + eq.hp,
             sp: regen.sp,
             maxSp: maxSp + eq.sp,
-            atk: atkOf(c.profession, strEff, intelEff) + eq.atk,
-            def: defOf(agiEff) + eq.def,
+            atk: combat.atk,
+            def: combat.def,
             dodge: dodgeOf(agiEff),
-            crit: BASE_CRIT,
-            critMult: CRIT_MULT,
-            intervalMs: eq.intervalMs ?? PLAYER_ATTACK_MS[c.profession],
-            // 武器区间成对写入（equipmentBonusesOf 保证同时置空/同时赋值，缺省 → 徒手 1~3）
-            dmgMin: eq.dmgMin ?? undefined,
-            dmgMax: eq.dmgMax ?? undefined,
+            crit: combat.crit,
+            critMult: combat.critMult,
+            intervalMs: combat.intervalMs,
+            // 武器区间成对写入（playerCombatOf 无武器兜底徒手 1~3，与缺省时的引擎兜底同值）
+            dmgMin: combat.dmgMin,
+            dmgMax: combat.dmgMax,
           },
           foe: {
             name: monster.name,

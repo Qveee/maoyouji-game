@@ -13,6 +13,7 @@ import {
   type EquipSlotCode,
 } from "../game/inventory.ts";
 import { equipmentBonusesOf } from "../game/equipment.ts";
+import { playerCombatOf } from "../game/engine.ts";
 import { hpMaxOf, lazyRegen, spMaxOf } from "../game/rules.ts";
 
 /** 背包行（character_inventory 行的最小投影） */
@@ -45,6 +46,15 @@ interface CharacterRow extends RowDataPacket {
   hp: number;
   sp: number;
   resources_updated_at: Date;
+}
+
+/** GET 视图角色行：copper + combat 块所需的职业与基础五维 */
+interface ViewCharacterRow extends RowDataPacket {
+  copper: number;
+  profession: "warrior" | "mage";
+  str: number;
+  agi: number;
+  intel: number;
 }
 
 const CHARACTER_LOCK_FIELDS =
@@ -109,7 +119,8 @@ function toBagItemView(row: {
 export async function inventoryRoutes(app: FastifyInstance) {
   /**
    * 背包视图：bag 仅未穿戴行（按 slotIndex 升序）、equipment 为 14 栏位全量键记录、
-   * bonuses 为 equipmentBonusesOf 原样输出（dmgMin/dmgMax/intervalMs null=无有效武器）。
+   * bonuses 为 equipmentBonusesOf 原样输出（dmgMin/dmgMax/intervalMs null=无有效武器）、
+   * combat 为宠物窗战斗属性块（engine.playerCombatOf 组装，与开战并装同源）。
    * 静态字段从 itemIndex() 取，未知 code 兜底占位材料（静态数据漂移不阻断渲染）。
    */
   app.get("/", { preHandler: requireCharacter }, async (req) => {
@@ -126,8 +137,8 @@ export async function inventoryRoutes(app: FastifyInstance) {
        WHERE e.character_id = ?`,
       [characterId],
     );
-    const [charRows] = await pool.query<RowDataPacket[]>(
-      "SELECT copper FROM characters WHERE id = ?",
+    const [charRows] = await pool.query<ViewCharacterRow[]>(
+      "SELECT copper, profession, str, agi, intel FROM characters WHERE id = ?",
       [characterId],
     );
 
@@ -148,11 +159,35 @@ export async function inventoryRoutes(app: FastifyInstance) {
       .sort((a, b) => Number(a.slot_index) - Number(b.slot_index)) // slotIndex 升序
       .map(toBagItemView);
 
+    const bonuses = equipmentBonusesOf(equippedRows, (code) => itemIndex().get(code));
+    // combat 块（宠物窗战斗属性表数据源）：与 routes/battle.ts /start 的开战并装共用
+    // engine.playerCombatOf 同一组装处（有效五维 → rules 公式、无武器兜底徒手、攻速职业默认、
+    // 暴击 BASE_CRIT），口径恒同源，禁止在面板或路由复刻公式
+    const c = charRows[0];
+    const combat = playerCombatOf(
+      c?.profession ?? "warrior",
+      // 有效五维 = 基础 + 装备加成（与 battle.ts 的 strEff/agiEff/intelEff 同构）
+      {
+        str: Number(c?.str ?? 0) + bonuses.str,
+        agi: Number(c?.agi ?? 0) + bonuses.agi,
+        intel: Number(c?.intel ?? 0) + bonuses.intel,
+      },
+      bonuses,
+    );
+
     return {
-      copper: Number(charRows[0]?.copper ?? 0),
+      copper: Number(c?.copper ?? 0),
       bag,
       equipment,
-      bonuses: equipmentBonusesOf(equippedRows, (code) => itemIndex().get(code)),
+      bonuses,
+      combat: {
+        dmgMin: combat.dmgMin,
+        dmgMax: combat.dmgMax,
+        intervalMs: combat.intervalMs,
+        atk: combat.atk,
+        def: combat.def,
+        critRate: combat.crit,
+      },
     };
   });
 

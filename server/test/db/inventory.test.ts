@@ -3,7 +3,7 @@ import type { ResultSetHeader, RowDataPacket } from "mysql2";
 import { buildApp } from "../../src/app.ts";
 import { getPool } from "../../src/db.ts";
 import { EQUIP_SLOT_CODES } from "../../src/game/inventory.ts";
-import { hpMaxOf, spMaxOf } from "../../src/game/rules.ts";
+import { atkOf, BASE_CRIT, defOf, PLAYER_ATTACK_MS, UNARMED_MAX, UNARMED_MIN, hpMaxOf, spMaxOf } from "../../src/game/rules.ts";
 import { resetDb, registerAndLogin, cookieOf } from "./helpers.ts";
 
 const app = buildApp();
@@ -186,6 +186,49 @@ describe("GET /api/inventory", () => {
     });
     expect(body.bag[1].equip).toBeUndefined(); // 非装备无 equip 子对象
     await freshBag();
+  });
+
+  // combat 块防口径漂移：数值必须与战斗引擎同源（engine.playerCombatOf 组装），断言直接对 rules 公式
+  it("combat 块裸装：徒手区间/职业攻速/基础五维代入 atkOf·defOf/BASE_CRIT（与开战并装同口径）", async () => {
+    await freshBag();
+    const [chars] = await getPool().query<RowDataPacket[]>(
+      "SELECT profession, str, agi, intel FROM characters WHERE id = ?",
+      [charId],
+    );
+    const c = chars[0]!;
+    const prof = c.profession as "warrior" | "mage";
+    const res = await get();
+    expect(res.statusCode).toBe(200);
+    expect(res.json().combat).toEqual({
+      dmgMin: UNARMED_MIN,
+      dmgMax: UNARMED_MAX,
+      intervalMs: PLAYER_ATTACK_MS[prof],
+      atk: atkOf(prof, Number(c.str), Number(c.intel)),
+      def: defOf(Number(c.agi)),
+      critRate: BASE_CRIT,
+    });
+  });
+
+  it("combat 块穿装备：武器区间/攻速进 combat，五维加成代入公式抬升（力量之卷刃剑 str+1 → atk+2）", async () => {
+    await freshBag();
+    // SQL 直绑穿戴位（绕过等级校验，与 battle.test.ts 开战并装用例同写法）
+    const sword = await insertRow("liliang_juanrenjian", null, 1, 17);
+    await bindEquip("main_hand", sword);
+    const [chars] = await getPool().query<RowDataPacket[]>(
+      "SELECT profession, str, agi, intel FROM characters WHERE id = ?",
+      [charId],
+    );
+    const c = chars[0]!;
+    const res = await get();
+    // 力量之卷刃剑（items.json）：10-14 伤害 / 攻速 2100 / bonuses.str=1
+    expect(res.json().combat).toEqual({
+      dmgMin: 10,
+      dmgMax: 14,
+      intervalMs: 2100,
+      atk: atkOf("warrior", Number(c.str) + 1, Number(c.intel)),
+      def: defOf(Number(c.agi)),
+      critRate: BASE_CRIT,
+    });
   });
 });
 

@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, onUnmounted, ref } from "vue";
 import { api, ApiError, type BagItemView, type EquipSlotCode, type InventoryView } from "../api";
-import { QUALITY_COLORS, QUALITY_NAMES } from "../quality";
+import { QUALITY_COLORS } from "../quality";
 import { fallbackIconOf } from "../itemIcon";
+import ItemDetailWindow from "./ItemDetailWindow.vue";
 
 const emit = defineEmits<{ close: []; toast: [string]; changed: []; sys: [string] }>();
 
@@ -17,17 +18,6 @@ const SLOT_LABELS: Record<EquipSlotCode, string> = {
   main_hand: "主手", off_hand: "副手", head: "头部", shoulder: "肩部", chest: "胸部",
   hands: "手部", waist: "腰部", legs: "腿部", feet: "足部", wrist: "手腕",
   ring1: "戒指Ⅰ", ring2: "戒指Ⅱ", neck: "项链", cloak: "披风",
-};
-/** 静态部位中文名（equip.slot 是静态 code，ring 未拆分；详情窗信息行用） */
-const PART_LABELS: Record<string, string> = {
-  main_hand: "主手", off_hand: "副手", head: "头部", shoulder: "肩部", chest: "胸部",
-  hands: "手部", waist: "腰部", legs: "腿部", feet: "足部", wrist: "手腕",
-  ring: "戒指", neck: "项链", cloak: "披风",
-};
-/** 属性加成词条中文（详情窗属性卡用；口径照 docs/游戏规则设计.md 五维：力量/敏捷/体力/智力/精神） */
-const STAT_LABELS: Record<string, string> = {
-  vit: "体力", str: "力量", agi: "敏捷", intel: "智力", spr: "精神",
-  atk: "攻击", hp: "HP", sp: "SP",
 };
 
 const view = ref<InventoryView | null>(null);
@@ -97,7 +87,6 @@ async function reload(): Promise<boolean> {
 }
 onMounted(() => {
   reload();
-  loadLevel();
   document.addEventListener("click", onDocClick);
   document.addEventListener("keydown", onGlobalKey);
 });
@@ -184,7 +173,7 @@ async function onMenuAction(actName: string) {
   closeBagActions();
   if (!row) return;
   if (actName === "desc") {
-    detail.value = row; // 详情窗独立常开，直到点它自己的关闭
+    detail.value = row.item; // 详情窗独立常开，直到点它自己的关闭
   } else if (actName === "equip") {
     if (await act(() => api.equip(row.item.inventoryId), "穿戴失败")) emit("changed");
   } else if (actName === "use") {
@@ -202,8 +191,8 @@ async function onMenuAction(actName: string) {
   }
 }
 
-// ---------- 道具说明窗（照原型 #item-detail-win；装备类升级为完整属性卡） ----------
-const detail = ref<ListRow | null>(null);
+// ---------- 道具说明窗（共享 ItemDetailWindow 组件，宠物窗装备名点击同用；显隐由下方 v-if 控制） ----------
+const detail = ref<BagItemView | null>(null);
 
 // ---------- 丢弃二次确认（防误删；仅丢弃走确认，穿戴/使用/卸下不变） ----------
 const discardTarget = ref<ListRow | null>(null);
@@ -239,53 +228,6 @@ async function onDiscardConfirm() {
 function onGlobalKey(e: KeyboardEvent) {
   if (e.key === "Escape") discardTarget.value = null;
 }
-
-/** 角色等级（等级需求未达标标红用）：无 props 合同变更，经 me()+characters() 自取，失败仅不标红 */
-const charLevel = ref<number | null>(null);
-async function loadLevel() {
-  try {
-    const me = await api.me();
-    if (!me.characterId) return;
-    const { characters } = await api.characters();
-    charLevel.value = characters.find((c) => c.id === me.characterId)?.level ?? null;
-  } catch {
-    /* 等级仅用于标红，获取失败静默降级 */
-  }
-}
-
-/** 装备属性卡逐行内容（样式与原型描述文字一致；color 为品质色/未达标红） */
-const detailEquipLines = computed<{ text: string; color?: string }[]>(() => {
-  const it = detail.value?.item;
-  if (!it || it.kind !== "equipment" || !it.equip) return [];
-  const e = it.equip;
-  const lines: { text: string; color?: string }[] = [];
-  if (it.quality) {
-    lines.push({ text: `品质：${QUALITY_NAMES[it.quality] ?? it.quality}`, color: QUALITY_COLORS[it.quality] });
-  }
-  lines.push({ text: `部位：${PART_LABELS[e.slot] ?? e.slot}·${e.equipType}` });
-  const lvText = `等级需求：${e.levelReq}`;
-  lines.push(
-    charLevel.value != null && charLevel.value < e.levelReq
-      ? { text: lvText, color: "#c33812" } // 原型页签红：等级不足标红
-      : { text: lvText },
-  );
-  if (it.durability != null) {
-    lines.push({ text: `耐久：${it.durability}/${e.durabilityMax}${it.durability === 0 ? "（失效）" : ""}` });
-  }
-  if (e.dmgMin != null && e.dmgMax != null) {
-    lines.push({ text: `伤害：${e.dmgMin}~${e.dmgMax}` });
-    if (e.intervalMs != null) {
-      lines.push({ text: `攻速：${(e.intervalMs / 1000).toFixed(1).replace(/\.0$/, "")} 秒` });
-    }
-  }
-  if (e.defBonus != null) {
-    lines.push({ text: `防御：+${e.defBonus}` });
-  }
-  for (const [k, v] of Object.entries(e.bonuses)) {
-    if (v) lines.push({ text: `${STAT_LABELS[k] ?? k}：+${v}` });
-  }
-  return lines;
-});
 
 // ---------- 背包窗口拖动（照原型：标题条按下，限制在游戏窗口内） ----------
 const winPos = ref({ x: 712, y: 76 }); // 原型 #bag-win 初始坐标（相对 1400×832 游戏窗口）
@@ -421,37 +363,8 @@ function onDragEnd() {
     </div>
   </Teleport>
 
-  <!-- 道具说明窗（照原型 #item-detail-win：与背包窗同为游戏窗口的绝对定位兄弟节点） -->
-  <div v-if="detail" class="item-detail-win">
-    <div class="item-head">
-      <b>道具说明</b>
-      <div class="win-btns">
-        <button type="button" class="win-btn" title="关闭" @click="detail = null">
-          <svg viewBox="0 0 12 12"><g stroke="currentColor" stroke-width="2" stroke-linecap="square"><line x1="2" y1="2" x2="10" y2="10"/><line x1="10" y1="2" x2="2" y2="10"/></g></svg>
-        </button>
-      </div>
-    </div>
-    <div class="item-body">
-      <span class="item-figure">
-        <img
-          v-if="detail.item.sprite && !brokenSprites.has(detail.item.itemCode)"
-          :src="detail.item.sprite"
-          :alt="detail.item.name"
-          @error="onImgErr(detail.item)"
-        />
-        <span v-else class="ic-fallback lg" aria-hidden="true" v-html="fallbackIconOf(detail.item)"></span>
-      </span>
-      <div class="item-info">
-        <b>{{ detail.item.name }}</b>
-        <p>{{ detail.item.desc || "（暂无描述。）" }}</p>
-        <p
-          v-for="(l, i) in detailEquipLines"
-          :key="i"
-          :style="l.color ? { color: l.color } : undefined"
-        >{{ l.text }}</p>
-      </div>
-    </div>
-  </div>
+  <!-- 道具说明窗（共享 ItemDetailWindow 组件：照原型 #item-detail-win，与背包窗同为游戏窗口的绝对定位兄弟节点） -->
+  <ItemDetailWindow v-if="detail" :item="detail" @close="detail = null" />
 </template>
 
 <style scoped>
@@ -657,23 +570,8 @@ function onDragEnd() {
 .discard-btns button:hover { background: linear-gradient(#fff, #f8fafc); border-color: #4f46e5; color: #3730a3; }
 .discard-btns button:active { box-shadow: inset 0 2px 3px rgba(15, 23, 42, 0.2); }
 
-/* ============ 道具说明窗（CSS 照抄原型 #item-detail-win 段） ============ */
-.item-detail-win {
-  position: absolute;
-  left: 410px;
-  top: 126px;
-  z-index: 55;
-  width: 270px;
-  display: flex;
-  flex-direction: column;
-  border: 1px solid rgba(255, 255, 255, 0.72);
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.72);
-  backdrop-filter: blur(14px);
-  box-shadow: 0 8px 28px rgba(31, 38, 135, 0.3);
-  font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
-  overflow: hidden;
-}
+/* ============ 道具说明窗样式随共享组件 ItemDetailWindow.vue（.item-head/.win-btns/.win-btn
+   仍留在本文件：丢弃确认小框复用同一窗体语言，照原型 #item-detail-win 段） ============ */
 .item-head {
   height: 34px;
   flex: none;
@@ -686,22 +584,4 @@ function onDragEnd() {
   user-select: none;
 }
 .item-head b { font: 600 13px "Microsoft YaHei", sans-serif; color: #1e293b; }
-.item-body { display: flex; gap: 12px; padding: 12px 14px 14px; }
-.item-figure {
-  width: 64px;
-  height: 64px;
-  flex: none;
-  display: grid;
-  place-items: center;
-  background: rgba(255, 255, 255, 0.75);
-  border: 1px solid rgba(148, 163, 184, 0.55);
-  border-radius: 8px;
-  overflow: hidden;
-}
-.item-figure img { width: 52px; height: 52px; object-fit: contain; display: block; image-rendering: pixelated; }
-.item-figure .ic-fallback,
-.item-figure .ic-fallback :deep(svg) { width: 52px; height: 52px; }
-.item-info { min-width: 0; flex: 1; }
-.item-info b { display: block; font: 600 14px/1.4 "Microsoft YaHei", sans-serif; color: #1e293b; margin-bottom: 5px; }
-.item-info p { font: 12px/1.7 "Microsoft YaHei", sans-serif; color: #334155; white-space: pre-wrap; }
 </style>

@@ -180,12 +180,23 @@ export interface EquipmentBonusesView {
   intervalMs: number | null;
 }
 
+/** 宠物窗战斗属性块（GET /api/inventory combat；engine.playerCombatOf 同源口径：无武器徒手兜底、暴击 BASE_CRIT） */
+export interface CombatStatsView {
+  dmgMin: number;
+  dmgMax: number;
+  intervalMs: number;
+  atk: number;
+  def: number;
+  critRate: number;
+}
+
 /** GET /api/inventory 响应 */
 export interface InventoryView {
   copper: number;
   bag: BagItemView[]; // 仅未穿戴行，slotIndex 升序
   equipment: Record<EquipSlotCode, BagItemView | null>; // 恒 14 键，空部位 null
   bonuses: EquipmentBonusesView;
+  combat: CombatStatsView; // 与战斗引擎开战并装同源（勿在面板复刻公式）
 }
 
 /** /map/move 响应：同图返回 node 简要；跨图出口返回完整新图视图（与 MapCurrent 同构） */

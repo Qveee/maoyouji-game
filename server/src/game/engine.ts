@@ -11,7 +11,15 @@
  */
 
 import { createRng, type Rng } from "./rng.ts";
-import { UNARMED_MAX, UNARMED_MIN } from "./rules.ts";
+import {
+  atkOf,
+  BASE_CRIT,
+  CRIT_MULT,
+  defOf,
+  PLAYER_ATTACK_MS,
+  UNARMED_MAX,
+  UNARMED_MIN,
+} from "./rules.ts";
 
 // ---------- 类型 ----------
 
@@ -89,6 +97,38 @@ export interface BattleState {
 
 /** 战斗时长上限：MVP 无逃跑，快进越过 3 分钟仍无胜负即平局脱战（设计决策 #3） */
 const BATTLE_DURATION_MS = 180000;
+
+// ---------- 玩家战斗数值组装 ----------
+
+/**
+ * 玩家侧战斗数值组装（开战快照与背包 GET /api/inventory combat 块共用的唯一口径）：
+ * 有效五维（基础 + 装备加成）代入 rules.ts 的 atkOf/defOf；无武器兜底徒手 UNARMED_MIN/MAX，
+ * 攻速兜底职业默认 PLAYER_ATTACK_MS；暴击恒 BASE_CRIT。
+ * 宠物窗面板数值必须与战斗同源——禁止调用方复刻公式，改口径只改这里。
+ */
+export function playerCombatOf(
+  profession: "warrior" | "mage",
+  eff: { str: number; agi: number; intel: number },
+  eq: { atk: number; def: number; dmgMin: number | null; dmgMax: number | null; intervalMs: number | null },
+): {
+  atk: number;
+  def: number;
+  crit: number;
+  critMult: number;
+  dmgMin: number;
+  dmgMax: number;
+  intervalMs: number;
+} {
+  return {
+    atk: atkOf(profession, eff.str, eff.intel) + eq.atk,
+    def: defOf(eff.agi) + eq.def,
+    crit: BASE_CRIT,
+    critMult: CRIT_MULT,
+    dmgMin: eq.dmgMin ?? UNARMED_MIN,
+    dmgMax: eq.dmgMax ?? UNARMED_MAX,
+    intervalMs: eq.intervalMs ?? PLAYER_ATTACK_MS[profession],
+  };
+}
 
 // ---------- 创建战斗 ----------
 

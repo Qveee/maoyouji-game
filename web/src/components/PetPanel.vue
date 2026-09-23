@@ -3,6 +3,7 @@ import { computed, onMounted, ref } from "vue";
 import { api, ApiError, type BagItemView, type Character, type EquipSlotCode, type InventoryView } from "../api";
 import { QUALITY_COLORS } from "../quality";
 import { fallbackIconOf } from "../itemIcon";
+import ItemDetailWindow from "./ItemDetailWindow.vue";
 
 /** 角色属性由 GameShell 传入（当前角色 reactive 状态），穿戴与汇总加成打开窗口时经 api.inventory() 拉取 */
 const props = defineProps<{ character: Character }>();
@@ -50,35 +51,33 @@ const stats = computed(() => {
 });
 
 // ---------- 战斗属性 ----------
-/** 徒手口径（无武器时服务端的实际战斗数值，与 server/src/game/rules.ts 保持同步：UNARMED_MIN/MAX、PLAYER_ATTACK_MS） */
-const UNARMED = {
-  min: 1,
-  max: 3,
-  intervalMs: { warrior: 2000, mage: 2200 } as Record<Character["profession"], number>,
-};
+/** 战斗数值块（GET /api/inventory combat）：服务端经 engine.playerCombatOf 与开战并装同源组装
+ *  （徒手兜底成真实数值、atk/def 为 rules 公式结果、暴击取战斗同款 BASE_CRIT），面板零公式复刻 */
+const combat = computed(() => view.value?.combat ?? null);
 
-/** 伤害区间：有武器显示 dmgMin - dmgMax，无武器按约定显示「徒手」 */
+/** 伤害区间：dmgMin - dmgMax（无武器时服务端已按徒手基准兜底为数值，不再出现「徒手」字样） */
 const dmgText = computed(() => {
-  const b = view.value?.bonuses;
-  if (b?.dmgMin != null && b?.dmgMax != null) return `${b.dmgMin} - ${b.dmgMax}`;
-  return "徒手";
+  const c = combat.value;
+  return c ? `${c.dmgMin} - ${c.dmgMax}` : "-";
 });
 
-/** 出手间隔：主手武器攻速，无武器用职业徒手间隔 */
-const paceMs = computed(
-  () => view.value?.bonuses.intervalMs ?? UNARMED.intervalMs[props.character.profession],
-);
 /** 秒伤 = 伤害区间均值 ÷ 攻速秒数（一位小数） */
 const dpsText = computed(() => {
-  const b = view.value?.bonuses;
-  const mean =
-    b?.dmgMin != null && b?.dmgMax != null ? (b.dmgMin + b.dmgMax) / 2 : (UNARMED.min + UNARMED.max) / 2;
-  return (mean / (paceMs.value / 1000)).toFixed(1);
+  const c = combat.value;
+  return c ? ((c.dmgMin + c.dmgMax) / 2 / (c.intervalMs / 1000)).toFixed(1) : "-";
 });
 /** 攻速：intervalMs/1000（2、2.2、2.6 这样，尾零不显示） */
-const speedText = computed(() => String(parseFloat((paceMs.value / 1000).toFixed(2))));
-const atkText = computed(() => String(view.value?.bonuses.atk ?? 0));
-const defText = computed(() => String(view.value?.bonuses.def ?? 0));
+const speedText = computed(() => {
+  const c = combat.value;
+  return c ? String(parseFloat((c.intervalMs / 1000).toFixed(2))) : "-";
+});
+const atkText = computed(() => String(combat.value?.atk ?? "-"));
+const defText = computed(() => String(combat.value?.def ?? "-"));
+/** 重击（暴击率）：小数 → 百分比（照原型「重击: 362.91%」格式，尾零不显示） */
+const critText = computed(() => {
+  const c = combat.value;
+  return c ? `${parseFloat((c.critRate * 100).toFixed(2))}%` : "-";
+});
 
 // ---------- 装备行品质与图标 ----------
 /** 品质 → 原型品质类（仅 gray/blue/purple 有对应类）；green/orange 原型未定义，回退 QUALITY_COLORS 内联色 */
@@ -122,9 +121,10 @@ async function onUnequip(row: EqRow) {
   emit("changed");
 }
 
-/** 装备名点击（照原型）：仅提示功能预留 */
+/** 装备名点击（照原型）：打开道具说明窗（与背包窗「说明」菜单共用 ItemDetailWindow 组件） */
+const detail = ref<BagItemView | null>(null);
 function onNameClick(item: BagItemView) {
-  emit("toast", `${item.name}（装备操作功能预留）`);
+  detail.value = item;
 }
 
 // ---------- 窗口拖动（照原型：隐形标题条按下拖动，限制在游戏窗口内；写法照 InventoryPanel 适配 stage-fit 缩放） ----------
@@ -202,12 +202,12 @@ function onDragEnd() {
           <td>{{ stats.spr.label }}:&thinsp;<span class="add">{{ stats.spr.v }}</span></td><td></td></tr>
       </tbody></table>
       <hr>
-      <!-- ③ 战斗属性（重击/资历/成就无对应系统，整行省略） -->
+      <!-- ③ 战斗属性（数值来自 combat 块=战斗引擎同源口径；资历/成就无对应系统，整行省略） -->
       <table class="attr"><tbody>
         <tr>
           <td>伤害:&thinsp;<b class="dmg">{{ dmgText }}</b></td><td>秒伤:&thinsp;<span class="dps">{{ dpsText }}</span></td></tr><tr>
           <td>攻击:&thinsp;<span class="atk">{{ atkText }}</span></td><td>防御:&thinsp;<span class="def">{{ defText }}</span></td></tr><tr>
-          <td>攻速:&thinsp;{{ speedText }}</td><td></td></tr>
+          <td>重击:&thinsp;{{ critText }}</td><td>攻速:&thinsp;{{ speedText }}</td></tr>
       </tbody></table>
       <hr>
       <!-- ④ 穿戴装备列表（自动修理无对应系统，整行省略；ops 列改为「卸下」文字链接） -->
@@ -230,6 +230,9 @@ function onDragEnd() {
       </tbody></table>
     </div>
   </div>
+
+  <!-- 道具说明窗（共享 ItemDetailWindow 组件：装备名点击打开，内容与背包窗「说明」一致） -->
+  <ItemDetailWindow v-if="detail" :item="detail" @close="detail = null" />
 </template>
 
 <style scoped>
