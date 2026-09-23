@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
-import { api, type BagItemView } from "../api";
+import { api, type BagItemView, type BindState } from "../api";
 import { QUALITY_COLORS, QUALITY_NAMES } from "../quality";
 import { fallbackIconOf } from "../itemIcon";
 
@@ -22,6 +22,13 @@ const PART_LABELS: Record<string, string> = {
 const STAT_LABELS: Record<string, string> = {
   vit: "体力", str: "力量", agi: "敏捷", intel: "智力", spr: "精神",
   atk: "攻击", hp: "HP", sp: "SP",
+};
+
+/** 绑定状态行文案（bind_state 列两取值；统一灰 #666 仅文字区分，2026-09-23 用户指定；
+ *  bind_on_equip=装备后绑定（可交易地基）、bound=已绑定（不可交易）） */
+const BIND_STATE_LABELS: Record<BindState, string> = {
+  bind_on_equip: "装备后绑定",
+  bound: "已绑定",
 };
 
 /** 角色等级（等级需求未达标标红用）：组件自取，失败仅不标红 */
@@ -49,6 +56,8 @@ const equipLines = computed<{ text: string; color?: string }[]>(() => {
   if (it.quality) {
     lines.push({ text: `品质：${QUALITY_NAMES[it.quality] ?? it.quality}`, color: QUALITY_COLORS[it.quality] });
   }
+  // 绑定状态行（仅装备显示；消耗品/材料不出现该行）：两种取值统一灰 #666，仅文字区分
+  lines.push({ text: `状态：${BIND_STATE_LABELS[it.bindState]}`, color: "#666666" });
   lines.push({ text: `部位：${PART_LABELS[e.slot] ?? e.slot}·${e.equipType}` });
   const lvText = `等级需求：${e.levelReq}`;
   lines.push(

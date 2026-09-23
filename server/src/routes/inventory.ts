@@ -16,13 +16,14 @@ import { equipmentBonusesOf } from "../game/equipment.ts";
 import { playerCombatOf } from "../game/engine.ts";
 import { hpMaxOf, lazyRegen, spMaxOf } from "../game/rules.ts";
 
-/** 背包行（character_inventory 行的最小投影） */
+/** 背包行（character_inventory 行的最小投影；bind_state 取值 bind_on_equip|bound，应用层校验） */
 interface InvRow extends RowDataPacket {
   id: number;
   item_code: string;
   slot_index: number | null;
   quantity: number;
   durability: number | null;
+  bind_state: string;
 }
 
 /** 穿戴行（character_equipment join character_inventory；slot_index 恒 NULL） */
@@ -33,6 +34,7 @@ interface EquipJoinRow extends RowDataPacket {
   slot_index: number | null;
   quantity: number;
   durability: number | null;
+  bind_state: string;
 }
 
 /** 写路由共用的角色行（锁角色行读一次带齐校验字段） */
@@ -72,6 +74,11 @@ async function lockCharacter(
   return rows[0] ?? null;
 }
 
+/** 绑定状态取值白名单（应用层兜底：未知值按 bind_on_equip 视作可交易，静态漂移同款不阻断渲染） */
+function bindStateOf(raw: string | undefined | null): "bind_on_equip" | "bound" {
+  return raw === "bound" ? "bound" : "bind_on_equip";
+}
+
 /** 视图层的背包行投影（brief Interfaces 锁定的 BagItemView） */
 function toBagItemView(row: {
   id: number;
@@ -79,6 +86,7 @@ function toBagItemView(row: {
   slot_index: number | null;
   quantity: number;
   durability: number | null;
+  bind_state: string;
 }) {
   const it = itemIndex().get(row.item_code);
   const isEquip = it?.kind === "equipment";
@@ -88,6 +96,8 @@ function toBagItemView(row: {
     slotIndex: row.slot_index == null ? null : Number(row.slot_index),
     quantity: Number(row.quantity),
     durability: row.durability == null ? null : Number(row.durability),
+    // 绑定状态透传（消耗品/材料也有列值，但仅装备详情卡展示该行）
+    bindState: bindStateOf(row.bind_state),
     // 静态漂移兜底（Review Focus #1）：未知 code 按占位材料渲染，不阻断视图
     name: it?.name ?? row.item_code,
     quality: it?.kind === "equipment" ? it.quality : "",
@@ -127,12 +137,12 @@ export async function inventoryRoutes(app: FastifyInstance) {
     const characterId = req.account!.characterId!;
     const pool = getPool();
     const [invRows] = await pool.query<InvRow[]>(
-      `SELECT id, item_code, slot_index, quantity, durability FROM character_inventory
+      `SELECT id, item_code, slot_index, quantity, durability, bind_state FROM character_inventory
        WHERE character_id = ?`,
       [characterId],
     );
     const [eqRows] = await pool.query<EquipJoinRow[]>(
-      `SELECT e.slot_code, i.id, i.item_code, i.slot_index, i.quantity, i.durability
+      `SELECT e.slot_code, i.id, i.item_code, i.slot_index, i.quantity, i.durability, i.bind_state
        FROM character_equipment e JOIN character_inventory i ON i.id = e.inventory_id
        WHERE e.character_id = ?`,
       [characterId],
@@ -192,14 +202,23 @@ export async function inventoryRoutes(app: FastifyInstance) {
   });
 
   /**
-   * 穿戴：planEquip 纯校验（等级/职业/替换联动/背包空位）→ 按腾格顺序落库：
+   * 穿戴：planEquip 纯校验（等级/职业/替换联动/背包空位）→ 绑定确认两段式
+   * （「装备后绑定」未带 confirmBind 回 200 needBindConfirm 不落库；确认后 ① 里同事务落 bound）
+   * → 按腾格顺序落库：
    * ① 新装备行置 NULL（其原格即刻空闲）② 回包件逐件 firstFreeSlot 重算分配
    * ③ equipment UPSERT（uk (character_id, slot_code)，替换时原行原地改指新件）
    * ④ 被替换件（含双手/副手联动卸下件）的 equipment 行 DELETE。
    * 满包替换天然成功（①腾出的格 ≥ 回包件数，规格决策 7）。
    */
   app.post("/equip", { preHandler: requireCharacter }, async (req, reply) => {
-    const body = z.object({ inventoryId: z.number().int().positive() }).safeParse(req.body);
+    const body = z
+      .object({
+        inventoryId: z.number().int().positive(),
+        // 两段式穿戴确认：缺省=第一击（「装备后绑定」装备回 needBindConfirm 不落库）；
+        // true=第二击（聊天区「确认装备」，同事务落 bind_state='bound'）
+        confirmBind: z.boolean().optional(),
+      })
+      .safeParse(req.body);
     if (!body.success) return reply.code(400).send({ message: "参数不合法" });
     const characterId = req.account!.characterId!;
     const conn = await getPool().getConnection();
@@ -211,7 +230,7 @@ export async function inventoryRoutes(app: FastifyInstance) {
         return reply.code(404).send({ message: "角色不存在" });
       }
       const [invRows] = await conn.query<InvRow[]>(
-        `SELECT id, item_code, slot_index, quantity, durability FROM character_inventory
+        `SELECT id, item_code, slot_index, quantity, durability, bind_state FROM character_inventory
          WHERE id = ? AND character_id = ? FOR UPDATE`,
         [body.data.inventoryId, characterId],
       );
@@ -267,10 +286,20 @@ export async function inventoryRoutes(app: FastifyInstance) {
         return reply.code(400).send({ message: plan.reason }); // reason 直传
       }
 
-      // ① 新装备离包（其原格即刻空闲）
-      await conn.query("UPDATE character_inventory SET slot_index = NULL WHERE id = ?", [
-        body.data.inventoryId,
-      ]);
+      // 两段式确认（planEquip 通过后才询问，非装备/等级职业问题已先行拦截）：
+      // 「装备后绑定」且未带确认 → 回滚不落库，回 200 needBindConfirm 让前端在聊天区求确认
+      if (row.bind_state !== "bound" && !body.data.confirmBind) {
+        await conn.rollback();
+        return { needBindConfirm: true, name: item.name };
+      }
+
+      // ① 新装备离包（其原格即刻空闲）；confirmBind 第二击同事务落「已绑定」
+      await conn.query(
+        body.data.confirmBind
+          ? "UPDATE character_inventory SET slot_index = NULL, bind_state = 'bound' WHERE id = ?"
+          : "UPDATE character_inventory SET slot_index = NULL WHERE id = ?",
+        [body.data.inventoryId],
+      );
       // ② 回包件逐件重算 firstFreeSlot 分配空格（工作集含新装备原格的腾出）
       const work: BagRow[] = bag.filter((r) => r.id !== body.data.inventoryId);
       for (const id of plan.unequipInventoryIds) {

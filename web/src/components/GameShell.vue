@@ -39,7 +39,9 @@ type LogLine =
   /** 战斗结算行：金橙加粗大字号，与普通战斗行明显区分 */
   | { time: string; text: string; kind: "battle-end" }
   /** 掉落行（样式同 sys）：parts 内联品质色（QUALITY_COLORS），丢失段整行红 */
-  | { time: string; kind: "drops"; parts: { t: string; color?: string }[] };
+  | { time: string; kind: "drops"; parts: { t: string; color?: string }[] }
+  /** 装备绑定确认行（左下聊天区交互提示）：「装备后绑定」装备第一击被拦下后的求确认，[确认装备]/[取消] 可点 */
+  | { time: string; kind: "bind-confirm"; inventoryId: number; name: string };
 const messages = ref<LogLine[]>([]);
 const chatBodyEl = ref<HTMLElement | null>(null); // 聊天记录滚动容器（自动贴底用）
 const chatText = ref("");
@@ -197,6 +199,43 @@ function onFuncBtn(f: string) {
   if (f === "道具") showBag.value = !showBag.value;
   else if (f === "宠物") showPet.value = !showPet.value;
   else todo(f);
+}
+
+// ---------- 装备绑定确认（两段式穿戴：确认交互固定在左下聊天区，同时只一个 pending） ----------
+
+const bagPanel = ref<InstanceType<typeof InventoryPanel> | null>(null); // 确认装备后经 ref 触发面板刷新
+
+/** 背包窗「穿戴」被服务端 needBindConfirm 拦下：插绑定确认行（新提示替换旧行，同时只一个 pending） */
+function onBindConfirm(info: { inventoryId: number; name: string }) {
+  messages.value = messages.value.filter((m) => m.kind !== "bind-confirm");
+  messages.value.push({ time: now(), kind: "bind-confirm", inventoryId: info.inventoryId, name: info.name });
+  if (messages.value.length > 60) messages.value.shift();
+  void nextTick(stickChat);
+}
+
+/** 收走聊天区确认行（确认/取消后立即失效，不再可点） */
+function clearBindConfirmLines() {
+  messages.value = messages.value.filter((m) => m.kind !== "bind-confirm");
+}
+
+/** [确认装备]：第二击 equip(confirmBind=true) → 成功落系统行并刷新背包面板/角色面板；失败落系统错误行 */
+async function confirmBindEquip(inventoryId: number, name: string) {
+  clearBindConfirmLines();
+  try {
+    const res = await api.equip(inventoryId, true);
+    if ("needBindConfirm" in res && res.needBindConfirm) return; // 确认第二击必落绑定，防御分支静默收行
+    say(`【${name}】已装备并绑定`, "sys"); // 穿戴成功只在聊天区留行，不再弹 toast
+    void bagPanel.value?.refresh();
+    emit("characterChanged"); // 穿戴改变战斗属性，同步刷新角色面板
+  } catch (err) {
+    say(`【系统】${err instanceof Error ? err.message : "装备失败"}`, "sys");
+  }
+}
+
+/** [取消]：收确认行落取消系统行（服务端第一击本就未落库，背包行原封不动） */
+function cancelBindEquip() {
+  clearBindConfirmLines();
+  say("已取消装备", "sys");
 }
 
 // ---------- 战斗 ----------
@@ -798,6 +837,12 @@ onUnmounted(() => {
                   <template v-else>{{ p.t }}</template>
                 </template>
               </template>
+              <!-- 装备绑定确认行：文字随 sys 行样式，[确认装备]/[取消] 为聊天区可点链接（原型链接风格） -->
+              <template v-else-if="m.kind === 'bind-confirm'">
+                将装备【{{ m.name }}】，装备后将与您绑定，是否继续？
+                <a class="bind-lnk ok" @click="confirmBindEquip(m.inventoryId, m.name)">[确认装备]</a>
+                <a class="bind-lnk no" @click="cancelBindEquip">[取消]</a>
+              </template>
               <template v-else>{{ m.text }}</template>
             </p>
           </div>
@@ -934,13 +979,16 @@ onUnmounted(() => {
     </footer>
 
     <!-- 道具背包面板：绝对定位覆盖主区中央；toast 复用场景内轻提示，changed=用药后刷新角色面板，
-         sys=丢弃成功等系统行直接落左下角聊天记录区（样式同掉落明细行） -->
+         sys=丢弃成功等系统行直接落左下角聊天记录区（样式同掉落明细行），
+         bind-confirm=「装备后绑定」第一击被拦下 → 聊天区插确认行（ref 供确认后触发面板刷新） -->
     <InventoryPanel
       v-if="showBag"
+      ref="bagPanel"
       @close="showBag = false"
       @toast="toast"
       @changed="emit('characterChanged')"
       @sys="(t) => say(t, 'sys')"
+      @bind-confirm="onBindConfirm"
     />
 
     <!-- 宠物窗：展示角色属性与穿戴装备（样式照原型 #pet-win 段）；changed=卸下后刷新角色面板 -->
@@ -1207,6 +1255,13 @@ onUnmounted(() => {
 /* 战斗日志行配色（照原型）：你=红、怪名=绿下划线 */
 .chatlog .you { color: #f52627; }
 .chatlog .mk { color: #178714; text-decoration: underline; }
+/* 装备绑定确认行的操作链接：样式语言照原型聊天区可点链接（.g-self：下划线+指针），
+   颜色取原型调色板 —— 确认=聊天玩家名蓝 --name-blue #2b2fb5、取消=页签红 --tab-red #c33812 */
+.chatlog .bind-lnk { cursor: pointer; text-decoration: underline; }
+.chatlog .bind-lnk.ok { color: #2b2fb5; }
+.chatlog .bind-lnk.ok:hover { font-weight: bold; }
+.chatlog .bind-lnk.no { color: #c33812; }
+.chatlog .bind-lnk.no:hover { font-weight: bold; }
 
 .center { width: 290px; flex: none; min-width: 0; overflow: hidden; display: flex; flex-direction: column; gap: 4px; min-height: 0; }
 .npc-panel { flex: 3; }

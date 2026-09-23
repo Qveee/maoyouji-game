@@ -5,7 +5,14 @@ import { QUALITY_COLORS } from "../quality";
 import { fallbackIconOf } from "../itemIcon";
 import ItemDetailWindow from "./ItemDetailWindow.vue";
 
-const emit = defineEmits<{ close: []; toast: [string]; changed: []; sys: [string] }>();
+const emit = defineEmits<{
+  close: [];
+  toast: [string];
+  changed: [];
+  sys: [string];
+  /** 「装备后绑定」装备的第一击被服务端拦下：上报给 GameShell 在左下聊天区插确认行（含待穿行与名字） */
+  bindConfirm: [info: { inventoryId: number; name: string }];
+}>();
 
 const BAG_MAX = 300; // 原版口径 300 格（与 server BAG_SLOTS 一致）
 
@@ -107,6 +114,12 @@ async function act(run: () => Promise<unknown>, fallback: string): Promise<boole
   }
 }
 
+/** 外部刷新入口（GameShell 在聊天区确认绑定后经 ref 调用）：重拉背包视图 */
+async function refresh(): Promise<boolean> {
+  return reload();
+}
+defineExpose({ refresh });
+
 async function onRefresh() {
   if (await reload()) emit("toast", "背包已刷新喵~ (=^･ω･^=)");
 }
@@ -175,7 +188,20 @@ async function onMenuAction(actName: string) {
   if (actName === "desc") {
     detail.value = row.item; // 详情窗独立常开，直到点它自己的关闭
   } else if (actName === "equip") {
-    if (await act(() => api.equip(row.item.inventoryId), "穿戴失败")) emit("changed");
+    // 两段式确认第一击：「装备后绑定」装备被服务端拦下 → 上报 GameShell 在聊天区插确认行；
+    // 直接成功（已绑定装备/确认后的行为 GameShell 处理）走既有刷新+通知，不额外弹 toast
+    try {
+      const res = await api.equip(row.item.inventoryId);
+      if ("needBindConfirm" in res && res.needBindConfirm) {
+        emit("bindConfirm", { inventoryId: row.item.inventoryId, name: res.name });
+        emit("toast", "请在左下角确认绑定");
+      } else {
+        await reload();
+        emit("changed");
+      }
+    } catch (err) {
+      emit("toast", err instanceof ApiError ? err.message : "穿戴失败");
+    }
   } else if (actName === "use") {
     // 用药成功会改 hp/sp：除重拉背包外，再让 GameShell 刷新角色面板
     if (await act(() => api.useItem(row.item.inventoryId), "使用失败")) emit("changed");

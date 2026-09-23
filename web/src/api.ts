@@ -148,6 +148,9 @@ export interface BagItemEquip {
   bonuses: Partial<Record<"vit" | "str" | "agi" | "intel" | "spr" | "atk" | "hp" | "sp", number>>;
 }
 
+/** 绑定状态（server bind_state 列；应用层兜底未知值 → bind_on_equip）：装备后绑定=可交易地基，已绑定=不可交易 */
+export type BindState = "bind_on_equip" | "bound";
+
 /** 背包/已穿行视图（inventory.ts toBagItemView 输出；静态漂移兜底：name=code、quality=""） */
 export interface BagItemView {
   inventoryId: number;
@@ -155,6 +158,7 @@ export interface BagItemView {
   slotIndex: number | null; // null=已穿戴（character_equipment 引用的行）
   quantity: number;
   durability: number | null;
+  bindState: BindState; // 绑定状态透传（消耗品/材料不展示，仅装备详情卡显示）
   name: string;
   quality: string; // 仅装备有 gray/green/blue/purple/orange，其余为 ""
   sprite: string;
@@ -198,6 +202,11 @@ export interface InventoryView {
   bonuses: EquipmentBonusesView;
   combat: CombatStatsView; // 与战斗引擎开战并装同源（勿在面板复刻公式）
 }
+
+/** POST /api/inventory/equip 响应（两段式确认）：ok=已穿上；needBindConfirm=「装备后绑定」待确认（未落库） */
+export type EquipResult =
+  | { ok: boolean }
+  | { needBindConfirm: true; name: string };
 
 /** /map/move 响应：同图返回 node 简要；跨图出口返回完整新图视图（与 MapCurrent 同构） */
 export type MapMoveResult = { node?: { code: string; name: string; short: string } } & Partial<MapCurrent>;
@@ -277,11 +286,13 @@ export const api = {
     }),
   // 背包视图：铜币 + 背包行（slotIndex 升序）+ 14 栏位装备 + 加成汇总
   inventory: () => request<InventoryView>("/api/inventory"),
-  // 穿戴：替换/双手联动由服务端 planEquip 处理；400 message（等级/职业/背包空间不足）直接可提示
-  equip: (inventoryId: number) =>
-    request<{ ok: boolean }>("/api/inventory/equip", {
+  // 穿戴（两段式确认）：不带 confirmBind=第一击，「装备后绑定」装备回 needBindConfirm（不落库）；
+  // confirmBind=true=第二击（聊天区「确认装备」），穿戴成功并落 bound。
+  // 替换/双手联动由服务端 planEquip 处理；400 message（等级/职业/背包空间不足）直接可提示
+  equip: (inventoryId: number, confirmBind?: boolean) =>
+    request<EquipResult>("/api/inventory/equip", {
       method: "POST",
-      body: JSON.stringify({ inventoryId }),
+      body: JSON.stringify(confirmBind === undefined ? { inventoryId } : { inventoryId, confirmBind }),
     }),
   // 卸下：包满 400「背包已满」
   unequip: (slotCode: EquipSlotCode) =>

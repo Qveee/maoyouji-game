@@ -50,8 +50,14 @@ afterAll(async () => {
 function get(who = cookie) {
   return app.inject({ method: "GET", url: "/api/inventory", headers: { cookie: who } });
 }
-function equipReq(inventoryId: number, who = cookie) {
-  return app.inject({ method: "POST", url: "/api/inventory/equip", headers: { cookie: who }, payload: { inventoryId } });
+function equipReq(inventoryId: number, confirmBind?: boolean, who = cookie) {
+  return app.inject({
+    method: "POST",
+    url: "/api/inventory/equip",
+    headers: { cookie: who },
+    // confirmBind 缺省=第一击（「装备后绑定」装备回 needBindConfirm）；true=第二击（聊天区确认）
+    payload: confirmBind === undefined ? { inventoryId } : { inventoryId, confirmBind },
+  });
 }
 function unequipReq(slotCode: string, who = cookie) {
   return app.inject({ method: "POST", url: "/api/inventory/unequip", headers: { cookie: who }, payload: { slotCode } });
@@ -94,6 +100,11 @@ async function bindEquip(slotCode: string, inventoryId: number, ownerCharId = ch
   );
 }
 
+/** 直改行绑定状态为已绑定（模拟老玩家已确认过的装备） */
+async function markBound(inventoryId: number): Promise<void> {
+  await getPool().query("UPDATE character_inventory SET bind_state = 'bound' WHERE id = ?", [inventoryId]);
+}
+
 /** 清空角色背包 + 装备位（先删装备位再删背包行，外键顺序） */
 async function freshBag(ownerCharId = charId): Promise<void> {
   await getPool().query("DELETE FROM character_equipment WHERE character_id = ?", [ownerCharId]);
@@ -121,11 +132,12 @@ interface InvRow extends RowDataPacket {
   slot_index: number | null;
   quantity: number;
   durability: number | null;
+  bind_state: string;
 }
 
 async function invRowsOf(ownerCharId = charId): Promise<InvRow[]> {
   const [rows] = await getPool().query<InvRow[]>(
-    `SELECT id, item_code, slot_index, quantity, durability FROM character_inventory
+    `SELECT id, item_code, slot_index, quantity, durability, bind_state FROM character_inventory
      WHERE character_id = ? ORDER BY id`,
     [ownerCharId],
   );
@@ -254,7 +266,7 @@ describe("POST /api/inventory/equip", () => {
   it("空部位成功：inventory 行 slot_index=NULL，equipment 表出现 targetSlot", async () => {
     await freshBag();
     const sword = await insertRow("nongfuzhijian", 3, 1, 10);
-    const res = await equipReq(sword);
+    const res = await equipReq(sword, true); // 默认「装备后绑定」：槽位机制用例直接走确认后的第二击
     expect(res.statusCode).toBe(200);
     expect(res.json()).toEqual({ ok: true });
 
@@ -270,9 +282,9 @@ describe("POST /api/inventory/equip", () => {
     await getPool().query("UPDATE characters SET level = 5 WHERE id = ?", [charId]);
     const swordA = await insertRow("nongfuzhijian", 0, 1, 10);
     const swordB = await insertRow("bubingjian", 1, 1, 13);
-    expect((await equipReq(swordA)).statusCode).toBe(200);
+    expect((await equipReq(swordA, true)).statusCode).toBe(200);
 
-    const res = await equipReq(swordB);
+    const res = await equipReq(swordB, true);
     expect(res.statusCode).toBe(200);
     // 旧件 A 回包（唯一空闲格 0——B 的原格 1 也被①腾出，但 firstFreeSlot 取最小）
     const rows = await invRowsOf();
@@ -290,7 +302,7 @@ describe("POST /api/inventory/equip", () => {
     expect(before).toEqual([{ slot_code: "main_hand", inventory_id: expect.any(Number) }]);
     const swordBId = Number(before[0]!.inventory_id);
 
-    const res = await equipReq(swordC);
+    const res = await equipReq(swordC, true);
     expect(res.statusCode).toBe(200);
     // 全表只有一行：main_hand → C（B 的行随 UPSERT 原地改指 + DELETE 兜底，绝不残留双行）
     const after = await eqRowsOf();
@@ -311,7 +323,7 @@ describe("POST /api/inventory/equip", () => {
     // 300 格全占（已穿戴行 slot NULL 不占格）：299 材料 + 新主手剑
     expect((await invRowsOf()).filter((r) => r.slot_index != null)).toHaveLength(300);
 
-    const res = await equipReq(newSword);
+    const res = await equipReq(newSword, true);
     expect(res.statusCode).toBe(200); // 新件离包腾出自己的格 → 单件替换净 0 可行
     const rows = await invRowsOf();
     const rowWorn = rows.find((r) => r.id === wornSword)!;
@@ -340,7 +352,7 @@ describe("POST /api/inventory/unequip", () => {
   it("成功回包（slot_index=firstFreeSlot）；包满 400（脱下净 +1 格无空位可回）", async () => {
     await freshBag();
     const sword = await insertRow("nongfuzhijian", 2, 1, 10);
-    expect((await equipReq(sword)).statusCode).toBe(200);
+    expect((await equipReq(sword, true)).statusCode).toBe(200);
 
     const res = await unequipReq("main_hand");
     expect(res.statusCode).toBe(200);
@@ -358,6 +370,82 @@ describe("POST /api/inventory/unequip", () => {
     expect(full.json().message).toBe("背包已满");
     expect((await eqRowsOf())).toEqual([{ slot_code: "main_hand", inventory_id: wornSword }]);
     expect((await invRowsOf()).filter((r) => r.slot_index != null)).toHaveLength(300);
+    await freshBag();
+  });
+});
+
+// ---------- 装备绑定状态（两段式穿戴确认） ----------
+
+describe("装备绑定状态（两段式穿戴确认）", () => {
+  it("「装备后绑定」不带确认：200 needBindConfirm 行原封不动；带确认：穿戴成功 bind_state='bound'", async () => {
+    await freshBag();
+    // insertRow 不指定 bind_state：列默认值即「装备后绑定」（掉落/商店新装备的同款落库路径）
+    const sword = await insertRow("nongfuzhijian", 3, 1, 10);
+
+    // 第一击：不带确认 → 200 + needBindConfirm（非错误码，前端据此在聊天区求确认），行不落任何改动
+    const res = await equipReq(sword);
+    expect(res.statusCode).toBe(200);
+    expect(res.json()).toEqual({ needBindConfirm: true, name: "农夫之剑" });
+    const rows = await invRowsOf();
+    expect(Number(rows[0]!.slot_index)).toBe(3); // 仍在原格
+    expect(rows[0]!.bind_state).toBe("bind_on_equip"); // 状态未被洗
+    expect(await eqRowsOf()).toEqual([]); // 未穿戴
+
+    // 第二击：confirmBind=true → 穿戴成功，同事务落「已绑定」
+    const res2 = await equipReq(sword, true);
+    expect(res2.statusCode).toBe(200);
+    expect(res2.json()).toEqual({ ok: true });
+    const after = await invRowsOf();
+    expect(after[0]!.slot_index).toBeNull();
+    expect(after[0]!.bind_state).toBe("bound");
+    expect(await eqRowsOf()).toEqual([{ slot_code: "main_hand", inventory_id: sword }]);
+  });
+
+  it("已绑定卸下再穿：不带确认直接成功，状态保持 bound（卸下不洗绑定）", async () => {
+    await freshBag();
+    const sword = await insertRow("nongfuzhijian", 0, 1, 10);
+    await markBound(sword);
+    expect((await equipReq(sword)).statusCode).toBe(200); // 已绑定：无需确认
+
+    expect((await unequipReq("main_hand")).statusCode).toBe(200);
+    const rows = await invRowsOf();
+    expect(Number(rows[0]!.slot_index)).toBe(0); // 回包
+    expect(rows[0]!.bind_state).toBe("bound");
+
+    expect((await equipReq(sword)).statusCode).toBe(200); // 再穿不带确认直接成功
+    const after = await invRowsOf();
+    expect(after[0]!.slot_index).toBeNull();
+    expect(after[0]!.bind_state).toBe("bound");
+    await freshBag();
+  });
+
+  it("GET 视图透传 bindState：背包行、消耗品行、已穿装备行都带", async () => {
+    await freshBag();
+    const sword = await insertRow("nongfuzhijian", 0, 1, 10);
+    await markBound(sword);
+    const potion = await insertRow("xiaoxing_buxueji", 1, 3);
+
+    let body = (await get()).json();
+    const bagById = (id: number) => body.bag.find((r: { inventoryId: number }) => r.inventoryId === id);
+    expect(bagById(sword).bindState).toBe("bound");
+    // 消耗品行也透传列值（列默认 bind_on_equip），UI 侧仅装备详情卡展示
+    expect(bagById(potion).bindState).toBe("bind_on_equip");
+
+    expect((await equipReq(sword)).statusCode).toBe(200);
+    body = (await get()).json();
+    expect(body.equipment.main_hand.bindState).toBe("bound");
+    await freshBag();
+  });
+
+  it("战斗掉落新行默认 bind_on_equip：battle.ts victory 掉落 INSERT（同列清单，不含 bind_state）落列默认值", async () => {
+    await freshBag();
+    // 与 routes/battle.ts victory 掉落 INSERT 完全相同的列清单——交易地基层不要求改 battle.ts
+    await getPool().query(
+      `INSERT INTO character_inventory (character_id, item_code, slot_index, quantity, durability)
+       VALUES (?, 'nongfuzhijian', 0, 1, 10)`,
+      [charId],
+    );
+    expect((await invRowsOf())[0]!.bind_state).toBe("bind_on_equip");
     await freshBag();
   });
 });
