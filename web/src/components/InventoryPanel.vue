@@ -160,8 +160,12 @@ onMounted(() => {
   reload();
   loadLevel();
   document.addEventListener("click", onDocClick);
+  document.addEventListener("keydown", onGlobalKey);
 });
-onUnmounted(() => document.removeEventListener("click", onDocClick));
+onUnmounted(() => {
+  document.removeEventListener("click", onDocClick);
+  document.removeEventListener("keydown", onGlobalKey);
+});
 
 /** 统一操作出口：成功重拉视图，ApiError.message / 兜底文案经 toast 上报 */
 async function act(run: () => Promise<unknown>, fallback: string): Promise<boolean> {
@@ -250,10 +254,8 @@ async function onMenuAction(actName: string) {
   } else if (actName === "unequip") {
     if (row.slotCode && (await act(() => api.unequip(row.slotCode!), "卸下失败"))) emit("changed");
   } else if (actName === "discard") {
-    // 不弹数量输入，每次丢 1
-    if (await act(() => api.discard(row.item.inventoryId, 1), "丢弃失败")) {
-      emit("toast", `丢弃了 ${row.item.name}×1`);
-    }
+    // 不立即删：弹二次确认小框（每次丢 1），确认后才真正调用
+    await openDiscardConfirm(row);
   } else if (actName === "transfer") {
     emit("toast", `转让【${row.item.name}】（功能预留）`);
   } else if (actName === "show") {
@@ -263,6 +265,40 @@ async function onMenuAction(actName: string) {
 
 // ---------- 道具说明窗（照原型 #item-detail-win；装备类升级为完整属性卡） ----------
 const detail = ref<ListRow | null>(null);
+
+// ---------- 丢弃二次确认（防误删；仅丢弃走确认，穿戴/使用/卸下不变） ----------
+const discardTarget = ref<ListRow | null>(null);
+const confirmEl = ref<HTMLElement | null>(null);
+const confirmPos = ref({ x: 0, y: 0 });
+
+/** 打开确认框：居中于游戏区（Teleport 到 body 后用 .shell 的屏幕矩形换算视口坐标） */
+async function openDiscardConfirm(row: ListRow) {
+  discardTarget.value = row; // 行菜单已在 onMenuAction 开头收起
+  await nextTick(); // 等小框渲染出真实尺寸
+  const el = confirmEl.value;
+  const shell = winEl.value?.offsetParent as HTMLElement | null;
+  if (!el || !shell) return;
+  const g = shell.getBoundingClientRect(); // 缩放后的屏幕矩形，与 body 下 fixed 坐标系一致
+  confirmPos.value = {
+    x: Math.max(0, g.left + (g.width - el.offsetWidth) / 2),
+    y: Math.max(0, g.top + (g.height - el.offsetHeight) / 2),
+  };
+}
+
+/** 确认丢弃：真正调用 api.discard（每次 1 个），成功重拉 + toast */
+async function onDiscardConfirm() {
+  const row = discardTarget.value;
+  discardTarget.value = null;
+  if (!row) return;
+  if (await act(() => api.discard(row.item.inventoryId, 1), "丢弃失败")) {
+    emit("toast", `丢弃了 ${row.item.name}×1`);
+  }
+}
+
+/** Esc 关闭确认框（常驻监听，未开框时为空操作） */
+function onGlobalKey(e: KeyboardEvent) {
+  if (e.key === "Escape") discardTarget.value = null;
+}
 
 /** 角色等级（等级需求未达标标红用）：无 props 合同变更，经 me()+characters() 自取，失败仅不标红 */
 const charLevel = ref<number | null>(null);
@@ -411,6 +447,37 @@ function onDragEnd() {
   <Teleport to="body">
     <div v-if="menu" ref="menuEl" class="bag-menu" :style="{ left: menu.x + 'px', top: menu.y + 'px' }">
       <button v-for="b in menuButtons" :key="b.act" type="button" @click="onMenuAction(b.act)">{{ b.label }}</button>
+    </div>
+  </Teleport>
+
+  <!-- 丢弃二次确认小框：窗体语言照 item-detail-win，按钮规格照 #bag-menu；
+       Teleport 到 body 避开 stage-fit 缩放劫持，居中坐标按 .shell 屏幕矩形换算 -->
+  <Teleport to="body">
+    <div v-if="discardTarget" class="discard-mask" @click="discardTarget = null">
+      <div
+        ref="confirmEl"
+        class="discard-win"
+        :style="{ left: confirmPos.x + 'px', top: confirmPos.y + 'px' }"
+        role="alertdialog"
+        aria-label="丢弃确认"
+        @click.stop
+      >
+        <div class="item-head">
+          <b>丢弃确认</b>
+          <div class="win-btns">
+            <button type="button" class="win-btn" title="关闭" @click="discardTarget = null">
+              <svg viewBox="0 0 12 12"><g stroke="currentColor" stroke-width="2" stroke-linecap="square"><line x1="2" y1="2" x2="10" y2="10"/><line x1="10" y1="2" x2="2" y2="10"/></g></svg>
+            </button>
+          </div>
+        </div>
+        <div class="discard-body">
+          <p>确认丢弃【{{ discardTarget.item.name }}】×1？</p>
+          <div class="discard-btns">
+            <button type="button" @click="onDiscardConfirm">确认</button>
+            <button type="button" @click="discardTarget = null">取消</button>
+          </div>
+        </div>
+      </div>
     </div>
   </Teleport>
 
@@ -616,6 +683,39 @@ function onDragEnd() {
 }
 .bag-menu button:hover { background: linear-gradient(#fff, #f8fafc); border-color: #4f46e5; color: #3730a3; }
 .bag-menu button:active { box-shadow: inset 0 2px 3px rgba(15, 23, 42, 0.2); }
+
+/* ============ 丢弃二次确认小框（窗体语言照 #item-detail-win，遮罩盖全屏） ============ */
+.discard-mask { position: fixed; inset: 0; z-index: 100; background: rgba(15, 23, 42, 0.35); }
+.discard-win {
+  position: absolute;
+  width: 240px;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 8px 28px rgba(31, 38, 135, 0.3);
+  font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+  overflow: hidden;
+}
+.discard-body { padding: 14px 16px 12px; }
+.discard-body p { font: 13px/1.7 "Microsoft YaHei", sans-serif; color: #1e293b; margin: 0 0 12px; }
+.discard-btns { display: flex; gap: 8px; justify-content: flex-end; }
+/* 按钮照 #bag-menu button 同款规格 */
+.discard-btns button {
+  height: 24px;
+  padding: 0 12px;
+  cursor: pointer;
+  color: #1e293b;
+  font: 12px SimSun, "宋体", serif;
+  background: linear-gradient(#fff, #e2e8f0);
+  border: 1px solid #94a3b8;
+  border-radius: 3px;
+  box-shadow: inset 0 1px 0 #fff;
+}
+.discard-btns button:hover { background: linear-gradient(#fff, #f8fafc); border-color: #4f46e5; color: #3730a3; }
+.discard-btns button:active { box-shadow: inset 0 2px 3px rgba(15, 23, 42, 0.2); }
 
 /* ============ 道具说明窗（CSS 照抄原型 #item-detail-win 段） ============ */
 .item-detail-win {
