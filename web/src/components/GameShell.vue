@@ -925,12 +925,14 @@ onUnmounted(() => {
       </div>
     </footer>
 
-    <!-- 道具背包面板：绝对定位覆盖主区中央；toast 复用场景内轻提示，changed=用药后刷新角色面板 -->
+    <!-- 道具背包面板：绝对定位覆盖主区中央；toast 复用场景内轻提示，changed=用药后刷新角色面板，
+         sys=丢弃成功等系统行直接落左下角聊天记录区（样式同掉落明细行） -->
     <InventoryPanel
       v-if="showBag"
       @close="showBag = false"
       @toast="toast"
       @changed="emit('characterChanged')"
+      @sys="(t) => say(t, 'sys')"
     />
   </main>
   </div>

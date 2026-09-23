@@ -3,7 +3,7 @@ import { computed, nextTick, onMounted, onUnmounted, ref } from "vue";
 import { api, ApiError, type BagItemView, type EquipSlotCode, type InventoryView } from "../api";
 import { QUALITY_COLORS, QUALITY_NAMES } from "../quality";
 
-const emit = defineEmits<{ close: []; toast: [string]; changed: [] }>();
+const emit = defineEmits<{ close: []; toast: [string]; changed: []; sys: [string] }>();
 
 const BAG_MAX = 300; // 原版口径 300 格（与 server BAG_SLOTS 一致）
 
@@ -291,7 +291,8 @@ async function onDiscardConfirm() {
   discardTarget.value = null;
   if (!row) return;
   if (await act(() => api.discard(row.item.inventoryId, 1), "丢弃失败")) {
-    emit("toast", `${row.item.name}×1 丢弃成功！`);
+    // 丢弃成功不走浮层 toast：落左下角聊天记录区系统行（与掉落明细行一致）
+    emit("sys", `${row.item.name}×1 丢弃成功！`);
   }
 }
 
