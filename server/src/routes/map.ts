@@ -66,7 +66,15 @@ async function buildMapView(mapCode: string, currentNodeCode: string) {
     }
   }
   return {
-    map: { code: map.code, name: map.name, type: map.type, background: map.background },
+    map: {
+      code: map.code,
+      name: map.name,
+      type: map.type,
+      background: map.background,
+      // 原版页面坐标空间（节点 x/y 参照系），前端据此铺背景/摆点位；缺省 800×600 兜底
+      width: map.width ?? 800,
+      height: map.height ?? 600,
+    },
     currentNodeCode,
     nodes: map.nodes.map((n) => {
       const base = {

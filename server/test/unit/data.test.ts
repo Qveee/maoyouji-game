@@ -198,7 +198,7 @@ describe("地图交叉引用校验", () => {
 });
 
 describe("牧野草原地图", () => {
-  it("含 38 节点：出生点村口、边界锁点合法、与猫隐村互为出口", () => {
+  it("含 38 节点：出生点村口、与猫隐村/万马草原/低矮林地经出口互通", () => {
     const muye = loadMaps().maps.find((m) => m.code === "muye_caoyuan")!;
     expect(muye.type).toBe("field");
     expect(muye.background).toBe("/maps/muyecaoyuan.jpg");
@@ -207,9 +207,15 @@ describe("牧野草原地图", () => {
     const rukou = muye.nodes.find((n) => n.code === "my_rukou")!;
     expect(rukou.exit).toEqual({ map: "maoyin_village", node: "cunkou" });
     expect(rukou.locked).toBeUndefined();
-    for (const code of ["my_wanma", "my_aolin"]) {
-      expect(muye.nodes.find((n) => n.code === code)!.locked).toBe(true);
-    }
+    // 预留门户已随万马草原/低矮林地接入解锁（出口对偶照原版 pos title）
+    expect(muye.nodes.find((n) => n.code === "my_wanma")!.exit).toEqual({
+      map: "wanma_caoyuan",
+      node: "wm03",
+    });
+    expect(muye.nodes.find((n) => n.code === "my_aolin")!.exit).toEqual({
+      map: "diailindi",
+      node: "dl_bianjie",
+    });
     // 野外节点无静态 NPC（怪物是运行时实例）
     expect(muye.nodes.every((n) => n.npcs.length === 0)).toBe(true);
   });
@@ -269,6 +275,100 @@ describe("牧野草原地图", () => {
     expect(withPaopao.map((n) => n.code)).toEqual([
       "my00", "my01", "my02", "my03", "my07", "my10", "my11", "my12", "my13", "my14",
     ]);
+  });
+});
+
+describe("四张新地图（万马草原/低矮林地/卡斯特平原/拖把城）", () => {
+  it("四图基础形状：节点数/类型/背景/原版坐标空间", () => {
+    const maps = loadMaps().maps;
+    const expectMap = (code: string, name: string, type: string, bg: string, w: number, h: number, count: number, spawn: string) => {
+      const m = maps.find((x) => x.code === code)!;
+      expect(m.name).toBe(name);
+      expect(m.type).toBe(type);
+      expect(m.background).toBe(bg);
+      expect(m.width).toBe(w);
+      expect(m.height).toBe(h);
+      expect(m.nodes).toHaveLength(count);
+      expect(m.spawnNodeCode).toBe(spawn);
+    };
+    expectMap("wanma_caoyuan", "万马草原", "field", "/maps/wanmacaoyuan.jpg", 753, 987, 73, "wm03");
+    expectMap("diailindi", "低矮林地", "field", "/maps/diailindi.jpg", 800, 600, 49, "dl_bianjie");
+    expectMap("kasitepingyuan", "卡斯特平原", "field", "/maps/kasitepingyuan.jpg", 753, 988, 49, "ks13");
+    expectMap("tuobacheng", "拖把城", "town", "/maps/tuobacheng.jpg", 1417, 881, 55, "tbc_dongmen");
+  });
+
+  it("三张野外图自出生点沿 adjacent 全部节点可达且邻接表对称", () => {
+    for (const code of ["wanma_caoyuan", "diailindi", "kasitepingyuan"]) {
+      const m = mapIndex().get(code)!;
+      const byCode = new Map(m.nodes.map((n) => [n.code, n]));
+      const seen = new Set<string>([m.spawnNodeCode]);
+      const queue = [m.spawnNodeCode];
+      while (queue.length > 0) {
+        const cur = byCode.get(queue.shift()!)!;
+        for (const adj of cur.adjacent ?? []) {
+          if (byCode.has(adj) && !seen.has(adj)) {
+            seen.add(adj);
+            queue.push(adj);
+          }
+        }
+      }
+      for (const n of m.nodes) {
+        expect(seen.has(n.code), `${code} 节点 ${n.code} 不可达`).toBe(true);
+        for (const adj of n.adjacent ?? []) {
+          const other = byCode.get(adj);
+          if (!other) continue;
+          expect(other.adjacent ?? [], `${code} 边 ${n.code}→${adj} 缺反向边`).toContain(n.code);
+        }
+      }
+    }
+  });
+
+  it("跨图出口对偶：原版 pos title 决定的门户两两成对", () => {
+    const maps = loadMaps().maps;
+    const exitOf = (mapCode: string, nodeCode: string) =>
+      maps.find((m) => m.code === mapCode)!.nodes.find((n) => n.code === nodeCode)!.exit;
+    expect(exitOf("muye_caoyuan", "my_wanma")).toEqual({ map: "wanma_caoyuan", node: "wm03" });
+    expect(exitOf("wanma_caoyuan", "wm_muye")).toEqual({ map: "muye_caoyuan", node: "my06" });
+    expect(exitOf("muye_caoyuan", "my_aolin")).toEqual({ map: "diailindi", node: "dl_bianjie" });
+    expect(exitOf("diailindi", "dl_bianjie")).toEqual({ map: "muye_caoyuan", node: "my_aolin" });
+    expect(exitOf("diailindi", "dl_muye")).toEqual({ map: "muye_caoyuan", node: "my35" });
+    for (const [gate, kst] of [["dongmen", "13"], ["ximen", "21"], ["nanmen", "16"]] as const) {
+      expect(exitOf("kasitepingyuan", `ks_${gate}`)).toEqual({ map: "tuobacheng", node: `tbc_${gate}` });
+      expect(exitOf("tuobacheng", `tbc_kst${kst}`)).toEqual({ map: "kasitepingyuan", node: `ks${kst}` });
+    }
+  });
+
+  it("未开放区域出口保持锁点并带原因；新图暂不刷怪不出 NPC", () => {
+    const maps = loadMaps().maps;
+    const lockedPortals: Array<[string, string, string]> = [
+      ["wanma_caoyuan", "wm_hanfeng", "寒风草地"],
+      ["diailindi", "dl_wuying", "雾影岛"],
+      ["diailindi", "dl_wuyinghu", "雾影湖"],
+      ["kasitepingyuan", "ks_yinguang", "银光森林"],
+      ["kasitepingyuan", "ks_mawang", "马王滩"],
+    ];
+    for (const [mapCode, nodeCode, area] of lockedPortals) {
+      const n = maps.find((m) => m.code === mapCode)!.nodes.find((x) => x.code === nodeCode)!;
+      expect(n.locked).toBe(true);
+      expect(n.lockedReason).toContain(area);
+      expect(n.exit).toBeUndefined(); // 目标地图未接入，不得配置出口
+    }
+    for (const code of ["wanma_caoyuan", "diailindi", "kasitepingyuan", "tuobacheng"]) {
+      const m = maps.find((x) => x.code === code)!;
+      for (const n of m.nodes) {
+        expect(n.npcs).toHaveLength(0);
+        expect(n.spawns).toBeUndefined(); // 怪物数值考据后补（本轮接图不接怪）
+      }
+    }
+  });
+
+  it("拖把城为城镇：无邻接表（图内自由移动），三城门出口指向卡斯特平原", () => {
+    const tbc = mapIndex().get("tuobacheng")!;
+    for (const n of tbc.nodes) {
+      expect(n.adjacent).toBeUndefined();
+    }
+    const exits = tbc.nodes.filter((n) => n.exit).map((n) => n.exit!.node);
+    expect(exits.sort()).toEqual(["ks13", "ks16", "ks21"]);
   });
 });
 

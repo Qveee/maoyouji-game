@@ -270,6 +270,10 @@ export const MapSchema = z.object({
   name: z.string().min(1).max(32),
   type: z.enum(["town", "field"]),
   background: z.string().min(1),
+  /** 原版页面坐标空间（节点 x/y 的参照系，各图尺寸不一：如拖把城 1417×881、万马草原 753×987）；
+   *  前端按它铺背景/摆点位/算镜头，缺省 800×600（早期两图的尺寸） */
+  width: z.number().int().min(1).max(4096).optional(),
+  height: z.number().int().min(1).max(4096).optional(),
   spawnNodeCode: z.string().min(1),
   nodes: z.array(MapNodeSchema).min(1),
 });

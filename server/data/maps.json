@@ -620,7 +620,9 @@
             }
           ]
         }
-      ]
+      ],
+      "width": 800,
+      "height": 600
     },
     {
       "code": "muye_caoyuan",
@@ -1241,11 +1243,14 @@
           "short": "万马草原",
           "x": 17,
           "y": 19,
-          "locked": true,
           "adjacent": [
             "my06"
           ],
-          "npcs": []
+          "npcs": [],
+          "exit": {
+            "map": "wanma_caoyuan",
+            "node": "wm03"
+          }
         },
         {
           "code": "my_aolin",
@@ -1253,10 +1258,2699 @@
           "short": "低矮林地",
           "x": 704,
           "y": 527,
-          "locked": true,
           "adjacent": [
             "my35"
           ],
+          "npcs": [],
+          "exit": {
+            "map": "diailindi",
+            "node": "dl_bianjie"
+          }
+        }
+      ],
+      "width": 800,
+      "height": 600
+    },
+    {
+      "code": "wanma_caoyuan",
+      "name": "万马草原",
+      "type": "field",
+      "background": "/maps/wanmacaoyuan.jpg",
+      "width": 753,
+      "height": 987,
+      "spawnNodeCode": "wm03",
+      "nodes": [
+        {
+          "code": "wm05",
+          "name": "万马草原05",
+          "short": "05",
+          "x": 376,
+          "y": 888,
+          "npcs": [],
+          "adjacent": [
+            "wm06",
+            "wm04"
+          ]
+        },
+        {
+          "code": "wm02",
+          "name": "万马草原02",
+          "short": "02",
+          "x": 484,
+          "y": 867,
+          "npcs": [],
+          "adjacent": [
+            "wm19",
+            "wm01",
+            "wm04"
+          ]
+        },
+        {
+          "code": "wm01",
+          "name": "万马草原01",
+          "short": "01",
+          "x": 555,
+          "y": 835,
+          "npcs": [],
+          "adjacent": [
+            "wm02",
+            "wm00"
+          ]
+        },
+        {
+          "code": "wm20",
+          "name": "万马草原20",
+          "short": "20",
+          "x": 604,
+          "y": 612,
+          "npcs": [],
+          "adjacent": [
+            "wm21",
+            "wm32",
+            "wm16"
+          ]
+        },
+        {
+          "code": "wm06",
+          "name": "万马草原06",
+          "short": "06",
+          "x": 310,
+          "y": 855,
+          "npcs": [],
+          "adjacent": [
+            "wm25",
+            "wm07",
+            "wm05"
+          ]
+        },
+        {
+          "code": "wm25",
+          "name": "万马草原25",
+          "short": "25",
+          "x": 298,
+          "y": 785,
+          "npcs": [],
+          "adjacent": [
+            "wm26",
+            "wm13",
+            "wm06"
+          ]
+        },
+        {
+          "code": "wm10",
+          "name": "万马草原10",
+          "short": "10",
+          "x": 101,
+          "y": 868,
+          "npcs": [],
+          "adjacent": [
+            "wm11",
+            "wm09"
+          ]
+        },
+        {
+          "code": "wm24",
+          "name": "万马草原24",
+          "short": "24",
+          "x": 380,
+          "y": 679,
+          "npcs": [],
+          "adjacent": [
+            "wm30",
+            "wm18"
+          ]
+        },
+        {
+          "code": "wm00",
+          "name": "万马草原00",
+          "short": "00",
+          "x": 630,
+          "y": 830,
+          "npcs": [],
+          "adjacent": [
+            "wm15",
+            "wm01",
+            "wm03",
+            "wm_muye"
+          ]
+        },
+        {
+          "code": "wm03",
+          "name": "万马草原入口",
+          "short": "入口",
+          "x": 648,
+          "y": 774,
+          "npcs": [],
+          "adjacent": [
+            "wm00"
+          ]
+        },
+        {
+          "code": "wm11",
+          "name": "万马草原11",
+          "short": "11",
+          "x": 81,
+          "y": 796,
+          "npcs": [],
+          "adjacent": [
+            "wm12",
+            "wm10"
+          ]
+        },
+        {
+          "code": "wm22",
+          "name": "万马草原22",
+          "short": "22",
+          "x": 470,
+          "y": 667,
+          "npcs": [],
+          "adjacent": [
+            "wm45",
+            "wm23",
+            "wm18"
+          ]
+        },
+        {
+          "code": "wm16",
+          "name": "万马草原16",
+          "short": "16",
+          "x": 601,
+          "y": 689,
+          "npcs": [],
+          "adjacent": [
+            "wm20",
+            "wm17",
+            "wm15"
+          ]
+        },
+        {
+          "code": "wm21",
+          "name": "万马草原21",
+          "short": "21",
+          "x": 531,
+          "y": 575,
+          "npcs": [],
+          "adjacent": [
+            "wm23",
+            "wm48",
+            "wm20"
+          ]
+        },
+        {
+          "code": "wm23",
+          "name": "万马草原23",
+          "short": "23",
+          "x": 470,
+          "y": 594,
+          "npcs": [],
+          "adjacent": [
+            "wm22",
+            "wm21"
+          ]
+        },
+        {
+          "code": "wm19",
+          "name": "万马草原19",
+          "short": "19",
+          "x": 454,
+          "y": 816,
+          "npcs": [],
+          "adjacent": [
+            "wm18",
+            "wm02"
+          ]
+        },
+        {
+          "code": "wm18",
+          "name": "万马草原18",
+          "short": "18",
+          "x": 437,
+          "y": 738,
+          "npcs": [],
+          "adjacent": [
+            "wm22",
+            "wm17",
+            "wm24",
+            "wm19"
+          ]
+        },
+        {
+          "code": "wm12",
+          "name": "万马草原12",
+          "short": "12",
+          "x": 79,
+          "y": 710,
+          "npcs": [],
+          "adjacent": [
+            "wm29",
+            "wm28",
+            "wm14",
+            "wm11"
+          ]
+        },
+        {
+          "code": "wm15",
+          "name": "万马草原15",
+          "short": "15",
+          "x": 663,
+          "y": 715,
+          "npcs": [],
+          "adjacent": [
+            "wm16",
+            "wm00"
+          ]
+        },
+        {
+          "code": "wm14",
+          "name": "万马草原14",
+          "short": "14",
+          "x": 153,
+          "y": 733,
+          "npcs": [],
+          "adjacent": [
+            "wm26",
+            "wm12",
+            "wm13"
+          ]
+        },
+        {
+          "code": "wm17",
+          "name": "万马草原17",
+          "short": "17",
+          "x": 525,
+          "y": 721,
+          "npcs": [],
+          "adjacent": [
+            "wm16",
+            "wm18"
+          ]
+        },
+        {
+          "code": "wm09",
+          "name": "万马草原09",
+          "short": "09",
+          "x": 138,
+          "y": 929,
+          "npcs": [],
+          "adjacent": [
+            "wm10",
+            "wm08"
+          ]
+        },
+        {
+          "code": "wm13",
+          "name": "万马草原13",
+          "short": "13",
+          "x": 208,
+          "y": 792,
+          "npcs": [],
+          "adjacent": [
+            "wm25",
+            "wm14",
+            "wm08"
+          ]
+        },
+        {
+          "code": "wm08",
+          "name": "万马草原08",
+          "short": "08",
+          "x": 193,
+          "y": 865,
+          "npcs": [],
+          "adjacent": [
+            "wm13",
+            "wm09",
+            "wm07"
+          ]
+        },
+        {
+          "code": "wm07",
+          "name": "万马草原07",
+          "short": "07",
+          "x": 257,
+          "y": 899,
+          "npcs": [],
+          "adjacent": [
+            "wm08",
+            "wm06"
+          ]
+        },
+        {
+          "code": "wm04",
+          "name": "万马草原04",
+          "short": "04",
+          "x": 441,
+          "y": 923,
+          "npcs": [],
+          "adjacent": [
+            "wm02",
+            "wm05"
+          ]
+        },
+        {
+          "code": "wm70",
+          "name": "万马草原70",
+          "short": "70",
+          "x": 615,
+          "y": 201,
+          "npcs": [],
+          "adjacent": [
+            "wm63",
+            "wm62"
+          ]
+        },
+        {
+          "code": "wm69",
+          "name": "万马草原69",
+          "short": "69",
+          "x": 145,
+          "y": 112,
+          "npcs": [],
+          "adjacent": [
+            "wm_hanfeng",
+            "wm68"
+          ]
+        },
+        {
+          "code": "wm68",
+          "name": "万马草原68",
+          "short": "68",
+          "x": 217,
+          "y": 97,
+          "npcs": [],
+          "adjacent": [
+            "wm69",
+            "wm67"
+          ]
+        },
+        {
+          "code": "wm67",
+          "name": "万马草原67",
+          "short": "67",
+          "x": 278,
+          "y": 79,
+          "npcs": [],
+          "adjacent": [
+            "wm68",
+            "wm66",
+            "wm58"
+          ]
+        },
+        {
+          "code": "wm66",
+          "name": "万马草原66",
+          "short": "66",
+          "x": 422,
+          "y": 108,
+          "npcs": [],
+          "adjacent": [
+            "wm67",
+            "wm65",
+            "wm57"
+          ]
+        },
+        {
+          "code": "wm65",
+          "name": "万马草原65",
+          "short": "65",
+          "x": 501,
+          "y": 122,
+          "npcs": [],
+          "adjacent": [
+            "wm66",
+            "wm63"
+          ]
+        },
+        {
+          "code": "wm64",
+          "name": "万马草原64",
+          "short": "64",
+          "x": 518,
+          "y": 221,
+          "npcs": [],
+          "adjacent": [
+            "wm63",
+            "wm59"
+          ]
+        },
+        {
+          "code": "wm63",
+          "name": "万马草原63",
+          "short": "63",
+          "x": 555,
+          "y": 174,
+          "npcs": [],
+          "adjacent": [
+            "wm65",
+            "wm70",
+            "wm64"
+          ]
+        },
+        {
+          "code": "wm62",
+          "name": "万马草原62",
+          "short": "62",
+          "x": 654,
+          "y": 248,
+          "npcs": [],
+          "adjacent": [
+            "wm70",
+            "wm61"
+          ]
+        },
+        {
+          "code": "wm61",
+          "name": "万马草原61",
+          "short": "61",
+          "x": 675,
+          "y": 307,
+          "npcs": [],
+          "adjacent": [
+            "wm62",
+            "wm60"
+          ]
+        },
+        {
+          "code": "wm60",
+          "name": "万马草原60",
+          "short": "60",
+          "x": 671,
+          "y": 374,
+          "npcs": [],
+          "adjacent": [
+            "wm61",
+            "wm35"
+          ]
+        },
+        {
+          "code": "wm59",
+          "name": "万马草原59",
+          "short": "59",
+          "x": 500,
+          "y": 285,
+          "npcs": [],
+          "adjacent": [
+            "wm64",
+            "wm52"
+          ]
+        },
+        {
+          "code": "wm58",
+          "name": "万马草原58",
+          "short": "58",
+          "x": 290,
+          "y": 136,
+          "npcs": [],
+          "adjacent": [
+            "wm67",
+            "wm57",
+            "wm54"
+          ]
+        },
+        {
+          "code": "wm57",
+          "name": "万马草原57",
+          "short": "57",
+          "x": 351,
+          "y": 144,
+          "npcs": [],
+          "adjacent": [
+            "wm58",
+            "wm66",
+            "wm56"
+          ]
+        },
+        {
+          "code": "wm56",
+          "name": "万马草原56",
+          "short": "56",
+          "x": 362,
+          "y": 220,
+          "npcs": [],
+          "adjacent": [
+            "wm57",
+            "wm55"
+          ]
+        },
+        {
+          "code": "wm55",
+          "name": "万马草原55",
+          "short": "55",
+          "x": 299,
+          "y": 257,
+          "npcs": [],
+          "adjacent": [
+            "wm56",
+            "wm53"
+          ]
+        },
+        {
+          "code": "wm54",
+          "name": "万马草原54",
+          "short": "54",
+          "x": 246,
+          "y": 180,
+          "npcs": [],
+          "adjacent": [
+            "wm53",
+            "wm58"
+          ]
+        },
+        {
+          "code": "wm53",
+          "name": "万马草原53",
+          "short": "53",
+          "x": 231,
+          "y": 247,
+          "npcs": [],
+          "adjacent": [
+            "wm55",
+            "wm54",
+            "wm39"
+          ]
+        },
+        {
+          "code": "wm52",
+          "name": "万马草原52",
+          "short": "52",
+          "x": 515,
+          "y": 340,
+          "npcs": [],
+          "adjacent": [
+            "wm59",
+            "wm50",
+            "wm51"
+          ]
+        },
+        {
+          "code": "wm51",
+          "name": "万马草原51",
+          "short": "51",
+          "x": 566,
+          "y": 397,
+          "npcs": [],
+          "adjacent": [
+            "wm52",
+            "wm50",
+            "wm49",
+            "wm35"
+          ]
+        },
+        {
+          "code": "wm50",
+          "name": "万马草原50",
+          "short": "50",
+          "x": 463,
+          "y": 372,
+          "npcs": [],
+          "adjacent": [
+            "wm52",
+            "wm47",
+            "wm51"
+          ]
+        },
+        {
+          "code": "wm49",
+          "name": "万马草原49",
+          "short": "49",
+          "x": 538,
+          "y": 452,
+          "npcs": [],
+          "adjacent": [
+            "wm51",
+            "wm35",
+            "wm48",
+            "wm47"
+          ]
+        },
+        {
+          "code": "wm48",
+          "name": "万马草原48",
+          "short": "48",
+          "x": 524,
+          "y": 513,
+          "npcs": [],
+          "adjacent": [
+            "wm49",
+            "wm21"
+          ]
+        },
+        {
+          "code": "wm47",
+          "name": "万马草原47",
+          "short": "47",
+          "x": 438,
+          "y": 422,
+          "npcs": [],
+          "adjacent": [
+            "wm50",
+            "wm49",
+            "wm46"
+          ]
+        },
+        {
+          "code": "wm46",
+          "name": "万马草原46",
+          "short": "46",
+          "x": 379,
+          "y": 475,
+          "npcs": [],
+          "adjacent": [
+            "wm47",
+            "wm45"
+          ]
+        },
+        {
+          "code": "wm45",
+          "name": "万马草原45",
+          "short": "45",
+          "x": 410,
+          "y": 548,
+          "npcs": [],
+          "adjacent": [
+            "wm46",
+            "wm22"
+          ]
+        },
+        {
+          "code": "wm44",
+          "name": "万马草原44",
+          "short": "44",
+          "x": 190,
+          "y": 355,
+          "npcs": [],
+          "adjacent": [
+            "wm39",
+            "wm43"
+          ]
+        },
+        {
+          "code": "wm43",
+          "name": "万马草原43",
+          "short": "43",
+          "x": 149,
+          "y": 404,
+          "npcs": [],
+          "adjacent": [
+            "wm44",
+            "wm42",
+            "wm38"
+          ]
+        },
+        {
+          "code": "wm42",
+          "name": "万马草原42",
+          "short": "42",
+          "x": 83,
+          "y": 412,
+          "npcs": [],
+          "adjacent": [
+            "wm43",
+            "wm41"
+          ]
+        },
+        {
+          "code": "wm41",
+          "name": "万马草原41",
+          "short": "41",
+          "x": 58,
+          "y": 475,
+          "npcs": [],
+          "adjacent": [
+            "wm42",
+            "wm40"
+          ]
+        },
+        {
+          "code": "wm40",
+          "name": "万马草原40",
+          "short": "40",
+          "x": 32,
+          "y": 545,
+          "npcs": [],
+          "adjacent": [
+            "wm41",
+            "wm29"
+          ]
+        },
+        {
+          "code": "wm39",
+          "name": "万马草原39",
+          "short": "39",
+          "x": 250,
+          "y": 321,
+          "npcs": [],
+          "adjacent": [
+            "wm53",
+            "wm44",
+            "wm38"
+          ]
+        },
+        {
+          "code": "wm38",
+          "name": "万马草原38",
+          "short": "38",
+          "x": 238,
+          "y": 396,
+          "npcs": [],
+          "adjacent": [
+            "wm43",
+            "wm37",
+            "wm39"
+          ]
+        },
+        {
+          "code": "wm37",
+          "name": "万马草原37",
+          "short": "37",
+          "x": 231,
+          "y": 464,
+          "npcs": [],
+          "adjacent": [
+            "wm38",
+            "wm36"
+          ]
+        },
+        {
+          "code": "wm36",
+          "name": "万马草原36",
+          "short": "36",
+          "x": 242,
+          "y": 538,
+          "npcs": [],
+          "adjacent": [
+            "wm37",
+            "wm31"
+          ]
+        },
+        {
+          "code": "wm35",
+          "name": "万马草原35",
+          "short": "35",
+          "x": 637,
+          "y": 432,
+          "npcs": [],
+          "adjacent": [
+            "wm60",
+            "wm51",
+            "wm49",
+            "wm34"
+          ]
+        },
+        {
+          "code": "wm34",
+          "name": "万马草原34",
+          "short": "34",
+          "x": 698,
+          "y": 471,
+          "npcs": [],
+          "adjacent": [
+            "wm35",
+            "wm33"
+          ]
+        },
+        {
+          "code": "wm33",
+          "name": "万马草原33",
+          "short": "33",
+          "x": 719,
+          "y": 525,
+          "npcs": [],
+          "adjacent": [
+            "wm34",
+            "wm32"
+          ]
+        },
+        {
+          "code": "wm32",
+          "name": "万马草原32",
+          "short": "32",
+          "x": 686,
+          "y": 588,
+          "npcs": [],
+          "adjacent": [
+            "wm20",
+            "wm33"
+          ]
+        },
+        {
+          "code": "wm31",
+          "name": "万马草原31",
+          "short": "31",
+          "x": 261,
+          "y": 600,
+          "npcs": [],
+          "adjacent": [
+            "wm27",
+            "wm36",
+            "wm30"
+          ]
+        },
+        {
+          "code": "wm30",
+          "name": "万马草原30",
+          "short": "30",
+          "x": 329,
+          "y": 634,
+          "npcs": [],
+          "adjacent": [
+            "wm31",
+            "wm24"
+          ]
+        },
+        {
+          "code": "wm29",
+          "name": "万马草原29",
+          "short": "29",
+          "x": 76,
+          "y": 599,
+          "npcs": [],
+          "adjacent": [
+            "wm40",
+            "wm28",
+            "wm12"
+          ]
+        },
+        {
+          "code": "wm28",
+          "name": "万马草原28",
+          "short": "28",
+          "x": 154,
+          "y": 668,
+          "npcs": [],
+          "adjacent": [
+            "wm29",
+            "wm12",
+            "wm27"
+          ]
+        },
+        {
+          "code": "wm27",
+          "name": "万马草原27",
+          "short": "27",
+          "x": 220,
+          "y": 680,
+          "npcs": [],
+          "adjacent": [
+            "wm28",
+            "wm26",
+            "wm31"
+          ]
+        },
+        {
+          "code": "wm26",
+          "name": "万马草原26",
+          "short": "26",
+          "x": 272,
+          "y": 715,
+          "npcs": [],
+          "adjacent": [
+            "wm27",
+            "wm14",
+            "wm25"
+          ]
+        },
+        {
+          "code": "wm_muye",
+          "name": "牧野草原口",
+          "short": "牧野草原",
+          "x": 699,
+          "y": 824,
+          "npcs": [],
+          "adjacent": [
+            "wm00"
+          ],
+          "exit": {
+            "map": "muye_caoyuan",
+            "node": "my06"
+          }
+        },
+        {
+          "code": "wm_hanfeng",
+          "name": "寒风谷",
+          "short": "寒风谷",
+          "x": 47,
+          "y": 117,
+          "npcs": [],
+          "locked": true,
+          "lockedReason": "寒风草地暂未开放",
+          "adjacent": [
+            "wm69"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "diailindi",
+      "name": "低矮林地",
+      "type": "field",
+      "background": "/maps/diailindi.jpg",
+      "width": 800,
+      "height": 600,
+      "spawnNodeCode": "dl_bianjie",
+      "nodes": [
+        {
+          "code": "dl06",
+          "name": "低矮林地06",
+          "short": "06",
+          "x": 240,
+          "y": 307,
+          "npcs": [],
+          "adjacent": [
+            "dl00",
+            "dl42",
+            "dl43",
+            "dl31"
+          ]
+        },
+        {
+          "code": "dl44",
+          "name": "低矮林地44",
+          "short": "44",
+          "x": 141,
+          "y": 99,
+          "npcs": [],
+          "adjacent": [
+            "dl_bianjie",
+            "dl14",
+            "dl00"
+          ]
+        },
+        {
+          "code": "dl17",
+          "name": "低矮林地17",
+          "short": "17",
+          "x": 325,
+          "y": 47,
+          "npcs": [],
+          "adjacent": [
+            "dl13",
+            "dl39"
+          ]
+        },
+        {
+          "code": "dl10",
+          "name": "低矮林地10",
+          "short": "10",
+          "x": 388,
+          "y": 207,
+          "npcs": [],
+          "adjacent": [
+            "dl09",
+            "dl11",
+            "dl42"
+          ]
+        },
+        {
+          "code": "dl38",
+          "name": "低矮林地38",
+          "short": "38",
+          "x": 474,
+          "y": 12,
+          "npcs": [],
+          "adjacent": [
+            "dl39",
+            "dl19"
+          ]
+        },
+        {
+          "code": "dl30",
+          "name": "低矮林地30",
+          "short": "30",
+          "x": 121,
+          "y": 262,
+          "npcs": [],
+          "adjacent": [
+            "dl00",
+            "dl01"
+          ]
+        },
+        {
+          "code": "dl18",
+          "name": "低矮林地18",
+          "short": "18",
+          "x": 487,
+          "y": 569,
+          "npcs": [],
+          "adjacent": [
+            "dl12",
+            "dl22",
+            "dl_wuyinghu"
+          ]
+        },
+        {
+          "code": "dl15",
+          "name": "低矮林地15",
+          "short": "15",
+          "x": 505,
+          "y": 368,
+          "npcs": [],
+          "adjacent": [
+            "dl36",
+            "dl21",
+            "dl11",
+            "dl16"
+          ]
+        },
+        {
+          "code": "dl01",
+          "name": "低矮林地01",
+          "short": "01",
+          "x": 130,
+          "y": 310,
+          "npcs": [],
+          "adjacent": [
+            "dl30",
+            "dl02",
+            "dl31"
+          ]
+        },
+        {
+          "code": "dl14",
+          "name": "低矮林地14",
+          "short": "14",
+          "x": 209,
+          "y": 92,
+          "npcs": [],
+          "adjacent": [
+            "dl44",
+            "dl13"
+          ]
+        },
+        {
+          "code": "dl41",
+          "name": "低矮林地41",
+          "short": "41",
+          "x": 735,
+          "y": 318,
+          "npcs": [],
+          "adjacent": [
+            "dl35",
+            "dl25"
+          ]
+        },
+        {
+          "code": "dl43",
+          "name": "低矮林地43",
+          "short": "43",
+          "x": 331,
+          "y": 341,
+          "npcs": [],
+          "adjacent": [
+            "dl31",
+            "dl07",
+            "dl06",
+            "dl42",
+            "dl11"
+          ]
+        },
+        {
+          "code": "dl42",
+          "name": "低矮林地42",
+          "short": "42",
+          "x": 332,
+          "y": 260,
+          "npcs": [],
+          "adjacent": [
+            "dl10",
+            "dl06",
+            "dl43",
+            "dl11"
+          ]
+        },
+        {
+          "code": "dl00",
+          "name": "低矮林地00",
+          "short": "00",
+          "x": 124,
+          "y": 186,
+          "npcs": [],
+          "adjacent": [
+            "dl44",
+            "dl30",
+            "dl06"
+          ]
+        },
+        {
+          "code": "dl40",
+          "name": "低矮林地40",
+          "short": "40",
+          "x": 438,
+          "y": 112,
+          "npcs": [],
+          "adjacent": [
+            "dl39",
+            "dl28"
+          ]
+        },
+        {
+          "code": "dl39",
+          "name": "低矮林地39",
+          "short": "39",
+          "x": 392,
+          "y": 67,
+          "npcs": [],
+          "adjacent": [
+            "dl17",
+            "dl40",
+            "dl38"
+          ]
+        },
+        {
+          "code": "dl37",
+          "name": "低矮林地37",
+          "short": "37",
+          "x": 684,
+          "y": 169,
+          "npcs": [],
+          "adjacent": [
+            "dl24",
+            "dl27",
+            "dl26"
+          ]
+        },
+        {
+          "code": "dl02",
+          "name": "低矮林地02",
+          "short": "02",
+          "x": 35,
+          "y": 337,
+          "npcs": [],
+          "adjacent": [
+            "dl01",
+            "dl03"
+          ]
+        },
+        {
+          "code": "dl09",
+          "name": "低矮林地09",
+          "short": "09",
+          "x": 297,
+          "y": 150,
+          "npcs": [],
+          "adjacent": [
+            "dl13",
+            "dl10"
+          ]
+        },
+        {
+          "code": "dl36",
+          "name": "低矮林地36",
+          "short": "36",
+          "x": 583,
+          "y": 241,
+          "npcs": [],
+          "adjacent": [
+            "dl24",
+            "dl20",
+            "dl15"
+          ]
+        },
+        {
+          "code": "dl13",
+          "name": "低矮林地13",
+          "short": "13",
+          "x": 249,
+          "y": 115,
+          "npcs": [],
+          "adjacent": [
+            "dl14",
+            "dl09",
+            "dl17"
+          ]
+        },
+        {
+          "code": "dl23",
+          "name": "低矮林地23",
+          "short": "23",
+          "x": 608,
+          "y": 100,
+          "npcs": [],
+          "adjacent": [
+            "dl28",
+            "dl26",
+            "dl24"
+          ]
+        },
+        {
+          "code": "dl04",
+          "name": "低矮林地04",
+          "short": "04",
+          "x": 133,
+          "y": 427,
+          "npcs": [],
+          "adjacent": [
+            "dl03",
+            "dl31",
+            "dl05"
+          ]
+        },
+        {
+          "code": "dl22",
+          "name": "低矮林地22",
+          "short": "22",
+          "x": 597,
+          "y": 518,
+          "npcs": [],
+          "adjacent": [
+            "dl25",
+            "dl21",
+            "dl18",
+            "dl_wuyinghu"
+          ]
+        },
+        {
+          "code": "dl07",
+          "name": "低矮林地07",
+          "short": "07",
+          "x": 322,
+          "y": 419,
+          "npcs": [],
+          "adjacent": [
+            "dl34",
+            "dl12",
+            "dl32",
+            "dl43"
+          ]
+        },
+        {
+          "code": "dl12",
+          "name": "低矮林地12",
+          "short": "12",
+          "x": 338,
+          "y": 552,
+          "npcs": [],
+          "adjacent": [
+            "dl16",
+            "dl07",
+            "dl33",
+            "dl18"
+          ]
+        },
+        {
+          "code": "dl11",
+          "name": "低矮林地11",
+          "short": "11",
+          "x": 424,
+          "y": 319,
+          "npcs": [],
+          "adjacent": [
+            "dl15",
+            "dl10",
+            "dl34",
+            "dl42",
+            "dl43"
+          ]
+        },
+        {
+          "code": "dl16",
+          "name": "低矮林地16",
+          "short": "16",
+          "x": 420,
+          "y": 461,
+          "npcs": [],
+          "adjacent": [
+            "dl15",
+            "dl34",
+            "dl12"
+          ]
+        },
+        {
+          "code": "dl03",
+          "name": "低矮林地03",
+          "short": "03",
+          "x": 34,
+          "y": 443,
+          "npcs": [],
+          "adjacent": [
+            "dl02",
+            "dl04",
+            "dl29"
+          ]
+        },
+        {
+          "code": "dl05",
+          "name": "低矮林地05",
+          "short": "05",
+          "x": 149,
+          "y": 524,
+          "npcs": [],
+          "adjacent": [
+            "dl29",
+            "dl04",
+            "dl08"
+          ]
+        },
+        {
+          "code": "dl08",
+          "name": "低矮林地08",
+          "short": "08",
+          "x": 242,
+          "y": 534,
+          "npcs": [],
+          "adjacent": [
+            "dl05",
+            "dl33"
+          ]
+        },
+        {
+          "code": "dl25",
+          "name": "低矮林地25",
+          "short": "25",
+          "x": 687,
+          "y": 379,
+          "npcs": [],
+          "adjacent": [
+            "dl41",
+            "dl21",
+            "dl22"
+          ]
+        },
+        {
+          "code": "dl27",
+          "name": "低矮林地27",
+          "short": "27",
+          "x": 710,
+          "y": 246,
+          "npcs": [],
+          "adjacent": [
+            "dl35",
+            "dl37"
+          ]
+        },
+        {
+          "code": "dl26",
+          "name": "低矮林地26",
+          "short": "26",
+          "x": 715,
+          "y": 116,
+          "npcs": [],
+          "adjacent": [
+            "dl23",
+            "dl37"
+          ]
+        },
+        {
+          "code": "dl29",
+          "name": "矮林小屋",
+          "short": "矮林小屋",
+          "x": 51,
+          "y": 555,
+          "npcs": [],
+          "adjacent": [
+            "dl03",
+            "dl05"
+          ]
+        },
+        {
+          "code": "dl24",
+          "name": "低矮林地24",
+          "short": "24",
+          "x": 630,
+          "y": 177,
+          "npcs": [],
+          "adjacent": [
+            "dl23",
+            "dl36",
+            "dl37"
+          ]
+        },
+        {
+          "code": "dl21",
+          "name": "低矮林地21",
+          "short": "21",
+          "x": 566,
+          "y": 406,
+          "npcs": [],
+          "adjacent": [
+            "dl20",
+            "dl25",
+            "dl15",
+            "dl22"
+          ]
+        },
+        {
+          "code": "dl20",
+          "name": "低矮林地20",
+          "short": "20",
+          "x": 601,
+          "y": 303,
+          "npcs": [],
+          "adjacent": [
+            "dl36",
+            "dl35",
+            "dl21"
+          ]
+        },
+        {
+          "code": "dl28",
+          "name": "低矮林地28",
+          "short": "28",
+          "x": 544,
+          "y": 106,
+          "npcs": [],
+          "adjacent": [
+            "dl40",
+            "dl19",
+            "dl23"
+          ]
+        },
+        {
+          "code": "dl19",
+          "name": "低矮林地19",
+          "short": "19",
+          "x": 555,
+          "y": 38,
+          "npcs": [],
+          "adjacent": [
+            "dl38",
+            "dl28"
+          ]
+        },
+        {
+          "code": "dl31",
+          "name": "低矮林地31",
+          "short": "31",
+          "x": 169,
+          "y": 349,
+          "npcs": [],
+          "adjacent": [
+            "dl04",
+            "dl01",
+            "dl32",
+            "dl43",
+            "dl06"
+          ]
+        },
+        {
+          "code": "dl32",
+          "name": "低矮林地32",
+          "short": "32",
+          "x": 238,
+          "y": 424,
+          "npcs": [],
+          "adjacent": [
+            "dl31",
+            "dl07",
+            "dl33"
+          ]
+        },
+        {
+          "code": "dl33",
+          "name": "低矮林地33",
+          "short": "33",
+          "x": 249,
+          "y": 473,
+          "npcs": [],
+          "adjacent": [
+            "dl12",
+            "dl32",
+            "dl08"
+          ]
+        },
+        {
+          "code": "dl34",
+          "name": "低矮林地34",
+          "short": "34",
+          "x": 381,
+          "y": 429,
+          "npcs": [],
+          "adjacent": [
+            "dl35",
+            "dl11",
+            "dl16",
+            "dl07"
+          ]
+        },
+        {
+          "code": "dl35",
+          "name": "低矮林地35",
+          "short": "35",
+          "x": 660,
+          "y": 271,
+          "npcs": [],
+          "adjacent": [
+            "dl20",
+            "dl27",
+            "dl41",
+            "dl34"
+          ]
+        },
+        {
+          "code": "dl_muye",
+          "name": "牧野草原口",
+          "short": "牧野草原",
+          "x": 33,
+          "y": 49,
+          "npcs": [],
+          "adjacent": [
+            "dl_bianjie"
+          ],
+          "exit": {
+            "map": "muye_caoyuan",
+            "node": "my35"
+          }
+        },
+        {
+          "code": "dl_bianjie",
+          "name": "矮林边界",
+          "short": "矮林边界",
+          "x": 44,
+          "y": 116,
+          "npcs": [],
+          "adjacent": [
+            "dl44",
+            "dl_muye"
+          ],
+          "exit": {
+            "map": "muye_caoyuan",
+            "node": "my_aolin"
+          }
+        },
+        {
+          "code": "dl_wuying",
+          "name": "雾影岛渡口",
+          "short": "雾影岛",
+          "x": 735,
+          "y": 572,
+          "npcs": [],
+          "locked": true,
+          "lockedReason": "雾影岛暂未开放",
+          "adjacent": [
+            "dl_wuyinghu"
+          ]
+        },
+        {
+          "code": "dl_wuyinghu",
+          "name": "雾影湖渡口",
+          "short": "渡口",
+          "x": 645,
+          "y": 552,
+          "npcs": [],
+          "locked": true,
+          "lockedReason": "雾影湖暂未开放",
+          "adjacent": [
+            "dl22",
+            "dl18",
+            "dl_wuying"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "kasitepingyuan",
+      "name": "卡斯特平原",
+      "type": "field",
+      "background": "/maps/kasitepingyuan.jpg",
+      "width": 753,
+      "height": 988,
+      "spawnNodeCode": "ks13",
+      "nodes": [
+        {
+          "code": "ks05",
+          "name": "卡斯特平原05",
+          "short": "05",
+          "x": 572,
+          "y": 674,
+          "npcs": [],
+          "adjacent": [
+            "ks08",
+            "ks30",
+            "ks29"
+          ]
+        },
+        {
+          "code": "ks02",
+          "name": "卡斯特平原02",
+          "short": "02",
+          "x": 130,
+          "y": 886,
+          "npcs": [],
+          "adjacent": [
+            "ks04",
+            "ks_mawang"
+          ]
+        },
+        {
+          "code": "ks01",
+          "name": "卡斯特平原01",
+          "short": "01",
+          "x": 453,
+          "y": 858,
+          "npcs": [],
+          "adjacent": [
+            "ks24",
+            "ks26",
+            "ks25"
+          ]
+        },
+        {
+          "code": "ks20",
+          "name": "卡斯特平原20",
+          "short": "20",
+          "x": 552,
+          "y": 49,
+          "npcs": [],
+          "adjacent": [
+            "ks19",
+            "ks_yinguang",
+            "ks41"
+          ]
+        },
+        {
+          "code": "ks06",
+          "name": "卡斯特平原06",
+          "short": "06",
+          "x": 281,
+          "y": 839,
+          "npcs": [],
+          "adjacent": [
+            "ks25",
+            "ks27",
+            "ks04"
+          ]
+        },
+        {
+          "code": "ks10",
+          "name": "卡斯特平原10",
+          "short": "10",
+          "x": 128,
+          "y": 654,
+          "npcs": [],
+          "adjacent": [
+            "ks31",
+            "ks11",
+            "ks07"
+          ]
+        },
+        {
+          "code": "ks00",
+          "name": "卡斯特平原00",
+          "short": "00",
+          "x": 628,
+          "y": 799,
+          "npcs": [],
+          "adjacent": [
+            "ks29",
+            "ks24"
+          ]
+        },
+        {
+          "code": "ks32",
+          "name": "卡斯特平原32",
+          "short": "32",
+          "x": 464,
+          "y": 569,
+          "npcs": [],
+          "adjacent": [
+            "ks_guangchang",
+            "ks08"
+          ]
+        },
+        {
+          "code": "ks22",
+          "name": "卡斯特平原22",
+          "short": "22",
+          "x": 202,
+          "y": 66,
+          "npcs": [],
+          "adjacent": [
+            "ks23",
+            "ks17",
+            "ks21"
+          ]
+        },
+        {
+          "code": "ks16",
+          "name": "卡斯特平原16",
+          "short": "16",
+          "x": 256,
+          "y": 336,
+          "npcs": [],
+          "adjacent": [
+            "ks36",
+            "ks40",
+            "ks_nanmen"
+          ]
+        },
+        {
+          "code": "ks21",
+          "name": "卡斯特平原21",
+          "short": "21",
+          "x": 281,
+          "y": 121,
+          "npcs": [],
+          "adjacent": [
+            "ks22",
+            "ks17",
+            "ks42"
+          ]
+        },
+        {
+          "code": "ks23",
+          "name": "卡斯特平原23",
+          "short": "23",
+          "x": 108,
+          "y": 93,
+          "npcs": [],
+          "adjacent": [
+            "ks22"
+          ]
+        },
+        {
+          "code": "ks19",
+          "name": "卡斯特平原19",
+          "short": "19",
+          "x": 460,
+          "y": 82,
+          "npcs": [],
+          "adjacent": [
+            "ks42",
+            "ks20",
+            "ks_ximen"
+          ]
+        },
+        {
+          "code": "ks18",
+          "name": "卡斯特平原18",
+          "short": "18",
+          "x": 209,
+          "y": 300,
+          "npcs": [],
+          "adjacent": [
+            "ks40",
+            "ks17"
+          ]
+        },
+        {
+          "code": "ks12",
+          "name": "卡斯特平原12",
+          "short": "12",
+          "x": 637,
+          "y": 327,
+          "npcs": [],
+          "adjacent": [
+            "ks15",
+            "ks34"
+          ]
+        },
+        {
+          "code": "ks15",
+          "name": "卡斯特平原15",
+          "short": "15",
+          "x": 614,
+          "y": 227,
+          "npcs": [],
+          "adjacent": [
+            "ks41",
+            "ks12"
+          ]
+        },
+        {
+          "code": "ks14",
+          "name": "卡斯特平原14",
+          "short": "14",
+          "x": 54,
+          "y": 402,
+          "npcs": [],
+          "adjacent": [
+            "ks39",
+            "ks40"
+          ]
+        },
+        {
+          "code": "ks17",
+          "name": "卡斯特平原17",
+          "short": "17",
+          "x": 208,
+          "y": 196,
+          "npcs": [],
+          "adjacent": [
+            "ks22",
+            "ks21",
+            "ks18",
+            "ks_ximen"
+          ]
+        },
+        {
+          "code": "ks13",
+          "name": "卡斯特平原13",
+          "short": "13",
+          "x": 522,
+          "y": 366,
+          "npcs": [],
+          "adjacent": [
+            "ks35",
+            "ks_dongmen"
+          ]
+        },
+        {
+          "code": "ks08",
+          "name": "卡斯特平原08",
+          "short": "08",
+          "x": 572,
+          "y": 603,
+          "npcs": [],
+          "adjacent": [
+            "ks32",
+            "ks_bianjie",
+            "ks05"
+          ]
+        },
+        {
+          "code": "ks07",
+          "name": "卡斯特平原07",
+          "short": "07",
+          "x": 42,
+          "y": 687,
+          "npcs": [],
+          "adjacent": [
+            "ks31",
+            "ks10"
+          ]
+        },
+        {
+          "code": "ks04",
+          "name": "卡斯特平原04",
+          "short": "04",
+          "x": 165,
+          "y": 838,
+          "npcs": [],
+          "adjacent": [
+            "ks06",
+            "ks28",
+            "ks02"
+          ]
+        },
+        {
+          "code": "ks03",
+          "name": "卡斯特平原03",
+          "short": "03",
+          "x": 388,
+          "y": 722,
+          "npcs": [],
+          "adjacent": [
+            "ks_guangchang",
+            "ks30",
+            "ks26"
+          ]
+        },
+        {
+          "code": "ks35",
+          "name": "卡斯特平原35",
+          "short": "35",
+          "x": 485,
+          "y": 425,
+          "npcs": [],
+          "adjacent": [
+            "ks34",
+            "ks13",
+            "ks36"
+          ]
+        },
+        {
+          "code": "ks36",
+          "name": "卡斯特平原36",
+          "short": "36",
+          "x": 356,
+          "y": 403,
+          "npcs": [],
+          "adjacent": [
+            "ks35",
+            "ks37",
+            "ks16"
+          ]
+        },
+        {
+          "code": "ks37",
+          "name": "卡斯特平原37",
+          "short": "37",
+          "x": 272,
+          "y": 429,
+          "npcs": [],
+          "adjacent": [
+            "ks36",
+            "ks38"
+          ]
+        },
+        {
+          "code": "ks38",
+          "name": "卡斯特平原38",
+          "short": "38",
+          "x": 206,
+          "y": 499,
+          "npcs": [],
+          "adjacent": [
+            "ks37",
+            "ks33"
+          ]
+        },
+        {
+          "code": "ks40",
+          "name": "卡斯特平原40",
+          "short": "40",
+          "x": 148,
+          "y": 365,
+          "npcs": [],
+          "adjacent": [
+            "ks14",
+            "ks16",
+            "ks18"
+          ]
+        },
+        {
+          "code": "ks39",
+          "name": "卡斯特平原39",
+          "short": "39",
+          "x": 11,
+          "y": 491,
+          "npcs": [],
+          "adjacent": [
+            "ks11",
+            "ks14"
+          ]
+        },
+        {
+          "code": "ks31",
+          "name": "卡斯特平原31",
+          "short": "31",
+          "x": 193,
+          "y": 667,
+          "npcs": [],
+          "adjacent": [
+            "ks27",
+            "ks10",
+            "ks33",
+            "ks07",
+            "ks28"
+          ]
+        },
+        {
+          "code": "ks27",
+          "name": "卡斯特平原27",
+          "short": "27",
+          "x": 257,
+          "y": 746,
+          "npcs": [],
+          "adjacent": [
+            "ks06",
+            "ks31"
+          ]
+        },
+        {
+          "code": "ks28",
+          "name": "卡斯特平原28",
+          "short": "28",
+          "x": 163,
+          "y": 728,
+          "npcs": [],
+          "adjacent": [
+            "ks31",
+            "ks04"
+          ]
+        },
+        {
+          "code": "ks33",
+          "name": "卡斯特平原33",
+          "short": "33",
+          "x": 228,
+          "y": 582,
+          "npcs": [],
+          "adjacent": [
+            "ks38",
+            "ks_guangchang",
+            "ks31"
+          ]
+        },
+        {
+          "code": "ks24",
+          "name": "卡斯特平原24",
+          "short": "24",
+          "x": 538,
+          "y": 822,
+          "npcs": [],
+          "adjacent": [
+            "ks00",
+            "ks01",
+            "ks26"
+          ]
+        },
+        {
+          "code": "ks30",
+          "name": "卡斯特平原30",
+          "short": "30",
+          "x": 492,
+          "y": 711,
+          "npcs": [],
+          "adjacent": [
+            "ks05",
+            "ks03"
+          ]
+        },
+        {
+          "code": "ks26",
+          "name": "卡斯特平原26",
+          "short": "26",
+          "x": 426,
+          "y": 794,
+          "npcs": [],
+          "adjacent": [
+            "ks24",
+            "ks01",
+            "ks03"
+          ]
+        },
+        {
+          "code": "ks29",
+          "name": "卡斯特平原29",
+          "short": "29",
+          "x": 647,
+          "y": 719,
+          "npcs": [],
+          "adjacent": [
+            "ks05",
+            "ks00"
+          ]
+        },
+        {
+          "code": "ks25",
+          "name": "卡斯特平原25",
+          "short": "25",
+          "x": 367,
+          "y": 891,
+          "npcs": [],
+          "adjacent": [
+            "ks01",
+            "ks06"
+          ]
+        },
+        {
+          "code": "ks11",
+          "name": "卡斯特平原11",
+          "short": "11",
+          "x": 29,
+          "y": 575,
+          "npcs": [],
+          "adjacent": [
+            "ks10",
+            "ks39"
+          ]
+        },
+        {
+          "code": "ks42",
+          "name": "卡斯特平原42",
+          "short": "42",
+          "x": 373,
+          "y": 97,
+          "npcs": [],
+          "adjacent": [
+            "ks21",
+            "ks19"
+          ]
+        },
+        {
+          "code": "ks34",
+          "name": "卡斯特平原34",
+          "short": "34",
+          "x": 614,
+          "y": 411,
+          "npcs": [],
+          "adjacent": [
+            "ks12",
+            "ks_bianjie",
+            "ks35"
+          ]
+        },
+        {
+          "code": "ks41",
+          "name": "卡斯特平原41",
+          "short": "41",
+          "x": 533,
+          "y": 155,
+          "npcs": [],
+          "adjacent": [
+            "ks20",
+            "ks15"
+          ]
+        },
+        {
+          "code": "ks_guangchang",
+          "name": "城外广场",
+          "short": "广场",
+          "x": 342,
+          "y": 613,
+          "npcs": [],
+          "adjacent": [
+            "ks33",
+            "ks32",
+            "ks03"
+          ]
+        },
+        {
+          "code": "ks_bianjie",
+          "name": "边界",
+          "short": "边界",
+          "x": 663,
+          "y": 554,
+          "npcs": [],
+          "adjacent": [
+            "ks34",
+            "ks08"
+          ]
+        },
+        {
+          "code": "ks_dongmen",
+          "name": "东门",
+          "short": "拖把城",
+          "x": 462,
+          "y": 298,
+          "npcs": [],
+          "adjacent": [
+            "ks13"
+          ],
+          "exit": {
+            "map": "tuobacheng",
+            "node": "tbc_dongmen"
+          }
+        },
+        {
+          "code": "ks_ximen",
+          "name": "西门",
+          "short": "拖把城",
+          "x": 353,
+          "y": 194,
+          "npcs": [],
+          "adjacent": [
+            "ks17",
+            "ks19"
+          ],
+          "exit": {
+            "map": "tuobacheng",
+            "node": "tbc_ximen"
+          }
+        },
+        {
+          "code": "ks_nanmen",
+          "name": "南门",
+          "short": "拖把城",
+          "x": 312,
+          "y": 289,
+          "npcs": [],
+          "adjacent": [
+            "ks16"
+          ],
+          "exit": {
+            "map": "tuobacheng",
+            "node": "tbc_nanmen"
+          }
+        },
+        {
+          "code": "ks_yinguang",
+          "name": "银光森林口",
+          "short": "银光森林",
+          "x": 634,
+          "y": 21,
+          "npcs": [],
+          "locked": true,
+          "lockedReason": "银光森林暂未开放",
+          "adjacent": [
+            "ks20"
+          ]
+        },
+        {
+          "code": "ks_mawang",
+          "name": "马王滩口",
+          "short": "马王滩",
+          "x": 99,
+          "y": 943,
+          "npcs": [],
+          "locked": true,
+          "lockedReason": "马王滩暂未开放",
+          "adjacent": [
+            "ks02"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "tuobacheng",
+      "name": "拖把城",
+      "type": "town",
+      "background": "/maps/tuobacheng.jpg",
+      "width": 1417,
+      "height": 881,
+      "spawnNodeCode": "tbc_dongmen",
+      "nodes": [
+        {
+          "code": "tbc_heishou_caipansuo",
+          "name": "黑手裁判所",
+          "short": "黑手裁判所",
+          "x": 681,
+          "y": 132,
+          "npcs": []
+        },
+        {
+          "code": "tbc_fulin_jiujia",
+          "name": "福临酒家",
+          "short": "福临酒家",
+          "x": 763,
+          "y": 433,
+          "npcs": []
+        },
+        {
+          "code": "tbc_shizhimi",
+          "name": "石之谜",
+          "short": "石之谜",
+          "x": 411,
+          "y": 273,
+          "npcs": []
+        },
+        {
+          "code": "tbc_julongzhixue",
+          "name": "巨龙之血",
+          "short": "巨龙之血",
+          "x": 835,
+          "y": 294,
+          "npcs": []
+        },
+        {
+          "code": "tbc_wushu_daochang",
+          "name": "武术道场",
+          "short": "武术道场",
+          "x": 672,
+          "y": 553,
+          "npcs": []
+        },
+        {
+          "code": "tbc_jingxiang_chashi",
+          "name": "静香茶室",
+          "short": "静香茶室",
+          "x": 1035,
+          "y": 503,
+          "npcs": []
+        },
+        {
+          "code": "tbc_dongmen",
+          "name": "东门",
+          "short": "东门",
+          "x": 867,
+          "y": 667,
+          "npcs": []
+        },
+        {
+          "code": "tbc_bolichang_yizhi",
+          "name": "玻璃厂遗址",
+          "short": "玻璃厂遗址",
+          "x": 1160,
+          "y": 503,
+          "npcs": []
+        },
+        {
+          "code": "tbc_shizi_jiekou",
+          "name": "十字街口",
+          "short": "十字街口",
+          "x": 785,
+          "y": 352,
+          "npcs": []
+        },
+        {
+          "code": "tbc_huanggong_damen",
+          "name": "皇宫大门",
+          "short": "皇宫大门",
+          "x": 964,
+          "y": 282,
+          "npcs": []
+        },
+        {
+          "code": "tbc_jiaotang",
+          "name": "教堂",
+          "short": "教堂",
+          "x": 317,
+          "y": 345,
+          "npcs": []
+        },
+        {
+          "code": "tbc_huangjia_qishituan",
+          "name": "皇家骑士团",
+          "short": "皇家骑士团",
+          "x": 1044,
+          "y": 423,
+          "npcs": []
+        },
+        {
+          "code": "tbc_huanggong",
+          "name": "皇宫",
+          "short": "皇宫",
+          "x": 1104,
+          "y": 203,
+          "npcs": []
+        },
+        {
+          "code": "tbc_maoxianzhe_gonghui",
+          "name": "冒险者公会",
+          "short": "冒险者公会",
+          "x": 561,
+          "y": 177,
+          "npcs": []
+        },
+        {
+          "code": "tbc_wantong_biaoju",
+          "name": "万通镖局",
+          "short": "万通镖局",
+          "x": 620,
+          "y": 230,
+          "npcs": []
+        },
+        {
+          "code": "tbc_daojudian",
+          "name": "道具店",
+          "short": "道具店",
+          "x": 865,
+          "y": 404,
+          "npcs": []
+        },
+        {
+          "code": "tbc_moshidian",
+          "name": "魔石店",
+          "short": "魔石店",
+          "x": 328,
+          "y": 481,
+          "npcs": []
+        },
+        {
+          "code": "tbc_penquan",
+          "name": "喷泉",
+          "short": "喷泉",
+          "x": 530,
+          "y": 456,
+          "npcs": []
+        },
+        {
+          "code": "tbc_nanmen",
+          "name": "南门",
+          "short": "南门",
+          "x": 203,
+          "y": 589,
+          "npcs": []
+        },
+        {
+          "code": "tbc_zhongxin_guangchang",
+          "name": "中心广场",
+          "short": "中心广场",
+          "x": 577,
+          "y": 345,
+          "npcs": []
+        },
+        {
+          "code": "tbc_mingyue_jiuju",
+          "name": "明月酒居",
+          "short": "明月酒居",
+          "x": 983,
+          "y": 593,
+          "npcs": []
+        },
+        {
+          "code": "tbc_wuhe_heidian",
+          "name": "五湖黑店",
+          "short": "五湖黑店",
+          "x": 769,
+          "y": 215,
+          "npcs": []
+        },
+        {
+          "code": "tbc_kst13",
+          "name": "卡斯特平原13",
+          "short": "卡斯特平原",
+          "x": 924,
+          "y": 800,
+          "npcs": [],
+          "exit": {
+            "map": "kasitepingyuan",
+            "node": "ks13"
+          }
+        },
+        {
+          "code": "tbc_kst21",
+          "name": "卡斯特平原21",
+          "short": "卡斯特平原",
+          "x": 275,
+          "y": 93,
+          "npcs": [],
+          "exit": {
+            "map": "kasitepingyuan",
+            "node": "ks21"
+          }
+        },
+        {
+          "code": "tbc_kst16",
+          "name": "卡斯特平原16",
+          "short": "卡斯特平原",
+          "x": 55,
+          "y": 705,
+          "npcs": [],
+          "exit": {
+            "map": "kasitepingyuan",
+            "node": "ks16"
+          }
+        },
+        {
+          "code": "tbc_ximen",
+          "name": "西门",
+          "short": "西门",
+          "x": 332,
+          "y": 191,
+          "npcs": []
+        },
+        {
+          "code": "tbc_caoyaodian",
+          "name": "草药店",
+          "short": "草药店",
+          "x": 707,
+          "y": 657,
+          "npcs": []
+        },
+        {
+          "code": "tbc_cangku",
+          "name": "仓库",
+          "short": "仓库",
+          "x": 543,
+          "y": 697,
+          "npcs": []
+        },
+        {
+          "code": "tbc_yizhan",
+          "name": "驿站",
+          "short": "驿站",
+          "x": 884,
+          "y": 510,
+          "npcs": []
+        },
+        {
+          "code": "tbc_modao_xueyuan",
+          "name": "魔导学院",
+          "short": "魔导学院",
+          "x": 192,
+          "y": 479,
+          "npcs": []
+        },
+        {
+          "code": "tbc_zhuangbeidian",
+          "name": "装备店",
+          "short": "装备店",
+          "x": 210,
+          "y": 279,
+          "npcs": []
+        },
+        {
+          "code": "tbc_pige_dian",
+          "name": "皮革店",
+          "short": "皮革店",
+          "x": 667,
+          "y": 455,
+          "npcs": []
+        },
+        {
+          "code": "tbc_luguan",
+          "name": "旅馆",
+          "short": "旅馆",
+          "x": 376,
+          "y": 622,
+          "npcs": []
+        },
+        {
+          "code": "tbc_luguan_taofang",
+          "name": "旅馆套房",
+          "short": "旅馆套房",
+          "x": 400,
+          "y": 660,
+          "npcs": []
+        },
+        {
+          "code": "tbc_biwuchang",
+          "name": "比武场",
+          "short": "比武场",
+          "x": 504,
+          "y": 522,
+          "npcs": []
+        },
+        {
+          "code": "tbc_tianxianglou",
+          "name": "添香楼",
+          "short": "添香楼",
+          "x": 695,
+          "y": 358,
+          "npcs": []
+        },
+        {
+          "code": "tbc_tushuguan",
+          "name": "图书馆",
+          "short": "图书馆",
+          "x": 451,
+          "y": 332,
+          "npcs": []
+        },
+        {
+          "code": "tbc_小道00",
+          "name": "小道00",
+          "short": "小道00",
+          "x": 898,
+          "y": 347,
+          "npcs": []
+        },
+        {
+          "code": "tbc_小道01",
+          "name": "小道01",
+          "short": "小道01",
+          "x": 503,
+          "y": 256,
+          "npcs": []
+        },
+        {
+          "code": "tbc_小道02",
+          "name": "小道02",
+          "short": "小道02",
+          "x": 1070,
+          "y": 593,
+          "npcs": []
+        },
+        {
+          "code": "tbc_小道03",
+          "name": "小道03",
+          "short": "小道03",
+          "x": 804,
+          "y": 545,
+          "npcs": []
+        },
+        {
+          "code": "tbc_小道04",
+          "name": "小道04",
+          "short": "小道04",
+          "x": 782,
+          "y": 647,
+          "npcs": []
+        },
+        {
+          "code": "tbc_小道05",
+          "name": "小道05",
+          "short": "小道05",
+          "x": 581,
+          "y": 577,
+          "npcs": []
+        },
+        {
+          "code": "tbc_小道06",
+          "name": "小道06",
+          "short": "小道06",
+          "x": 316,
+          "y": 275,
+          "npcs": []
+        },
+        {
+          "code": "tbc_小道07",
+          "name": "小道07",
+          "short": "小道07",
+          "x": 325,
+          "y": 418,
+          "npcs": []
+        },
+        {
+          "code": "tbc_小道08",
+          "name": "小道08",
+          "short": "小道08",
+          "x": 297,
+          "y": 561,
+          "npcs": []
+        },
+        {
+          "code": "tbc_小道09",
+          "name": "小道09",
+          "short": "小道09",
+          "x": 468,
+          "y": 635,
+          "npcs": []
+        },
+        {
+          "code": "tbc_小道10",
+          "name": "小道10",
+          "short": "小道10",
+          "x": 684,
+          "y": 251,
+          "npcs": []
+        },
+        {
+          "code": "tbc_小道11",
+          "name": "小道11",
+          "short": "小道11",
+          "x": 963,
+          "y": 408,
+          "npcs": []
+        },
+        {
+          "code": "tbc_小道12",
+          "name": "小道12",
+          "short": "小道12",
+          "x": 951,
+          "y": 481,
+          "npcs": []
+        },
+        {
+          "code": "tbc_小道13",
+          "name": "小道13",
+          "short": "小道13",
+          "x": 865,
+          "y": 605,
+          "npcs": []
+        },
+        {
+          "code": "tbc_小道14",
+          "name": "小道14",
+          "short": "小道14",
+          "x": 618,
+          "y": 677,
+          "npcs": []
+        },
+        {
+          "code": "tbc_小道15",
+          "name": "小道15",
+          "short": "小道15",
+          "x": 443,
+          "y": 415,
+          "npcs": []
+        },
+        {
+          "code": "tbc_小道16",
+          "name": "小道16",
+          "short": "小道16",
+          "x": 415,
+          "y": 523,
+          "npcs": []
+        },
+        {
+          "code": "tbc_小道17",
+          "name": "小道17",
+          "short": "小道17",
+          "x": 960,
+          "y": 640,
           "npcs": []
         }
       ]

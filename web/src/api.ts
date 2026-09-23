@@ -54,7 +54,8 @@ export interface MapNode {
 }
 
 export interface MapCurrent {
-  map: { code: string; name: string; type: string; background: string };
+  /** width/height=原版页面坐标空间（节点 x/y 参照系），各图尺寸不一，前端据此铺背景/摆点位 */
+  map: { code: string; name: string; type: string; background: string; width: number; height: number };
   currentNodeCode: string | null;
   nodes: MapNode[];
 }

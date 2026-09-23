@@ -24,13 +24,20 @@ const props = defineProps<{
 
 const emit = defineEmits<{ switchView: []; characterChanged: [] }>();
 
-const GW = 800;
-const GH = 600;
 const ZOOM = 1.8; // 视野拉远：可见范围约为全图 55.6%（与原型一致）
 const camX = ref(0);
 const camY = ref(0);
 
 const map = ref<MapCurrent | null>(null);
+/** 当前图坐标空间（服务端静态数据下发的原版页面尺寸：拖把城 1417×881、万马草原 753×987…），缺省 800×600 */
+const GW = computed(() => map.value?.map.width ?? 800);
+const GH = computed(() => map.value?.map.height ?? 600);
+/** 世界层尺寸：基准 180%（=ZOOM 拉远视角，对 800×600 而言）乘以图宽高比修正，
+ *  让背景按各图原始比例铺放（竖图/宽图不变形），点位百分比定位与镜头钳制随之成立 */
+const worldStyle = computed(() => ({
+  width: `${(180 * GW.value) / 800}%`,
+  height: `${(180 * GH.value) / 600}%`,
+}));
 const fitScale = ref(1);
 /** 聊天记录行：战斗行在 push 时以当帧怪名烘焙分词结果（parts），战斗结束后历史行配色不回退 */
 type LogLine =
@@ -91,14 +98,17 @@ const currentNode = computed<MapNode | null>(
 /** 镜头：让玩家居中，clamp 在世界边界内（百分比 translate 基于 mapview 自身尺寸） */
 const camTransform = computed(() => {
   if (!currentNode.value) return "translate(0,0)";
-  const vw = GW / ZOOM;
-  const vh = GH / ZOOM;
-  const cx = Math.max(0, Math.min(currentNode.value.x - vw / 2, GW - vw));
-  const cy = Math.max(0, Math.min(currentNode.value.y - vh / 2, GH - vh));
-  return `translate(${-(cx / GW) * 100}%, ${-(cy / GH) * 100}%)`;
+  const vw = GW.value / ZOOM;
+  const vh = GH.value / ZOOM;
+  const cx = Math.max(0, Math.min(currentNode.value.x - vw / 2, GW.value - vw));
+  const cy = Math.max(0, Math.min(currentNode.value.y - vh / 2, GH.value - vh));
+  return `translate(${-(cx / GW.value) * 100}%, ${-(cy / GH.value) * 100}%)`;
 });
 
-const posStyle = (x: number, y: number) => ({ left: (x / GW) * 100 + "%", top: (y / GH) * 100 + "%" });
+const posStyle = (x: number, y: number) => ({
+  left: (x / GW.value) * 100 + "%",
+  top: (y / GH.value) * 100 + "%",
+});
 
 function now() {
   return new Date().toLocaleTimeString("zh-CN", { hour12: false });
@@ -737,7 +747,7 @@ onUnmounted(() => {
             <div
               v-if="map"
               class="world"
-              :style="{ transform: camTransform, background: `url('${map.map.background}') center / 100% 100% no-repeat` }"
+              :style="{ ...worldStyle, transform: camTransform, background: `url('${map.map.background}') center / 100% 100% no-repeat` }"
             >
             <template v-if="map">
               <button
