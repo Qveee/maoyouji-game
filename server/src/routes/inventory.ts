@@ -105,6 +105,8 @@ function toBagItemView(row: {
     desc: it?.desc ?? "",
     kind: it?.kind ?? "material",
     stackMax: it && it.kind !== "equipment" ? it.stackMax : 1,
+    // 数量单位（静态配置全量携带；未知 code 兜底「个」）
+    unit: it?.unit ?? "个",
     // 仅装备带 equip 子对象（可选字段 undefined 在 JSON 序列化时省略）
     ...(isEquip
       ? {

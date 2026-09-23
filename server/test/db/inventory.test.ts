@@ -186,7 +186,7 @@ describe("GET /api/inventory", () => {
     // 升序：slot 1（剑）在前、slot 5（材料）在后
     expect(body.bag[0]).toMatchObject({
       inventoryId: sword, itemCode: "nongfuzhijian", slotIndex: 1, quantity: 1, durability: 10,
-      name: "农夫之剑", quality: "gray", kind: "equipment", stackMax: 1,
+      name: "农夫之剑", quality: "gray", kind: "equipment", stackMax: 1, unit: "件",
     });
     expect(body.bag[0].equip).toMatchObject({
       slot: "main_hand", equipType: "剑", hands: 1, levelReq: 1,
@@ -194,7 +194,7 @@ describe("GET /api/inventory", () => {
     });
     expect(body.bag[1]).toMatchObject({
       inventoryId: mat, itemCode: "kunchong_waike", slotIndex: 5, quantity: 3, durability: null,
-      name: "昆虫外壳", quality: "", kind: "material", stackMax: 99,
+      name: "昆虫外壳", quality: "", kind: "material", stackMax: 99, unit: "个",
     });
     expect(body.bag[1].equip).toBeUndefined(); // 非装备无 equip 子对象
     await freshBag();

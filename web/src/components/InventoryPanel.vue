@@ -66,7 +66,7 @@ const rows = computed<ListRow[]>(() => {
   return (view.value?.bag ?? []).map((it) => ({
     key: `bag:${it.inventoryId}`,
     item: it,
-    qt: `${it.quantity} 个`,
+    qt: `${it.quantity} ${it.unit ?? "个"}`,
     slotCode: null,
   }));
 });

@@ -308,6 +308,14 @@ describe("items.json 静态物品", () => {
     expect(y.kind).toBe("consumable");
     if (y.kind === "consumable") expect(y.effect.hp).toBe(50);
   });
+  it("全部道具都配了 1~2 字中文单位（背包数量列展示）", () => {
+    for (const it of loadItems().items) expect(it.unit, it.code).toMatch(/^\S{1,2}$/);
+  });
+  it("unit 可选：缺省合法，超 2 字被拒绝", () => {
+    const base = { code: "x", name: "石", sprite: "/i.png", desc: "", kind: "material", stackMax: 99 };
+    expect(ItemsFileSchema.safeParse({ items: [base] }).success).toBe(true);
+    expect(ItemsFileSchema.safeParse({ items: [{ ...base, unit: "个每个" }] }).success).toBe(false);
+  });
   it("考据抽查：步兵剑 7-9/速度2.1/耐久13/等级4；能量之卷刃剑带攻击+2；冰风靴体力+2智力+2", () => {
     const idx = itemIndex();
     const b = idx.get("bubingjian")!;

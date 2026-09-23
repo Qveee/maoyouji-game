@@ -165,6 +165,7 @@ export interface BagItemView {
   desc: string; // 静态描述文案（未知 code 兜底为空串）
   kind: "consumable" | "material" | "equipment";
   stackMax: number;
+  unit: string; // 数量单位（静态 unit 全量携带；未知 code 服务端兜底「个」）
   equip?: BagItemEquip; // JSON 序列化时 undefined 字段省略
 }
 

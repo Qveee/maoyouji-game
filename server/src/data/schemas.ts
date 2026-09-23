@@ -52,6 +52,8 @@ const itemBase = {
   name: z.string().min(1).max(32),
   sprite: z.string().min(1),
   desc: z.string().max(200),
+  /** 数量单位（背包「N 瓶/张/件」列）：全量配置，前端仅保留兜底 */
+  unit: z.string().min(1).max(2).optional(),
 };
 
 const statBonuses = z.strictObject({
