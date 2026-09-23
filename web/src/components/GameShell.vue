@@ -14,6 +14,7 @@ import {
 } from "../api";
 import { QUALITY_COLORS } from "../quality";
 import InventoryPanel from "./InventoryPanel.vue";
+import PetPanel from "./PetPanel.vue";
 
 const props = defineProps<{
   username: string;
@@ -187,12 +188,14 @@ function todo(what: string) {
   say(`【系统】${what}将在后续切片开放。`);
 }
 
-/** 道具背包面板显隐（底部「道具」按钮开关） */
+/** 道具背包/宠物窗显隐（底部「道具」「宠物」按钮开关） */
 const showBag = ref(false);
+const showPet = ref(false);
 
-/** 底部功能按钮分流：「道具」开关背包面板，其余暂为占位提示 */
+/** 底部功能按钮分流：「道具」开关背包面板、「宠物」开关宠物窗，其余暂为占位提示 */
 function onFuncBtn(f: string) {
   if (f === "道具") showBag.value = !showBag.value;
+  else if (f === "宠物") showPet.value = !showPet.value;
   else todo(f);
 }
 
@@ -938,6 +941,15 @@ onUnmounted(() => {
       @toast="toast"
       @changed="emit('characterChanged')"
       @sys="(t) => say(t, 'sys')"
+    />
+
+    <!-- 宠物窗：展示角色属性与穿戴装备（样式照原型 #pet-win 段）；changed=卸下后刷新角色面板 -->
+    <PetPanel
+      v-if="showPet"
+      :character="character"
+      @close="showPet = false"
+      @toast="toast"
+      @changed="emit('characterChanged')"
     />
   </main>
   </div>
